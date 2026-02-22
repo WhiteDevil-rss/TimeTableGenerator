@@ -141,4 +141,4 @@ See the [In-depth GCP Deployment Guide](./gcp_deployment_guide.md) for step-by-s
 ## 📄 License
 Distributed under the MIT License. See `LICENSE` for more information.
 
-*Built with ❤️ for VNSGU by Antigravity AI.*
+*Built with ❤️ By [Rajput Shivam Singh](https://github.com/WhiteDevil-rss)*
