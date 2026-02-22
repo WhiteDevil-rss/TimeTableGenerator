@@ -81,36 +81,38 @@ The platform is divided into 4 specialized panels to handle the university hiera
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Step-by-Step Project Start
 
-### Prerequisites
-- [Node.js 20+](https://nodejs.org/)
-- [Python 3.10+](https://www.python.org/)
-- [pnpm 8+](https://pnpm.io/)
-- [Docker & Docker Compose](https://www.docker.com/)
+Follow these exact steps to launch the entire ecosystem in under 2 minutes:
 
-### 📦 Local Installation (Docker)
-The entire stack (DB, Redis, AI Engine, API) can be started with a single command:
-
+### 1. External Infrastructure (Docker)
+Ensure Docker is running, then spin up the database, cache, and solvers:
 ```bash
-# 1. Clone the repository
-git clone https://github.com/WhiteDevil-rss/TimeTableGenerator.git
-cd TimeTableGenerator
-
-# 2. Start the infrastructure
 docker-compose up -d
+```
 
-# 3. Seed the database (from apps/api)
+### 2. Backend & Database Sync
+Initialize the database schema and seed the environment with VNSGU demo data:
+```bash
 cd apps/api
 pnpm install
 npx prisma db push
-npx prisma db seed
+npx prisma db seed # This creates Ravi's account!
+# Start the API
+pnpm run dev
+```
 
-# 4. Run the frontend
-cd ../web
+### 3. Solvers & Health Check
+The AI engine and Redis start automatically with Docker. You can check the solver health at `http://localhost:5000/health`.
+
+### 4. Frontend Launch
+In a new terminal:
+```bash
+cd apps/web
 pnpm install
 pnpm run dev
 ```
+Open `http://localhost:3000` and login.
 
 ---
 
@@ -118,9 +120,10 @@ pnpm run dev
 
 | Role | Email | Password |
 | :--- | :--- | :--- |
-| **Superadmin** | `admin@nepscheduler.com` | `password123` |
+| **Superadmin** | `admin@nep-scheduler.com` | `password123` |
 | **Uni Admin** | `admin@vnsgu.ac.in` | `password123` |
-| **Dept Admin** | `admin.cs@vnsgu.ac.in` | `password123` |
+| **Dept Admin** | `admin_dcs@vnsgu.ac.in` | `password123` |
+| **Faculty (Ravi)** | `ravi@vnsgu.ac.in` | `password123` |
 
 ---
 
