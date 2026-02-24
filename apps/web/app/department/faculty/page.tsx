@@ -24,25 +24,30 @@ export default function DeptFacultyDashboard() {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [selectedFacId, setSelectedFacId] = useState<string | null>(null);
 
+    const [departments, setDepartments] = useState<any[]>([]);
     const [newFacForm, setNewFacForm] = useState({
         name: '', email: '', designation: '',
         maxHrsPerDay: 4, maxHrsPerWeek: 20, password: ''
     });
     const [editFacForm, setEditFacForm] = useState({
-        name: '', email: '', designation: '', maxHrsPerDay: 4, maxHrsPerWeek: 20
+        name: '', email: '', designation: '', maxHrsPerDay: 4, maxHrsPerWeek: 20, departmentId: ''
     });
 
     const fetchData = useCallback(async () => {
-        if (!user?.entityId) return;
+        if (!user?.entityId || !user?.universityId) return;
         try {
-            const { data } = await api.get(`/faculty`);
-            setFaculties(data);
+            const [facRes, deptRes] = await Promise.all([
+                api.get(`/faculty?universityId=${user.universityId}`),
+                api.get(`/universities/${user.universityId}/departments`),
+            ]);
+            setFaculties(facRes.data.filter((f: any) => f.departmentId === user.entityId));
+            setDepartments(deptRes.data);
         } catch (e) {
             console.error(e);
         } finally {
             setLoading(false);
         }
-    }, [user?.entityId]);
+    }, [user?.entityId, user?.universityId]);
 
     useEffect(() => {
         fetchData();
@@ -91,7 +96,7 @@ export default function DeptFacultyDashboard() {
     const navItems = [
         { title: 'Dashboard', href: '/department', icon: <LayoutDashboard className="w-5 h-5" /> },
         { title: 'Faculty', href: '/department/faculty', icon: <Users className="w-5 h-5 text-indigo-500" /> },
-        { title: 'Subjects', href: '/department/courses', icon: <GraduationCap className="w-5 h-5" /> },
+        { title: 'Programs', href: '/department/courses', icon: <GraduationCap className="w-5 h-5" /> },
         { title: 'Subjects', href: '/department/subjects', icon: <BookOpen className="w-5 h-5" /> },
         { title: 'Batches', href: '/department/batches', icon: <Network className="w-5 h-5" /> },
         { title: 'Resources', href: '/department/resources', icon: <Monitor className="w-5 h-5" /> },
@@ -152,7 +157,8 @@ export default function DeptFacultyDashboard() {
                                                 setSelectedFacId(fac.id);
                                                 setEditFacForm({
                                                     name: fac.name, email: fac.email, designation: fac.designation || '',
-                                                    maxHrsPerDay: fac.maxHrsPerDay, maxHrsPerWeek: fac.maxHrsPerWeek
+                                                    maxHrsPerDay: fac.maxHrsPerDay, maxHrsPerWeek: fac.maxHrsPerWeek,
+                                                    departmentId: fac.departmentId || '',
                                                 });
                                                 setIsEditOpen(true);
                                             }}
@@ -188,6 +194,13 @@ export default function DeptFacultyDashboard() {
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                             <div className="space-y-2">
+                                <label className="text-sm font-medium">Department</label>
+                                <div className="w-full h-10 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 flex items-center">
+                                    {departments.find(d => d.id === user?.entityId)?.name || 'Your Department'}
+                                    <span className="ml-2 text-xs text-slate-400">(auto-assigned)</span>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
                                 <label className="text-sm font-medium">Full Name</label>
                                 <Input
                                     placeholder="e.g. Dr. Apurva Desai"
@@ -214,48 +227,31 @@ export default function DeptFacultyDashboard() {
                             </div>
 
                             <hr className="my-2" />
-                            <h4 className="text-sm font-semibold text-slate-800">Workload Capacity Logic</h4>
-
+                            <h4 className="text-sm font-semibold text-slate-800">Workload Capacity</h4>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Max Hrs / Day</label>
-                                    <Input
-                                        type="number"
-                                        min="1"
-                                        max="12"
-                                        value={newFacForm.maxHrsPerDay}
-                                        onChange={(e) => setNewFacForm({ ...newFacForm, maxHrsPerDay: parseInt(e.target.value) || 4 })}
-                                    />
+                                    <Input type="number" min="1" max="12" value={newFacForm.maxHrsPerDay}
+                                        onChange={(e) => setNewFacForm({ ...newFacForm, maxHrsPerDay: parseInt(e.target.value) || 4 })} />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Max Hrs / Week</label>
-                                    <Input
-                                        type="number"
-                                        min="1"
-                                        max="50"
-                                        value={newFacForm.maxHrsPerWeek}
-                                        onChange={(e) => setNewFacForm({ ...newFacForm, maxHrsPerWeek: parseInt(e.target.value) || 20 })}
-                                    />
+                                    <Input type="number" min="1" max="50" value={newFacForm.maxHrsPerWeek}
+                                        onChange={(e) => setNewFacForm({ ...newFacForm, maxHrsPerWeek: parseInt(e.target.value) || 20 })} />
                                 </div>
                             </div>
 
                             <hr className="my-2" />
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Temporary Portal Password</label>
-                                <Input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    value={newFacForm.password}
-                                    onChange={(e) => setNewFacForm({ ...newFacForm, password: e.target.value })}
-                                />
+                                <Input type="password" placeholder="••••••••" value={newFacForm.password}
+                                    onChange={(e) => setNewFacForm({ ...newFacForm, password: e.target.value })} />
                             </div>
                         </div>
                         <DialogFooter>
                             <Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
-                            <Button
-                                onClick={handleCreateFaculty}
-                                disabled={!newFacForm.name || !newFacForm.email || !newFacForm.password}
-                            >
+                            <Button onClick={handleCreateFaculty}
+                                disabled={!newFacForm.name || !newFacForm.email || !newFacForm.password}>
                                 Provision Faculty
                             </Button>
                         </DialogFooter>
@@ -266,67 +262,53 @@ export default function DeptFacultyDashboard() {
                 <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
                     <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
-                            <DialogTitle>Refactor Profile Identity</DialogTitle>
+                            <DialogTitle>Edit Faculty Profile</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Full Name</label>
-                                <Input
-                                    placeholder="e.g. Dr. Smith"
-                                    value={editFacForm.name}
-                                    onChange={(e) => setEditFacForm({ ...editFacForm, name: e.target.value })}
-                                />
+                                <Input placeholder="e.g. Dr. Smith" value={editFacForm.name}
+                                    onChange={(e) => setEditFacForm({ ...editFacForm, name: e.target.value })} />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Contact Email</label>
-                                <Input
-                                    type="email"
-                                    value={editFacForm.email}
-                                    onChange={(e) => setEditFacForm({ ...editFacForm, email: e.target.value })}
-                                />
+                                <Input type="email" value={editFacForm.email}
+                                    onChange={(e) => setEditFacForm({ ...editFacForm, email: e.target.value })} />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Designation</label>
-                                <Input
-                                    placeholder="e.g. Professor"
-                                    value={editFacForm.designation}
-                                    onChange={(e) => setEditFacForm({ ...editFacForm, designation: e.target.value })}
-                                />
+                                <Input placeholder="e.g. Professor" value={editFacForm.designation}
+                                    onChange={(e) => setEditFacForm({ ...editFacForm, designation: e.target.value })} />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Department</label>
+                                <select className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                    value={editFacForm.departmentId}
+                                    onChange={(e) => setEditFacForm({ ...editFacForm, departmentId: e.target.value })}>
+                                    <option value="">-- Keep current department --</option>
+                                    {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                                </select>
                             </div>
 
                             <hr className="my-2" />
-                            <h4 className="text-sm font-semibold text-slate-800">Capacity Constraints</h4>
-
+                            <h4 className="text-sm font-semibold text-slate-800">Workload Capacity</h4>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Max Hrs / Day</label>
-                                    <Input
-                                        type="number"
-                                        min="1"
-                                        max="12"
-                                        value={editFacForm.maxHrsPerDay}
-                                        onChange={(e) => setEditFacForm({ ...editFacForm, maxHrsPerDay: parseInt(e.target.value) || 4 })}
-                                    />
+                                    <Input type="number" min="1" max="12" value={editFacForm.maxHrsPerDay}
+                                        onChange={(e) => setEditFacForm({ ...editFacForm, maxHrsPerDay: parseInt(e.target.value) || 4 })} />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Max Hrs / Week</label>
-                                    <Input
-                                        type="number"
-                                        min="1"
-                                        max="50"
-                                        value={editFacForm.maxHrsPerWeek}
-                                        onChange={(e) => setEditFacForm({ ...editFacForm, maxHrsPerWeek: parseInt(e.target.value) || 20 })}
-                                    />
+                                    <Input type="number" min="1" max="50" value={editFacForm.maxHrsPerWeek}
+                                        onChange={(e) => setEditFacForm({ ...editFacForm, maxHrsPerWeek: parseInt(e.target.value) || 20 })} />
                                 </div>
                             </div>
                         </div>
                         <DialogFooter>
                             <Button variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
-                            <Button
-                                onClick={handleEditFaculty}
-                                disabled={!editFacForm.name || !editFacForm.email}
-                            >
-                                Save Revisions
+                            <Button onClick={handleEditFaculty} disabled={!editFacForm.name || !editFacForm.email}>
+                                Save Changes
                             </Button>
                         </DialogFooter>
                     </DialogContent>

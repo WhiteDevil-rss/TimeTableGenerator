@@ -30,7 +30,7 @@ export default function FacultyDashboard() {
         maxHrsPerDay: 4, maxHrsPerWeek: 20, password: ''
     });
     const [editFacForm, setEditFacForm] = useState({
-        name: '', email: '', designation: '', maxHrsPerDay: 4, maxHrsPerWeek: 20
+        name: '', email: '', designation: '', maxHrsPerDay: 4, maxHrsPerWeek: 20, departmentId: ''
     });
 
     const fetchData = useCallback(async () => {
@@ -163,7 +163,8 @@ export default function FacultyDashboard() {
                                                 setSelectedFacId(fac.id);
                                                 setEditFacForm({
                                                     name: fac.name, email: fac.email, designation: fac.designation || '',
-                                                    maxHrsPerDay: fac.maxHrsPerDay, maxHrsPerWeek: fac.maxHrsPerWeek
+                                                    maxHrsPerDay: fac.maxHrsPerDay, maxHrsPerWeek: fac.maxHrsPerWeek,
+                                                    departmentId: fac.departmentId || '',
                                                 });
                                                 setIsEditOpen(true);
                                             }}
@@ -295,27 +296,31 @@ export default function FacultyDashboard() {
                         <div className="space-y-4 py-4">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Full Name</label>
-                                <Input
-                                    placeholder="e.g. Dr. Smith"
-                                    value={editFacForm.name}
-                                    onChange={(e) => setEditFacForm({ ...editFacForm, name: e.target.value })}
-                                />
+                                <Input placeholder="e.g. Dr. Smith" value={editFacForm.name}
+                                    onChange={(e) => setEditFacForm({ ...editFacForm, name: e.target.value })} />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Contact Email</label>
-                                <Input
-                                    type="email"
-                                    value={editFacForm.email}
-                                    onChange={(e) => setEditFacForm({ ...editFacForm, email: e.target.value })}
-                                />
+                                <Input type="email" value={editFacForm.email}
+                                    onChange={(e) => setEditFacForm({ ...editFacForm, email: e.target.value })} />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Designation</label>
-                                <Input
-                                    placeholder="e.g. Professor"
-                                    value={editFacForm.designation}
-                                    onChange={(e) => setEditFacForm({ ...editFacForm, designation: e.target.value })}
-                                />
+                                <Input placeholder="e.g. Professor" value={editFacForm.designation}
+                                    onChange={(e) => setEditFacForm({ ...editFacForm, designation: e.target.value })} />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Department Assignment</label>
+                                <select
+                                    className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                                    value={editFacForm.departmentId}
+                                    onChange={(e) => setEditFacForm({ ...editFacForm, departmentId: e.target.value })}
+                                >
+                                    <option value="">-- No change --</option>
+                                    {departments.map(dept => (
+                                        <option key={dept.id} value={dept.id}>{dept.name}</option>
+                                    ))}
+                                </select>
                             </div>
 
                             <hr className="my-2" />
@@ -324,23 +329,13 @@ export default function FacultyDashboard() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Max Hrs / Day</label>
-                                    <Input
-                                        type="number"
-                                        min="1"
-                                        max="12"
-                                        value={editFacForm.maxHrsPerDay}
-                                        onChange={(e) => setEditFacForm({ ...editFacForm, maxHrsPerDay: parseInt(e.target.value) || 4 })}
-                                    />
+                                    <Input type="number" min="1" max="12" value={editFacForm.maxHrsPerDay}
+                                        onChange={(e) => setEditFacForm({ ...editFacForm, maxHrsPerDay: parseInt(e.target.value) || 4 })} />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Max Hrs / Week</label>
-                                    <Input
-                                        type="number"
-                                        min="1"
-                                        max="50"
-                                        value={editFacForm.maxHrsPerWeek}
-                                        onChange={(e) => setEditFacForm({ ...editFacForm, maxHrsPerWeek: parseInt(e.target.value) || 20 })}
-                                    />
+                                    <Input type="number" min="1" max="50" value={editFacForm.maxHrsPerWeek}
+                                        onChange={(e) => setEditFacForm({ ...editFacForm, maxHrsPerWeek: parseInt(e.target.value) || 20 })} />
                                 </div>
                             </div>
                         </div>

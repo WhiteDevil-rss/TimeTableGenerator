@@ -140,8 +140,8 @@ export default function DeptSubjectsDashboard() {
         setLoading(true);
         try {
             const [coursesRes, programsRes] = await Promise.all([
-                api.get('/subjects'),
                 api.get('/courses'),
+                api.get('/programs'),
             ]);
             setCourses(coursesRes.data);
             setPrograms(programsRes.data);
