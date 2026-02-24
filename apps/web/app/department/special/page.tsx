@@ -32,18 +32,25 @@ export default function SpecialTimetablePage() {
     const fetchInitialData = useCallback(async () => {
         setLoading(true);
         try {
-            const [facRes, ttRes, resRes] = await Promise.all([
-                api.get(`/faculty?departmentId=${user!.entityId}`),
-                api.get(`/departments/${user!.entityId}/timetables/latest`),
-                api.get(`/resources?universityId=${user!.universityId}`) // University resources accessible by this department
+            const [facRes, resRes] = await Promise.all([
+                api.get(`/faculty`), // DEPT_ADMIN auto-scoped by backend to their department
+                api.get(`/resources`), // university-wide resources
             ]);
             setFaculty(facRes.data);
-            setBaselineTimetable(ttRes.data);
             setResources(resRes.data);
         } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+            setError('Failed to load faculty and resources. Please refresh.');
+        }
+
+        // Fetch latest timetable separately so a 404 is non-fatal
+        try {
+            const ttRes = await api.get(`/departments/${user!.entityId}/timetables/latest`);
+            setBaselineTimetable(ttRes.data);
+        } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
             if (err.response?.status !== 404) {
-                setError('Failed to fetch department data.');
+                console.warn('Could not load baseline timetable:', err.message);
             }
+            // 404 is expected if no timetable has been generated yet
         } finally {
             setLoading(false);
         }
@@ -109,11 +116,12 @@ export default function SpecialTimetablePage() {
     const navItems = [
         { title: 'Dashboard', href: '/department', icon: <LayoutDashboard className="w-5 h-5" /> },
         { title: 'Faculty', href: '/department/faculty', icon: <Users className="w-5 h-5" /> },
-        { title: 'Courses', href: '/department/courses', icon: <GraduationCap className="w-5 h-5" /> },
+        { title: 'Programs', href: '/department/courses', icon: <GraduationCap className="w-5 h-5" /> },
         { title: 'Subjects', href: '/department/subjects', icon: <BookOpen className="w-5 h-5" /> },
         { title: 'Batches', href: '/department/batches', icon: <Network className="w-5 h-5" /> },
         { title: 'Resources', href: '/department/resources', icon: <Monitor className="w-5 h-5" /> },
         { title: 'Timetables', href: '/department/timetables', icon: <Calendar className="w-5 h-5" /> },
+        { title: 'Special TT', href: '/department/special', icon: <Zap className="w-5 h-5 text-amber-500" /> },
     ];
 
     if (loading) return <DashboardLayout navItems={navItems} title="Special Schedule" ><div className="p-8">Loading configuration...</div></DashboardLayout>;
@@ -179,7 +187,7 @@ export default function SpecialTimetablePage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-2 mb-6">
+                            <div className="space-y-2 mt-6 mb-4">
                                 <label className="text-sm font-medium text-amber-900">Semester Batch Filter</label>
                                 <select
                                     className="flex h-10 w-full rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
@@ -199,7 +207,7 @@ export default function SpecialTimetablePage() {
                                 onClick={handleGenerateSpecial}
                                 disabled={generating || (excludedIds.size === 0 && excludedRoomIds.size === 0)}
                             >
-                                {generating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Remapping...</> : 'Generate Substitution Matrix'}
+                                {generating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Remapping...</> : <><Zap className="w-4 h-4 mr-2" /> Generate Substitution Matrix</>}
                             </Button>
                         </CardContent>
                     </Card>
