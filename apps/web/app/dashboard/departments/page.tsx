@@ -138,7 +138,7 @@ export default function DepartmentsDashboard() {
                                         </div>
                                         <div className="text-center border-l border-r">
                                             <div className="text-xl font-bold text-slate-800">{dept._count?.courses || 0}</div>
-                                            <div className="text-xs text-slate-500 font-medium">Courses</div>
+                                            <div className="text-xs text-slate-500 font-medium">Subjects</div>
                                         </div>
                                         <div className="text-center">
                                             <div className="text-xl font-bold text-slate-800">{dept._count?.batches || 0}</div>

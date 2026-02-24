@@ -9,9 +9,10 @@ router.use(authenticate);
 router.get('/', getResources);
 router.get('/:id', getResourceById);
 
-// Only Super Admin and Uni Admin can modify resources
-router.post('/', requireRole(['SUPERADMIN', 'UNI_ADMIN']), createResource);
-router.put('/:id', requireRole(['SUPERADMIN', 'UNI_ADMIN']), updateResource);
-router.delete('/:id', requireRole(['SUPERADMIN', 'UNI_ADMIN']), deleteResource);
+// Only Super Admin, Uni Admin, and Dept Admin can modify resources
+router.post('/', requireRole(['SUPERADMIN', 'UNI_ADMIN', 'DEPT_ADMIN']), createResource);
+router.put('/:id', requireRole(['SUPERADMIN', 'UNI_ADMIN', 'DEPT_ADMIN']), updateResource);
+router.delete('/:id', requireRole(['SUPERADMIN', 'UNI_ADMIN', 'DEPT_ADMIN']), deleteResource);
+
 
 export default router;

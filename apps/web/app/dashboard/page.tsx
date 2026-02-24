@@ -18,7 +18,7 @@ export default function UniAdminDashboard() {
             const [deptRes, facRes, crsRes, bchRes] = await Promise.all([
                 api.get(`/universities/${user?.universityId}/departments`),
                 api.get(`/faculty`),
-                api.get(`/courses`),
+                api.get(`/subjects`),
                 api.get(`/batches`),
             ]);
             setStats({
@@ -74,7 +74,7 @@ export default function UniAdminDashboard() {
                         </Card>
                         <Card className="shadow-sm">
                             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                                <CardTitle className="text-sm font-medium text-slate-500">Total Courses</CardTitle>
+                                <CardTitle className="text-sm font-medium text-slate-500">Total Subjects</CardTitle>
                                 <BookOpen className="w-4 h-4 text-slate-400" />
                             </CardHeader>
                             <CardContent>

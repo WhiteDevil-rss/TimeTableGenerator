@@ -86,8 +86,8 @@ function ConfirmDialog({ state, onClose }: { state: ConfirmState; onClose: () =>
 const navItems = [
     { title: 'Dashboard', href: '/department', icon: <LayoutDashboard className="w-5 h-5" /> },
     { title: 'Faculty', href: '/department/faculty', icon: <Users className="w-5 h-5" /> },
-    { title: 'Programs', href: '/department/programs', icon: <GraduationCap className="w-5 h-5" /> },
-    { title: 'Subjects', href: '/department/courses', icon: <BookOpen className="w-5 h-5" /> },
+    { title: 'Courses', href: '/department/courses', icon: <GraduationCap className="w-5 h-5" /> },
+    { title: 'Subjects', href: '/department/subjects', icon: <BookOpen className="w-5 h-5" /> },
     { title: 'Batches', href: '/department/batches', icon: <Network className="w-5 h-5 text-indigo-500" /> },
     { title: 'Resources', href: '/department/resources', icon: <Monitor className="w-5 h-5" /> },
     { title: 'Timetables', href: '/department/timetables', icon: <Calendar className="w-5 h-5" /> },
@@ -96,7 +96,7 @@ const navItems = [
 export default function DeptBatchesDashboard() {
     const { user } = useAuthStore();
     const [batches, setBatches] = useState<any[]>([]);
-    const [programs, setPrograms] = useState<any[]>([]);
+    const [programs, setSubjects] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [expandedBatch, setExpandedBatch] = useState<string | null>(null);
 
@@ -121,9 +121,9 @@ export default function DeptBatchesDashboard() {
         if (!user?.entityId) return;
         setLoading(true);
         try {
-            const [batchRes, progRes] = await Promise.all([api.get('/batches'), api.get('/programs')]);
+            const [batchRes, progRes] = await Promise.all([api.get('/batches'), api.get('/courses')]);
             setBatches(batchRes.data);
-            setPrograms(progRes.data);
+            setSubjects(progRes.data);
         } catch (e) { console.error(e); }
         finally { setLoading(false); }
     }, [user?.entityId]);

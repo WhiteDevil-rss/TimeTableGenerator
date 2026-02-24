@@ -26,7 +26,7 @@ export default function DeptAdminDashboard() {
         try {
             const [facRes, crsRes, bchRes, ttRes] = await Promise.all([
                 api.get(`/faculty`),
-                api.get(`/courses`),
+                api.get(`/subjects`),
                 api.get(`/batches`),
                 api.get(`/departments/${user!.entityId}/timetables/latest`).catch(() => ({ data: null }))
             ]);
@@ -48,8 +48,8 @@ export default function DeptAdminDashboard() {
     const navItems = [
         { title: 'Dashboard', href: '/department', icon: <LayoutDashboard className="w-5 h-5 text-indigo-500" /> },
         { title: 'Faculty', href: '/department/faculty', icon: <Users className="w-5 h-5" /> },
-        { title: 'Programs', href: '/department/programs', icon: <GraduationCap className="w-5 h-5" /> },
-        { title: 'Subjects', href: '/department/courses', icon: <BookOpen className="w-5 h-5" /> },
+        { title: 'Courses', href: '/department/courses', icon: <GraduationCap className="w-5 h-5" /> },
+        { title: 'Subjects', href: '/department/subjects', icon: <BookOpen className="w-5 h-5" /> },
         { title: 'Batches', href: '/department/batches', icon: <Network className="w-5 h-5" /> },
         { title: 'Resources', href: '/department/resources', icon: <Monitor className="w-5 h-5" /> },
         { title: 'Timetables', href: '/department/timetables', icon: <Calendar className="w-5 h-5" /> },

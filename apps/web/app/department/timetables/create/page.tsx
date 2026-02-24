@@ -67,8 +67,8 @@ export default function GenerateTimetablePage() {
     const navItems = [
         { title: 'Dashboard', href: '/department', icon: <LayoutDashboard className="w-5 h-5" /> },
         { title: 'Faculty', href: '/department/faculty', icon: <Users className="w-5 h-5" /> },
-        { title: 'Programs', href: '/department/programs', icon: <BookOpen className="w-5 h-5" /> },
-        { title: 'Subjects', href: '/department/courses', icon: <BookOpen className="w-5 h-5" /> },
+        { title: 'Courses', href: '/department/courses', icon: <BookOpen className="w-5 h-5" /> },
+        { title: 'Subjects', href: '/department/subjects', icon: <BookOpen className="w-5 h-5" /> },
         { title: 'Batches', href: '/department/batches', icon: <Users className="w-5 h-5" /> },
         { title: 'Resources', href: '/department/resources', icon: <Monitor className="w-5 h-5" /> },
         { title: 'Timetables', href: '/department/timetables', icon: <Calendar className="w-5 h-5 text-indigo-500" /> },

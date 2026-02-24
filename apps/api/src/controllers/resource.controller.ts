@@ -6,13 +6,17 @@ export const getResources = async (req: AuthRequest, res: Response) => {
     try {
         const { universityId } = req.query as { universityId?: string };
 
-        if (req.user!.role === 'UNI_ADMIN' && req.user!.universityId !== universityId && universityId) {
+        const isAdmin = ['UNI_ADMIN', 'DEPT_ADMIN'].includes(req.user!.role);
+        if (isAdmin && req.user!.universityId !== universityId && universityId) {
             return res.status(403).json({ error: 'Forbidden' });
         }
 
+
         const filters: any = {};
         if (universityId) filters.universityId = universityId;
-        if (req.user!.role === 'UNI_ADMIN' && !universityId) filters.universityId = req.user!.universityId;
+        if (isAdmin && !universityId) filters.universityId = req.user!.universityId;
+
+
 
         const resources = await prisma.resource.findMany({ where: filters });
         res.json(resources);
@@ -26,9 +30,11 @@ export const getResourceById = async (req: AuthRequest, res: Response) => {
         const resource = await prisma.resource.findUnique({ where: { id: req.params.id } });
         if (!resource) return res.status(404).json({ error: 'Not found' });
 
-        if (req.user!.role === 'UNI_ADMIN' && req.user!.universityId !== resource.universityId) {
+        const isAdmin = ['UNI_ADMIN', 'DEPT_ADMIN'].includes(req.user!.role);
+        if (isAdmin && req.user!.universityId !== resource.universityId) {
             return res.status(403).json({ error: 'Forbidden' });
         }
+
 
         res.json(resource);
     } catch (error) {
@@ -40,9 +46,11 @@ export const createResource = async (req: AuthRequest, res: Response) => {
     try {
         const { universityId, name, type, capacity, floor, building } = req.body;
 
-        if (req.user!.role === 'UNI_ADMIN' && req.user!.universityId !== universityId) {
+        const isAdmin = ['UNI_ADMIN', 'DEPT_ADMIN'].includes(req.user!.role);
+        if (isAdmin && req.user!.universityId !== universityId) {
             return res.status(403).json({ error: 'Forbidden' });
         }
+
 
         const resource = await prisma.resource.create({
             data: { universityId, name, type, capacity, floor, building }
@@ -61,9 +69,11 @@ export const updateResource = async (req: AuthRequest, res: Response) => {
         const targetResource = await prisma.resource.findUnique({ where: { id: req.params.id } });
         if (!targetResource) return res.status(404).json({ error: 'Not found' });
 
-        if (req.user!.role === 'UNI_ADMIN' && req.user!.universityId !== targetResource.universityId) {
+        const isAdmin = ['UNI_ADMIN', 'DEPT_ADMIN'].includes(req.user!.role);
+        if (isAdmin && req.user!.universityId !== targetResource.universityId) {
             return res.status(403).json({ error: 'Forbidden' });
         }
+
 
         const resource = await prisma.resource.update({
             where: { id: req.params.id },
@@ -81,9 +91,11 @@ export const deleteResource = async (req: AuthRequest, res: Response) => {
         const targetResource = await prisma.resource.findUnique({ where: { id: req.params.id } });
         if (!targetResource) return res.status(404).json({ error: 'Not found' });
 
-        if (req.user!.role === 'UNI_ADMIN' && req.user!.universityId !== targetResource.universityId) {
+        const isAdmin = ['UNI_ADMIN', 'DEPT_ADMIN'].includes(req.user!.role);
+        if (isAdmin && req.user!.universityId !== targetResource.universityId) {
             return res.status(403).json({ error: 'Forbidden' });
         }
+
 
         await prisma.resource.delete({ where: { id: req.params.id } });
         res.status(204).send();

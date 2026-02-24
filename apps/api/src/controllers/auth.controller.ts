@@ -13,6 +13,7 @@ export const login = async (req: Request, res: Response) => {
             where: { username },
         });
 
+
         if (!user) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
@@ -26,6 +27,7 @@ export const login = async (req: Request, res: Response) => {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
+
         const token = jwt.sign(
             {
                 id: user.id,
@@ -36,6 +38,7 @@ export const login = async (req: Request, res: Response) => {
             JWT_SECRET,
             { expiresIn: '8h' }
         );
+
 
         // Update lastLogin footprint
         await prisma.user.update({

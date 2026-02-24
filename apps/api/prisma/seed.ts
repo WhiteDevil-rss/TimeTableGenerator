@@ -180,10 +180,17 @@ async function main() {
     ];
 
     for (const f of facultyList) {
-        // Create User for Faculty
-        const user = await prisma.user.create({
-            data: {
-                username: f.email.split('@')[0],
+        const username = f.email.split('@')[0];
+        // Upsert User for Faculty
+        const user = await prisma.user.upsert({
+            where: { username },
+            update: {
+                email: f.email,
+                role: 'FACULTY',
+                universityId: university.id,
+            },
+            create: {
+                username,
                 email: f.email,
                 passwordHash,
                 role: 'FACULTY',
@@ -191,8 +198,16 @@ async function main() {
             },
         });
 
-        const faculty = await prisma.faculty.create({
-            data: {
+        const faculty = await prisma.faculty.upsert({
+            where: { email: f.email },
+            update: {
+                departmentId: department.id,
+                universityId: university.id,
+                name: f.name,
+                userId: user.id,
+                designation: 'Assistant Professor'
+            },
+            create: {
                 departmentId: department.id,
                 universityId: university.id,
                 name: f.name,
