@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../lib/prisma';
 import { AuthRequest } from '../middlewares/auth.middleware';
+import { logActivity } from '../utils/activity-logger';
 
 export const getResources = async (req: AuthRequest, res: Response) => {
     try {
@@ -57,6 +58,13 @@ export const createResource = async (req: AuthRequest, res: Response) => {
         });
 
         res.status(201).json(resource);
+
+        logActivity(
+            req.user!.id,
+            req.user!.role,
+            'RESOURCE_CREATE',
+            { resourceId: resource.id, name: resource.name, type: resource.type }
+        );
     } catch (error) {
         res.status(500).json({ error: 'Failed to create resource' });
     }
@@ -81,6 +89,13 @@ export const updateResource = async (req: AuthRequest, res: Response) => {
         });
 
         res.json(resource);
+
+        logActivity(
+            req.user!.id,
+            req.user!.role,
+            'RESOURCE_UPDATE',
+            { resourceId: resource.id, name: resource.name }
+        );
     } catch (error) {
         res.status(500).json({ error: 'Failed to update resource' });
     }
@@ -99,6 +114,13 @@ export const deleteResource = async (req: AuthRequest, res: Response) => {
 
         await prisma.resource.delete({ where: { id: req.params.id } });
         res.status(204).send();
+
+        logActivity(
+            req.user!.id,
+            req.user!.role,
+            'RESOURCE_DELETE',
+            { resourceId: req.params.id, name: targetResource.name }
+        );
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete resource' });
     }

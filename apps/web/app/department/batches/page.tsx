@@ -2,7 +2,7 @@
 
 import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
-import { Network, Plus, LayoutDashboard, Users, GraduationCap, BookOpen, Calendar, Trash2, Edit, ChevronDown, ChevronUp, UserCheck, AlertTriangle, Monitor } from 'lucide-react';
+import { Network, Plus, LayoutDashboard, Users, GraduationCap, BookOpen, Calendar, Trash2, Edit, ChevronDown, ChevronUp, UserCheck, AlertTriangle, Monitor, Search } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/store/useAuthStore';
@@ -83,20 +83,13 @@ function ConfirmDialog({ state, onClose }: { state: ConfirmState; onClose: () =>
     );
 }
 
-const navItems = [
-    { title: 'Dashboard', href: '/department', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { title: 'Faculty', href: '/department/faculty', icon: <Users className="w-5 h-5" /> },
-    { title: 'Courses', href: '/department/courses', icon: <GraduationCap className="w-5 h-5" /> },
-    { title: 'Subjects', href: '/department/subjects', icon: <BookOpen className="w-5 h-5" /> },
-    { title: 'Batches', href: '/department/batches', icon: <Network className="w-5 h-5 text-indigo-500" /> },
-    { title: 'Resources', href: '/department/resources', icon: <Monitor className="w-5 h-5" /> },
-    { title: 'Timetables', href: '/department/timetables', icon: <Calendar className="w-5 h-5" /> },
-];
+import { DEPT_ADMIN_NAV } from '@/lib/constants/nav-config';
 
 export default function DeptBatchesDashboard() {
     const { user } = useAuthStore();
     const [batches, setBatches] = useState<any[]>([]);
-    const [programs, setSubjects] = useState<any[]>([]);
+    const [programs, setPrograms] = useState<any[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [expandedBatch, setExpandedBatch] = useState<string | null>(null);
 
@@ -121,17 +114,24 @@ export default function DeptBatchesDashboard() {
         if (!user?.entityId) return;
         setLoading(true);
         try {
-            const [batchRes, progRes] = await Promise.all([api.get('/batches'), api.get('/courses')]);
+            const [batchRes, progRes] = await Promise.all([api.get('/batches'), api.get('/programs')]);
             setBatches(batchRes.data);
-            setSubjects(progRes.data);
+            setPrograms(progRes.data);
         } catch (e) { console.error(e); }
         finally { setLoading(false); }
     }, [user?.entityId]);
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
+    // Filter batches based on search term
+    const filteredBatches = batches.filter(batch =>
+        !searchTerm ||
+        batch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (batch.program && batch.program.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
     // Group batches by "program__name" key — each group is one logical batch, rows are divisions
-    const batchGroups: Record<string, any[]> = batches.reduce((acc, batch) => {
+    const batchGroups: Record<string, any[]> = filteredBatches.reduce((acc, batch) => {
         const key = `${batch.program || 'general'}__${batch.name}`;
         if (!acc[key]) acc[key] = [];
         acc[key].push(batch);
@@ -308,15 +308,26 @@ export default function DeptBatchesDashboard() {
 
     return (
         <ProtectedRoute allowedRoles={['DEPT_ADMIN']}>
-            <DashboardLayout navItems={navItems} title="Student Batches">
-                <div className="flex justify-between items-center mb-6">
+            <DashboardLayout navItems={DEPT_ADMIN_NAV} title="Student Batches">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight text-slate-800">Batch Management</h2>
                         <p className="text-slate-500">Manage batches like "MCA 25-27" with divisions (A, B, C) and student counts.</p>
                     </div>
-                    <Button onClick={() => { setError(''); setAddForm({ ...emptyBatchForm }); setIsAddOpen(true); }} className="bg-primary shadow-md">
-                        <Plus className="w-4 h-4 mr-2" /> New Batch
-                    </Button>
+                    <div className="flex gap-2 w-full sm:w-auto">
+                        <div className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2 shadow-sm w-full sm:w-64">
+                            <Search className="w-4 h-4 text-slate-400 shrink-0" />
+                            <Input
+                                placeholder="Search batches..."
+                                className="border-0 p-0 h-auto focus-visible:ring-0 text-sm placeholder:text-slate-400"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <Button onClick={() => { setError(''); setAddForm({ ...emptyBatchForm }); setIsAddOpen(true); }} className="bg-primary shadow-md">
+                            <Plus className="w-4 h-4 mr-2" /> New Batch
+                        </Button>
+                    </div>
                 </div>
 
                 {loading ? (

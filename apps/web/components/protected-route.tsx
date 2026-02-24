@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/useAuthStore';
 import { Loader2 } from 'lucide-react';
@@ -11,13 +11,12 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-    const { user, isAuthenticated } = useAuthStore();
+    const { user, isAuthenticated, hasHydrated } = useAuthStore();
     const router = useRouter();
-    const [isReady, setIsReady] = useState(false);
 
     useEffect(() => {
-        // Basic hydration wait
-        setIsReady(true);
+        // Wait for hydration before doing anything
+        if (!hasHydrated) return;
 
         if (!isAuthenticated || !user) {
             router.push('/login');
@@ -34,12 +33,15 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
                 default: router.push('/login');
             }
         }
-    }, [isAuthenticated, user, router, allowedRoles]);
+    }, [isAuthenticated, user, router, allowedRoles, hasHydrated]);
 
-    if (!isReady || !isAuthenticated || !user || !allowedRoles.includes(user.role)) {
+    if (!hasHydrated || !isAuthenticated || !user || !allowedRoles.includes(user.role)) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                    <p className="text-sm text-gray-500 animate-pulse font-medium">Verifying Session...</p>
+                </div>
             </div>
         );
     }

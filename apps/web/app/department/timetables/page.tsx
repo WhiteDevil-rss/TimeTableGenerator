@@ -3,20 +3,11 @@
 import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { LayoutDashboard, Users, BookOpen, Calendar, GraduationCap, Network, Monitor, PlusCircle, AlertTriangle, Eye, ArrowRight } from 'lucide-react';
+import { PlusCircle, AlertTriangle, Eye, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { DEPT_ADMIN_NAV } from '@/lib/constants/nav-config';
 
 export default function TimetablesMenuPage() {
-    const navItems = [
-        { title: 'Dashboard', href: '/department', icon: <LayoutDashboard className="w-5 h-5" /> },
-        { title: 'Faculty', href: '/department/faculty', icon: <Users className="w-5 h-5" /> },
-        { title: 'Courses', href: '/department/courses', icon: <GraduationCap className="w-5 h-5" /> },
-        { title: 'Subjects', href: '/department/subjects', icon: <BookOpen className="w-5 h-5" /> },
-        { title: 'Batches', href: '/department/batches', icon: <Network className="w-5 h-5" /> },
-        { title: 'Resources', href: '/department/resources', icon: <Monitor className="w-5 h-5" /> },
-        { title: 'Timetables', href: '/department/timetables', icon: <Calendar className="w-5 h-5 text-indigo-500" /> },
-    ];
-
     const options = [
         {
             title: "Regular timetable",
@@ -46,7 +37,7 @@ export default function TimetablesMenuPage() {
 
     return (
         <ProtectedRoute allowedRoles={['DEPT_ADMIN']}>
-            <DashboardLayout navItems={navItems} title="Timetables Menu">
+            <DashboardLayout navItems={DEPT_ADMIN_NAV} title="Timetables Menu">
                 <div className="max-w-5xl mx-auto space-y-6">
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight text-slate-800">Manage Timetables</h2>

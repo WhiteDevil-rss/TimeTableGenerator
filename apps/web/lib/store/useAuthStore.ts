@@ -13,6 +13,8 @@ export interface User {
 interface AuthState {
     user: User | null;
     isAuthenticated: boolean;
+    hasHydrated: boolean;
+    setHasHydrated: (state: boolean) => void;
     login: (user: User, token: string) => void;
     logout: () => void;
 }
@@ -22,6 +24,8 @@ export const useAuthStore = create<AuthState>()(
         (set) => ({
             user: null,
             isAuthenticated: false,
+            hasHydrated: false,
+            setHasHydrated: (state) => set({ hasHydrated: state }),
             login: (user, token) => {
                 Cookies.set('token', token, { expires: 1 }); // 1 day
                 set({ user, isAuthenticated: true });
@@ -33,6 +37,13 @@ export const useAuthStore = create<AuthState>()(
         }),
         {
             name: 'auth-storage',
+            partialize: (state) => ({
+                user: state.user,
+                isAuthenticated: state.isAuthenticated,
+            }),
+            onRehydrateStorage: () => (state) => {
+                state?.setHasHydrated(true);
+            },
         }
     )
 );

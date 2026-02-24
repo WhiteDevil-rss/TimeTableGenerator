@@ -49,6 +49,7 @@ class GenerateRequest(BaseModel):
     resources: List[Resource]
     excludedFacultyIds: List[str] = []
     excludedRoomIds: List[str] = []
+    excludedDayIds: List[int] = []
 
     model_config = ConfigDict(extra='ignore')
 

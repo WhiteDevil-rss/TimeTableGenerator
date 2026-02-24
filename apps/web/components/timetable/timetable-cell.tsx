@@ -6,9 +6,10 @@ interface TimetableCellProps {
     slot: any; // eslint-disable-line @typescript-eslint/no-explicit-any
     viewMode: 'admin' | 'faculty';
     className?: string;
+    diffStatus?: 'new' | 'changed' | 'unchanged';
 }
 
-export const TimetableCell: React.FC<TimetableCellProps> = ({ slot, viewMode, className }) => {
+export const TimetableCell: React.FC<TimetableCellProps> = ({ slot, viewMode, className, diffStatus }) => {
     if (!slot) {
         return (
             <div className={cn("h-full w-full min-h-[100px] border border-slate-100 bg-white/50 backdrop-blur-sm transition-colors hover:bg-slate-50", className)}>
@@ -35,10 +36,20 @@ export const TimetableCell: React.FC<TimetableCellProps> = ({ slot, viewMode, cl
 
     return (
         <div className={cn(
-            `h-full w-full min-h-[110px] border rounded-lg p-2.5 transition-all flex flex-col justify-between shadow-sm`,
+            `h-full w-full min-h-[110px] border rounded-lg p-2.5 transition-all flex flex-col justify-between shadow-sm relative overflow-hidden`,
             bgClass,
+            diffStatus === 'changed' && "ring-2 ring-amber-400 ring-offset-2 scale-[1.02] shadow-amber-100 z-10",
+            diffStatus === 'new' && "ring-2 ring-emerald-400 ring-offset-2 scale-[1.02] shadow-emerald-100 z-10",
             className
         )}>
+            {diffStatus && diffStatus !== 'unchanged' && (
+                <div className={cn(
+                    "absolute top-0 right-0 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-white rounded-bl-lg animate-pulse",
+                    diffStatus === 'changed' ? "bg-amber-500" : "bg-emerald-500"
+                )}>
+                    {diffStatus}
+                </div>
+            )}
             <div className="flex flex-col gap-1.5 mb-2">
                 <div className="flex justify-between items-start gap-1">
                     <div className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold border uppercase tracking-tighter ${isLab ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-blue-100 border-blue-200 text-blue-700'}`}>

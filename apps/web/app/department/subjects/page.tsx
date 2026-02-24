@@ -2,7 +2,7 @@
 
 import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
-import { BookOpen, Plus, LayoutDashboard, Users, GraduationCap, Network, Calendar, Trash2, Edit, Filter, Monitor } from 'lucide-react';
+import { Plus, LayoutDashboard, Users, GraduationCap, BookOpen, Calendar, Trash2, Edit, Filter, Search } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/store/useAuthStore';
@@ -43,7 +43,16 @@ function SubjectFormFields({
                 <Input
                     placeholder="e.g. Data Structures and Algorithms"
                     value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    onChange={(e) => {
+                        const newName = e.target.value;
+                        // auto-sync program name if it's empty or matches previous name
+                        const shouldSync = !form.program || form.program === form.name;
+                        setForm({
+                            ...form,
+                            name: newName,
+                            program: shouldSync ? newName : form.program
+                        });
+                    }}
                 />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -109,15 +118,7 @@ const typeColor: Record<string, string> = {
     'Theory+Lab': 'bg-purple-100 text-purple-700 border-purple-200',
 };
 
-const navItems = [
-    { title: 'Dashboard', href: '/department', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { title: 'Faculty', href: '/department/faculty', icon: <Users className="w-5 h-5" /> },
-    { title: 'Courses', href: '/department/courses', icon: <GraduationCap className="w-5 h-5" /> },
-    { title: 'Subjects', href: '/department/subjects', icon: <BookOpen className="w-5 h-5 text-indigo-500" /> },
-    { title: 'Batches', href: '/department/batches', icon: <Network className="w-5 h-5" /> },
-    { title: 'Resources', href: '/department/resources', icon: <Monitor className="w-5 h-5" /> },
-    { title: 'Timetables', href: '/department/timetables', icon: <Calendar className="w-5 h-5" /> },
-];
+import { DEPT_ADMIN_NAV } from '@/lib/constants/nav-config';
 
 export default function DeptSubjectsDashboard() {
     const { user } = useAuthStore();
@@ -126,6 +127,7 @@ export default function DeptSubjectsDashboard() {
 
     const [loading, setLoading] = useState(true);
     const [filterProgram, setFilterProgram] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -152,12 +154,18 @@ export default function DeptSubjectsDashboard() {
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
-    const filtered = filterProgram ? courses.filter(c => c.program === filterProgram) : courses;
+    const filtered = courses.filter(c => {
+        const matchesProgram = !filterProgram || c.program === filterProgram;
+        const matchesSearch = !searchTerm ||
+            c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.code.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesProgram && matchesSearch;
+    });
 
     const handleCreate = async () => {
         setError('');
         try {
-            await api.post('/subjects', {
+            await api.post('/courses', {
                 ...addForm,
                 departmentId: user?.entityId,
                 universityId: user?.universityId,
@@ -174,7 +182,7 @@ export default function DeptSubjectsDashboard() {
         if (!selectedId) return;
         setError('');
         try {
-            await api.put(`/subjects/${selectedId}`, editForm);
+            await api.put(`/courses/${selectedId}`, editForm);
             setIsEditOpen(false);
             fetchData();
         } catch (e: any) {
@@ -188,7 +196,7 @@ export default function DeptSubjectsDashboard() {
             message: 'Delete this subject? Faculty assignments for this subject will also be removed. This cannot be undone.',
             onConfirm: async () => {
                 try {
-                    await api.delete(`/subjects/${id}`);
+                    await api.delete(`/courses/${id}`);
                     fetchData();
                 } catch (e: any) {
                     showToast('error', e.response?.data?.error || 'Failed to delete subject.');
@@ -199,7 +207,7 @@ export default function DeptSubjectsDashboard() {
 
     return (
         <ProtectedRoute allowedRoles={['DEPT_ADMIN']}>
-            <DashboardLayout navItems={navItems} title="Subjects / Subjects">
+            <DashboardLayout navItems={DEPT_ADMIN_NAV} title="Academic Subjects">
                 <ConfirmDialog state={confirmState} onClose={closeConfirm} />
                 <Toast toast={toast} onClose={hideToast} />
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -212,16 +220,28 @@ export default function DeptSubjectsDashboard() {
                     </Button>
                 </div>
 
-                <div className="flex items-center gap-2 mb-6 bg-white border rounded-lg px-3 py-2 shadow-sm w-full max-w-sm">
-                    <Filter className="w-4 h-4 text-slate-400 shrink-0" />
-                    <select
-                        className="flex-1 text-sm bg-transparent outline-none"
-                        value={filterProgram}
-                        onChange={(e) => setFilterProgram(e.target.value)}
-                    >
-                        <option value="">All Subjects</option>
-                        {programs.map(p => <option key={p.id} value={p.shortName}>{p.name} ({p.shortName})</option>)}
-                    </select>
+                <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+                    <div className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2 shadow-sm w-full max-w-sm">
+                        <Filter className="w-4 h-4 text-slate-400 shrink-0" />
+                        <select
+                            className="flex-1 text-sm bg-transparent outline-none"
+                            value={filterProgram}
+                            onChange={(e) => setFilterProgram(e.target.value)}
+                        >
+                            <option value="">All Subjects</option>
+                            {programs.map(p => <option key={p.id} value={p.shortName}>{p.name} ({p.shortName})</option>)}
+                        </select>
+                    </div>
+
+                    <div className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2 shadow-sm w-full max-w-sm">
+                        <Search className="w-4 h-4 text-slate-400 shrink-0" />
+                        <Input
+                            placeholder="Search by name or code..."
+                            className="border-0 p-0 h-auto focus-visible:ring-0 text-sm placeholder:text-slate-400"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
                 </div>
 
                 {loading ? (

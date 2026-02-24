@@ -59,4 +59,7 @@ export interface GenerateRequest {
     departmentId: string;
     batchIds: string[];
     config: ScheduleConfig;
+    excludedFacultyIds?: string[];
+    excludedRoomIds?: string[];
+    excludedDayIds?: number[];
 }

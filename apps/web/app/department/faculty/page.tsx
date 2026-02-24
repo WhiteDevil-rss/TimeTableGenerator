@@ -2,7 +2,7 @@
 
 import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
-import { Users, Plus, LayoutDashboard, BookOpen, Calendar, Trash2, Edit, GraduationCap, Network, Monitor } from 'lucide-react';
+import { Users, Plus, LayoutDashboard, BookOpen, Calendar, Trash2, Edit, GraduationCap, Network, Monitor, Search } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/store/useAuthStore';
@@ -13,9 +13,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { ConfirmDialog, useConfirm } from '@/components/ui/confirm-dialog';
 import { Toast, useToast } from '@/components/ui/toast-alert';
 
+import { DEPT_ADMIN_NAV } from '@/lib/constants/nav-config';
+
 export default function DeptFacultyDashboard() {
     const { user } = useAuthStore();
     const [faculties, setFaculties] = useState<any[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const { confirmState, closeConfirm, askConfirm } = useConfirm();
     const { toast, showToast, hideToast } = useToast();
@@ -52,6 +55,13 @@ export default function DeptFacultyDashboard() {
     useEffect(() => {
         fetchData();
     }, [fetchData]);
+
+    const filtered = faculties.filter(fac =>
+        !searchTerm ||
+        fac.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        fac.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (fac.designation && fac.designation.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
 
     const handleCreateFaculty = async () => {
         try {
@@ -93,36 +103,37 @@ export default function DeptFacultyDashboard() {
         });
     };
 
-    const navItems = [
-        { title: 'Dashboard', href: '/department', icon: <LayoutDashboard className="w-5 h-5" /> },
-        { title: 'Faculty', href: '/department/faculty', icon: <Users className="w-5 h-5 text-indigo-500" /> },
-        { title: 'Programs', href: '/department/courses', icon: <GraduationCap className="w-5 h-5" /> },
-        { title: 'Subjects', href: '/department/subjects', icon: <BookOpen className="w-5 h-5" /> },
-        { title: 'Batches', href: '/department/batches', icon: <Network className="w-5 h-5" /> },
-        { title: 'Resources', href: '/department/resources', icon: <Monitor className="w-5 h-5" /> },
-        { title: 'Timetables', href: '/department/timetables', icon: <Calendar className="w-5 h-5" /> },
-    ];
-
     return (
         <ProtectedRoute allowedRoles={['DEPT_ADMIN']}>
-            <DashboardLayout navItems={navItems} title="Department Faculty">
+            <DashboardLayout navItems={DEPT_ADMIN_NAV} title="Department Faculty">
                 <ConfirmDialog state={confirmState} onClose={closeConfirm} />
                 <Toast toast={toast} onClose={hideToast} />
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight text-slate-800">Faculty Directory</h2>
                         <p className="text-slate-500">Manage all registered teaching bodies and workload capacities for your department.</p>
                     </div>
-                    <Button onClick={() => setIsAddOpen(true)} className="bg-primary shadow-md hover:bg-primary/90">
-                        <Plus className="w-4 h-4 mr-2" /> Register Faculty
-                    </Button>
+                    <div className="flex gap-2 w-full sm:w-auto">
+                        <div className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2 shadow-sm w-full sm:w-64">
+                            <Search className="w-4 h-4 text-slate-400 shrink-0" />
+                            <Input
+                                placeholder="Search faculty..."
+                                className="border-0 p-0 h-auto focus-visible:ring-0 text-sm placeholder:text-slate-400"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <Button onClick={() => setIsAddOpen(true)} className="bg-primary shadow-md hover:bg-primary/90">
+                            <Plus className="w-4 h-4 mr-2" /> Register Faculty
+                        </Button>
+                    </div>
                 </div>
 
                 {loading ? (
                     <div className="flex justify-center p-12"><div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin" /></div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {faculties.map(fac => (
+                        {filtered.map(fac => (
                             <Card key={fac.id} className="shadow-sm border-slate-200">
                                 <CardHeader className="pb-3 border-b bg-slate-50/50 rounded-t-xl group">
                                     <CardTitle className="flex items-start justify-between">
@@ -178,9 +189,9 @@ export default function DeptFacultyDashboard() {
                             </Card>
                         ))}
 
-                        {faculties.length === 0 && (
+                        {filtered.length === 0 && (
                             <div className="col-span-full py-12 text-center text-slate-500 bg-white rounded-xl border border-dashed border-slate-300">
-                                No faculty members found. Provision teaching personnel to construct schedules.
+                                {searchTerm ? `No results found for "${searchTerm}"` : 'No faculty members found. Provision teaching personnel to construct schedules.'}
                             </div>
                         )}
                     </div>

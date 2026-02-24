@@ -2,7 +2,7 @@
 
 import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
-import { GraduationCap, Plus, LayoutDashboard, Users, BookOpen, Network, Calendar, Trash2, Edit, Clock, Layers, Monitor } from 'lucide-react';
+import { GraduationCap, Plus, LayoutDashboard, Users, BookOpen, Network, Calendar, Trash2, Edit, Clock, Layers, Monitor, Search } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/store/useAuthStore';
@@ -89,19 +89,12 @@ const typeColors: Record<string, string> = {
     'Ph.D': 'bg-emerald-100 text-emerald-700 border-emerald-200',
 };
 
-const navItems = [
-    { title: 'Dashboard', href: '/department', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { title: 'Faculty', href: '/department/faculty', icon: <Users className="w-5 h-5" /> },
-    { title: 'Courses', href: '/department/courses', icon: <GraduationCap className="w-5 h-5 text-indigo-500" /> },
-    { title: 'Subjects', href: '/department/subjects', icon: <BookOpen className="w-5 h-5" /> },
-    { title: 'Batches', href: '/department/batches', icon: <Network className="w-5 h-5" /> },
-    { title: 'Resources', href: '/department/resources', icon: <Monitor className="w-5 h-5" /> },
-    { title: 'Timetables', href: '/department/timetables', icon: <Calendar className="w-5 h-5" /> },
-];
+import { DEPT_ADMIN_NAV } from '@/lib/constants/nav-config';
 
-export default function DeptSubjectsDashboard() {
+export default function DeptProgramsDashboard() {
     const { user } = useAuthStore();
-    const [programs, setSubjects] = useState<any[]>([]);
+    const [programs, setPrograms] = useState<any[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
@@ -116,8 +109,8 @@ export default function DeptSubjectsDashboard() {
         if (!user?.universityId) return;
         setLoading(true);
         try {
-            const { data } = await api.get('/courses');
-            setSubjects(data);
+            const { data } = await api.get('/programs');
+            setPrograms(data);
         } catch (e) {
             console.error(e);
         } finally {
@@ -127,10 +120,16 @@ export default function DeptSubjectsDashboard() {
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
+    const filtered = programs.filter(p =>
+        !searchTerm ||
+        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.shortName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     const handleCreate = async () => {
         setError('');
         try {
-            await api.post('/courses', { ...addForm, universityId: user?.universityId });
+            await api.post('/programs', { ...addForm, universityId: user?.universityId });
             setIsAddOpen(false);
             setAddForm({ ...emptyForm });
             fetchData();
@@ -143,7 +142,7 @@ export default function DeptSubjectsDashboard() {
         if (!selectedId) return;
         setError('');
         try {
-            await api.put(`/courses/${selectedId}`, editForm);
+            await api.put(`/programs/${selectedId}`, editForm);
             setIsEditOpen(false);
             fetchData();
         } catch (e: any) {
@@ -157,7 +156,7 @@ export default function DeptSubjectsDashboard() {
             message: 'Delete this program? All linked batches and subjects may be affected. This cannot be undone.',
             onConfirm: async () => {
                 try {
-                    await api.delete(`/courses/${id}`);
+                    await api.delete(`/programs/${id}`);
                     fetchData();
                 } catch (e: any) {
                     showToast('error', e.response?.data?.error || 'Failed to delete program.');
@@ -168,24 +167,35 @@ export default function DeptSubjectsDashboard() {
 
     return (
         <ProtectedRoute allowedRoles={['DEPT_ADMIN']}>
-            <DashboardLayout navItems={navItems} title="Academic Subjects">
+            <DashboardLayout navItems={DEPT_ADMIN_NAV} title="Academic Programs">
                 <ConfirmDialog state={confirmState} onClose={closeConfirm} />
                 <Toast toast={toast} onClose={hideToast} />
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight text-slate-800">Subjects Directory</h2>
+                        <h2 className="text-2xl font-bold tracking-tight text-slate-800">Programs Directory</h2>
                         <p className="text-slate-500">Manage degree programs offered by your department.</p>
                     </div>
-                    <Button onClick={() => { setError(''); setIsAddOpen(true); }} className="bg-primary shadow-md hover:bg-primary/90">
-                        <Plus className="w-4 h-4 mr-2" /> Add Program
-                    </Button>
+                    <div className="flex gap-2 w-full sm:w-auto">
+                        <div className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2 shadow-sm w-full sm:w-64">
+                            <Search className="w-4 h-4 text-slate-400 shrink-0" />
+                            <Input
+                                placeholder="Search programs..."
+                                className="border-0 p-0 h-auto focus-visible:ring-0 text-sm placeholder:text-slate-400"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <Button onClick={() => { setError(''); setIsAddOpen(true); }} className="bg-primary shadow-md hover:bg-primary/90">
+                            <Plus className="w-4 h-4 mr-2" /> Add Program
+                        </Button>
+                    </div>
                 </div>
 
                 {loading ? (
                     <div className="flex justify-center p-12"><div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin" /></div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {programs.map(prog => (
+                        {filtered.map(prog => (
                             <Card key={prog.id} className="shadow-sm border-slate-200 hover:shadow-md transition-shadow">
                                 <CardHeader className="pb-3 border-b bg-slate-50/50 rounded-t-xl">
                                     <div className="flex justify-between items-start">
@@ -233,11 +243,11 @@ export default function DeptSubjectsDashboard() {
                                 </CardContent>
                             </Card>
                         ))}
-                        {programs.length === 0 && (
+                        {filtered.length === 0 && (
                             <div className="col-span-full py-16 text-center text-slate-500 bg-white rounded-xl border-dashed border-2 border-slate-200">
                                 <GraduationCap className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                                <h3 className="text-lg font-semibold text-slate-700">No programs added yet</h3>
-                                <p className="text-sm mt-1">Add your first degree program (e.g. MCA, BCA) to get started.</p>
+                                <h3 className="text-lg font-semibold text-slate-700">{searchTerm ? `No results for "${searchTerm}"` : 'No programs added yet'}</h3>
+                                <p className="text-sm mt-1">{searchTerm ? 'Try a different search term' : 'Add your first degree program (e.g. MCA, BCA) to get started.'}</p>
                             </div>
                         )}
                     </div>

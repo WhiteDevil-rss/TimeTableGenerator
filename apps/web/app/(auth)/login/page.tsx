@@ -66,9 +66,11 @@ export default function LoginPage() {
                         <div className="p-3 bg-white/20 rounded-full mb-4 backdrop-blur-sm">
                             <GraduationCap className="h-10 w-10 text-white" />
                         </div>
-                        <CardTitle className="text-2xl font-bold tracking-tight text-white mb-2">NEP Scheduler</CardTitle>
-                        <CardDescription className="text-blue-100 text-center">
-                            Enter your credentials to access your dashboard
+                        <CardTitle className="text-3xl font-extrabold tracking-tight text-white mb-2 text-center leading-tight">
+                            Zembaa Solution
+                        </CardTitle>
+                        <CardDescription className="text-blue-100 text-center font-medium">
+                            Intelligent Scheduling Reinvented
                         </CardDescription>
                     </div>
                 </CardHeader>

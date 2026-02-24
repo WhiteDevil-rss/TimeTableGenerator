@@ -4,13 +4,14 @@ import { AuthRequest } from '../middlewares/auth.middleware';
 import { callAiEngine } from '../services/ai.service';
 import { createClient } from 'redis';
 import { socketService } from '../services/socket.service';
+import { logActivity } from '../utils/activity-logger';
 
 const redisClient = createClient({ url: process.env.REDIS_URL || 'redis://localhost:6379' });
 redisClient.connect().catch(console.error);
 
 export const generateTimetable = async (req: AuthRequest, res: Response) => {
     try {
-        let { departmentId, config, excludedFacultyIds = [], excludedRoomIds = [], semesterFilter = 'all' } = req.body;
+        let { departmentId, config, excludedFacultyIds = [], excludedRoomIds = [], excludedDayIds = [], semesterFilter = 'all' } = req.body;
 
         // Normalize config for backward compatibility
         if (config && !config.numberOfBreaks && config.breakAfterLecture !== undefined) {
@@ -172,6 +173,19 @@ export const generateTimetable = async (req: AuthRequest, res: Response) => {
             });
 
             res.status(200).json({ message: "Timetable Generated", timetable: fullTimetable });
+
+            logActivity(
+                req.user!.id,
+                req.user!.role,
+                'TIMETABLE_GENERATE',
+                {
+                    timetableId: savedTimetable.id,
+                    departmentId,
+                    isSpecial,
+                    generationMs,
+                    conflictCount: aiResponse.conflictCount
+                }
+            );
 
         } finally {
             await redisClient.del(lockKey); // Release lock

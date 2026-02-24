@@ -18,7 +18,7 @@ export default function UniAdminDashboard() {
             const [deptRes, facRes, crsRes, bchRes] = await Promise.all([
                 api.get(`/universities/${user?.universityId}/departments`),
                 api.get(`/faculty`),
-                api.get(`/subjects`),
+                api.get(`/courses`),
                 api.get(`/batches`),
             ]);
             setStats({

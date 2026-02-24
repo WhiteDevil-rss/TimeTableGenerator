@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import prisma from '../lib/prisma';
+import { logActivity } from '../utils/activity-logger';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key';
 
@@ -45,6 +46,14 @@ export const login = async (req: Request, res: Response) => {
             where: { id: user.id },
             data: { lastLogin: new Date() },
         });
+
+        // Persistent Activity Log
+        logActivity(
+            user.id,
+            user.role,
+            'USER_LOGIN',
+            { username: user.username, method: 'username/password', ip: req.ip }
+        );
 
         res.json({
             token,

@@ -10,9 +10,10 @@ interface TimetableGridProps {
     config: any; // eslint-disable-line @typescript-eslint/no-explicit-any
     viewMode: 'admin' | 'faculty';
     facultyId?: string;
+    baselineSlots?: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-export const TimetableGrid: React.FC<TimetableGridProps> = ({ slots, config, viewMode, facultyId }) => {
+export const TimetableGrid: React.FC<TimetableGridProps> = ({ slots, config, viewMode, facultyId, baselineSlots }) => {
     const [selectedBatch, setSelectedBatch] = useState<string>('ALL');
 
     // Extract unique batches for the filter
@@ -147,9 +148,35 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({ slots, config, vie
                                                 <div key={d} className={`p-1.5 min-h-[120px] ${dIdx < days - 1 ? 'border-r border-slate-100' : ''} group-hover:bg-indigo-50/10 transition-colors`}>
                                                     {cellSlots.length > 0 ? (
                                                         <div className="flex flex-col gap-2 h-full">
-                                                            {cellSlots.map((slot, sIdx) => (
-                                                                <TimetableCell key={`${slot.slotNumber}-${sIdx}`} slot={slot} viewMode={viewMode} />
-                                                            ))}
+                                                            {cellSlots.map((slot, sIdx) => {
+                                                                // Difference Detection Logic
+                                                                let diffStatus: 'new' | 'changed' | 'unchanged' = 'unchanged';
+                                                                if (baselineSlots && !slot.isBreak) {
+                                                                    const baseline = baselineSlots.find(b =>
+                                                                        b.dayOfWeek === slot.dayOfWeek &&
+                                                                        b.slotNumber === slot.slotNumber &&
+                                                                        b.batchId === slot.batchId
+                                                                    );
+
+                                                                    if (!baseline) {
+                                                                        diffStatus = 'new';
+                                                                    } else if (
+                                                                        baseline.facultyId !== slot.facultyId ||
+                                                                        baseline.roomId !== slot.roomId
+                                                                    ) {
+                                                                        diffStatus = 'changed';
+                                                                    }
+                                                                }
+
+                                                                return (
+                                                                    <TimetableCell
+                                                                        key={`${slot.slotNumber}-${sIdx}`}
+                                                                        slot={slot}
+                                                                        viewMode={viewMode}
+                                                                        diffStatus={diffStatus}
+                                                                    />
+                                                                );
+                                                            })}
                                                         </div>
                                                     ) : (
                                                         <div className="h-full w-full rounded-md border border-dashed border-slate-200/50 flex items-center justify-center">

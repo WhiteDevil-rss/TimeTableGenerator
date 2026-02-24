@@ -2,12 +2,14 @@
 
 import { ReactNode } from 'react';
 import { useAuthStore } from '@/lib/store/useAuthStore';
-import { LogOut } from 'lucide-react';
+import { LogOut, Clock, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter, usePathname } from 'next/navigation';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useRealtimeUpdates } from '@/lib/hooks/useRealtimeUpdates';
+import { useSessionStore } from '@/lib/store/useSessionStore';
 
 interface NavItem {
     title: string;
@@ -22,23 +24,84 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children, navItems, title }: DashboardLayoutProps) {
-    const { user, logout } = useAuthStore();
+    const { user, logout, hasHydrated } = useAuthStore();
     const router = useRouter();
     const pathname = usePathname();
 
+    const { timeLeft, decrementTime, resetTimer, forceReset } = useSessionStore();
+
     useRealtimeUpdates(); // Initialize Real-time mapping
 
-    const handleLogout = () => {
+    const handleLogout = useCallback(() => {
         logout();
+        forceReset();
         router.push('/login');
+    }, [logout, router, forceReset]);
+
+    // Timer logic
+    useEffect(() => {
+        if (!hasHydrated) return; // Wait for auth hydration too if needed, but session store has its own
+
+        if (timeLeft <= 0) {
+            handleLogout();
+            return;
+        }
+
+        const interval = setInterval(() => {
+            decrementTime();
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [timeLeft, handleLogout, decrementTime, hasHydrated]);
+
+    // Activity tracking – reset timer on user activity, but threshold logic in resetTimer prevents immediate reset on navigation
+    useEffect(() => {
+        const events = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart'];
+        events.forEach(e => window.addEventListener(e, resetTimer));
+        return () => {
+            events.forEach(e => window.removeEventListener(e, resetTimer));
+        };
+    }, [resetTimer]);
+
+
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
+
+    const getTimerColor = () => {
+        if (timeLeft < 60) return 'text-red-500 font-bold animate-pulse';
+        if (timeLeft < 180) return 'text-amber-500 font-semibold';
+        return 'text-slate-500';
+    };
+
+    const TimerDisplay = ({ isMobile = false }) => (
+        <div className={cn(
+            "flex items-center gap-2 px-3 py-1.5 rounded-full border bg-slate-50 transition-colors",
+            timeLeft < 60 ? "border-red-200 bg-red-50" : "border-slate-200",
+            isMobile && "px-2 py-1 scale-90"
+        )}>
+            {timeLeft < 60 ? (
+                <ShieldAlert className="w-4 h-4 text-red-500" />
+            ) : (
+                <Clock className="w-4 h-4 text-slate-400" />
+            )}
+            <div className="flex flex-col leading-none">
+                {!isMobile && <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Session Expires</span>}
+                <span className={cn("text-sm tabular-nums", getTimerColor(), isMobile && "text-xs")}>
+                    {formatTime(timeLeft)}
+                </span>
+            </div>
+        </div>
+    );
 
     return (
         <div className="h-screen flex overflow-hidden bg-slate-50">
             {/* Sidebar */}
             <aside className="w-64 bg-white border-r flex flex-col hidden md:flex flex-shrink-0">
-                <div className="h-16 flex items-center px-6 border-b text-lg font-bold text-primary">
-                    NEP Scheduler
+                <div className="h-16 flex items-center px-6 border-b text-lg font-bold text-primary tracking-tight">
+                    Zembaa Solution
                 </div>
 
                 <div className="flex-1 p-4 space-y-1 overflow-y-auto">
@@ -78,15 +141,22 @@ export function DashboardLayout({ children, navItems, title }: DashboardLayoutPr
             <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Top Navbar for Mobile (simplified) */}
                 <header className="h-16 bg-white border-b flex items-center justify-between px-6 md:hidden flex-shrink-0">
-                    <span className="font-bold text-primary">NEP Scheduler</span>
-                    <Button variant="ghost" size="icon" onClick={handleLogout}>
-                        <LogOut className="h-5 w-5 text-red-600" />
-                    </Button>
+                    <span className="font-bold text-primary text-sm tracking-tight text-center">Zembaa Solution</span>
+                    <div className="flex items-center gap-2">
+                        <TimerDisplay isMobile />
+                        <Button variant="ghost" size="icon" onClick={handleLogout}>
+                            <LogOut className="h-5 w-5 text-red-600" />
+                        </Button>
+                    </div>
                 </header>
 
                 {/* Top Header */}
-                <header className="h-16 bg-white border-b hidden md:flex items-center px-8 shadow-sm z-10 flex-shrink-0">
+                <header className="h-16 bg-white border-b hidden md:flex items-center justify-between px-8 shadow-sm z-10 flex-shrink-0">
                     <h1 className="text-xl font-semibold text-slate-800">{title}</h1>
+
+                    <div className="flex items-center gap-4">
+                        <TimerDisplay />
+                    </div>
                 </header>
 
                 {/* Page Content */}

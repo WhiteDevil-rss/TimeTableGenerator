@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import prisma from '../lib/prisma';
 import bcrypt from 'bcrypt';
 import { AuthRequest } from '../middlewares/auth.middleware';
+import { logActivity } from '../utils/activity-logger';
 
 const hashPassword = async (password: string) => bcrypt.hash(password, 12);
 
@@ -112,6 +113,13 @@ export const createFaculty = async (req: AuthRequest, res: Response) => {
         });
 
         res.status(201).json(faculty);
+
+        logActivity(
+            req.user!.id,
+            req.user!.role,
+            'FACULTY_CREATE',
+            { facultyId: faculty.id, name: faculty.name, departmentId: faculty.departmentId }
+        );
     } catch (error) {
         res.status(500).json({ error: 'Failed to create faculty' });
     }
@@ -138,6 +146,13 @@ export const updateFaculty = async (req: AuthRequest, res: Response) => {
         });
 
         res.json(faculty);
+
+        logActivity(
+            req.user!.id,
+            req.user!.role,
+            'FACULTY_UPDATE',
+            { facultyId: faculty.id, name: faculty.name }
+        );
     } catch (error) {
         res.status(500).json({ error: 'Failed to update faculty' });
     }
@@ -161,6 +176,13 @@ export const deleteFaculty = async (req: AuthRequest, res: Response) => {
         }
 
         res.status(204).send();
+
+        logActivity(
+            req.user!.id,
+            req.user!.role,
+            'FACULTY_DELETE',
+            { facultyId: req.params.id, name: targetFac.name }
+        );
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete faculty' });
     }

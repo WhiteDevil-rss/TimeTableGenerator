@@ -188,7 +188,7 @@ class TimetableScheduler:
                     for f in self.request.faculty:
                         for r in self.request.resources:
                             for b in self.request.batches:
-                                if f.id in self.request.excludedFacultyIds or r.id in self.request.excludedRoomIds:
+                                if f.id in self.request.excludedFacultyIds or r.id in self.request.excludedRoomIds or d in self.request.excludedDayIds:
                                     self.model.Add(self.vars[(d, p, c.id, f.id, r.id, b.id)] == 0)
 
     def solve(self):

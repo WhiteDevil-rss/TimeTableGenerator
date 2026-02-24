@@ -14,8 +14,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "VNSGU Timetable Management Platform",
-  description: "Intelligent scheduling architecture for Veer Narmad South Gujarat University.",
+  title: "Zembaa Solution",
+  description: "Zembaa Solution - Intelligent TimeTable Generator",
 };
 
 export default function RootLayout({

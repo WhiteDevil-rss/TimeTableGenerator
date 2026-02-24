@@ -14,7 +14,7 @@ export default function Home() {
           <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
             <Calendar className="w-6 h-6 text-white" />
           </div>
-          <span className="text-xl font-bold text-slate-800 tracking-tight">VNSGU Scheduler</span>
+          <span className="text-xl font-bold text-slate-800 tracking-tight leading-tight">Zembaa Solution</span>
         </div>
         <div className="flex gap-4 items-center">
           <Link
@@ -33,16 +33,16 @@ export default function Home() {
             Version 1.1 Live Deployment
           </div>
 
-          <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight text-slate-900 drop-shadow-sm">
-            Intelligent Timetable <br className="hidden lg:block" />
+          <h1 className="text-4xl lg:text-7xl font-extrabold tracking-tight text-slate-900 drop-shadow-sm leading-tight text-center">
+            Zembaa <br className="hidden lg:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">
-              Orchestration Engine
+              Solution
             </span>
           </h1>
 
-          <p className="text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            The next-generation scheduling architecture for Veer Narmad South Gujarat University.
-            Automated conflict resolution across endless department hierarchies.
+          <p className="text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed text-center">
+            The next-generation scheduling architecture built for excellence.
+            Leveraging intelligent algorithms for resource optimization and conflict resolution.
           </p>
 
           <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center">
