@@ -46,13 +46,13 @@ export default function FacultySchedulePage() {
         <ProtectedRoute allowedRoles={['FACULTY']}>
             <DashboardLayout navItems={navItems} title="My Schedule">
                 {loading ? (
-                    <div className="flex justify-center p-12"><div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin" /></div>
+                    <div className="flex justify-center p-12"><div className="w-8 h-8 rounded-full border-4 border-indigo-600 dark:border-neon-cyan border-t-transparent animate-spin" /></div>
                 ) : latestTimetable ? (
                     <div className="space-y-4">
-                        <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                        <div className="flex justify-between items-center bg-white dark:bg-[#0a0a0c] p-4 rounded-lg shadow-sm border border-slate-200 dark:border-white/10 glass-card">
                             <div>
-                                <h3 className="text-xl font-bold text-slate-800">Your Current Schedule</h3>
-                                <p className="text-sm text-slate-500">
+                                <h3 className="text-xl font-bold text-slate-800 dark:text-white">Your Current Schedule</h3>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">
                                     Generated on {new Date(latestTimetable.createdAt).toLocaleDateString()}
                                 </p>
                             </div>
@@ -66,9 +66,9 @@ export default function FacultySchedulePage() {
                         />
                     </div>
                 ) : (
-                    <div className="text-center p-12 border border-dashed rounded-xl bg-slate-50">
-                        <h3 className="text-lg font-semibold text-slate-700 mb-2">No active schedule found</h3>
-                        <p className="text-slate-500">Your specific department has not generated or published an active timetable yet.</p>
+                    <div className="text-center p-12 border border-dashed rounded-xl bg-slate-50 dark:bg-white/5 dark:border-white/10">
+                        <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-200 mb-2">No active schedule found</h3>
+                        <p className="text-slate-500 dark:text-slate-400">Your specific department has not generated or published an active timetable yet.</p>
                     </div>
                 )}
             </DashboardLayout>

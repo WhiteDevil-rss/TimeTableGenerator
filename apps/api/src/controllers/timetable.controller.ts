@@ -108,7 +108,6 @@ export const generateTimetable = async (req: AuthRequest, res: Response) => {
                 faculty: faculty.map((f: any) => ({
                     id: f.id,
                     name: f.name,
-                    maxHrsPerDay: f.maxHrsPerDay,
                     subjects: f.subjects.map((s: any) => ({ courseId: s.courseId, isPrimary: s.isPrimary }))
                 })),
                 courses: courses.map((c: any) => ({

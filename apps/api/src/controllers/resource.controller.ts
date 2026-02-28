@@ -28,7 +28,8 @@ export const getResources = async (req: AuthRequest, res: Response) => {
 
 export const getResourceById = async (req: AuthRequest, res: Response) => {
     try {
-        const resource = await prisma.resource.findUnique({ where: { id: req.params.id } });
+        const id = req.params.id as string;
+        const resource = await prisma.resource.findUnique({ where: { id } });
         if (!resource) return res.status(404).json({ error: 'Not found' });
 
         const isAdmin = ['UNI_ADMIN', 'DEPT_ADMIN'].includes(req.user!.role);
@@ -72,9 +73,10 @@ export const createResource = async (req: AuthRequest, res: Response) => {
 
 export const updateResource = async (req: AuthRequest, res: Response) => {
     try {
+        const id = req.params.id as string;
         const { name, type, capacity, floor, building } = req.body;
 
-        const targetResource = await prisma.resource.findUnique({ where: { id: req.params.id } });
+        const targetResource = await prisma.resource.findUnique({ where: { id } });
         if (!targetResource) return res.status(404).json({ error: 'Not found' });
 
         const isAdmin = ['UNI_ADMIN', 'DEPT_ADMIN'].includes(req.user!.role);
@@ -84,7 +86,7 @@ export const updateResource = async (req: AuthRequest, res: Response) => {
 
 
         const resource = await prisma.resource.update({
-            where: { id: req.params.id },
+            where: { id },
             data: { name, type, capacity, floor, building }
         });
 
@@ -103,7 +105,8 @@ export const updateResource = async (req: AuthRequest, res: Response) => {
 
 export const deleteResource = async (req: AuthRequest, res: Response) => {
     try {
-        const targetResource = await prisma.resource.findUnique({ where: { id: req.params.id } });
+        const id = req.params.id as string;
+        const targetResource = await prisma.resource.findUnique({ where: { id } });
         if (!targetResource) return res.status(404).json({ error: 'Not found' });
 
         const isAdmin = ['UNI_ADMIN', 'DEPT_ADMIN'].includes(req.user!.role);
@@ -112,14 +115,14 @@ export const deleteResource = async (req: AuthRequest, res: Response) => {
         }
 
 
-        await prisma.resource.delete({ where: { id: req.params.id } });
+        await prisma.resource.delete({ where: { id } });
         res.status(204).send();
 
         logActivity(
             req.user!.id,
             req.user!.role,
             'RESOURCE_DELETE',
-            { resourceId: req.params.id, name: targetResource.name }
+            { resourceId: id, name: targetResource.name }
         );
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete resource' });

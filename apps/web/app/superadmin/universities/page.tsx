@@ -47,7 +47,7 @@ export default function SuperAdminDashboard() {
             const { data } = await api.get('/universities');
             setUniversities(data);
         } catch (e) {
-            console.error(e);
+            console.warn(e);
             showToast('error', 'Failed to fetch universities');
         } finally {
             setLoading(false);
@@ -65,9 +65,10 @@ export default function SuperAdminDashboard() {
             setNewUniForm({ name: '', shortName: '', location: '', email: '', adminUsername: '', adminPassword: '' });
             fetchUniversities();
             showToast('success', 'University and Admin account implicitly created!');
-        } catch (e) {
-            console.error(e);
-            showToast('error', 'Failed to create university. Ensure shortName or admin username is unique.');
+        } catch (e: any) {
+            console.warn(e);
+            const errorMessage = e.response?.data?.error || 'Failed to create university. Ensure shortName or admin username is unique.';
+            showToast('error', errorMessage);
         }
     };
 
@@ -80,7 +81,7 @@ export default function SuperAdminDashboard() {
             fetchUniversities();
             showToast('success', 'University updated successfully!');
         } catch (e) {
-            console.error(e);
+            console.warn(e);
             showToast('error', 'Failed to update university.');
         }
     };
@@ -97,7 +98,7 @@ export default function SuperAdminDashboard() {
                     fetchUniversities();
                     showToast('success', 'University and all associated data deleted successfully!');
                 } catch (e) {
-                    console.error(e);
+                    console.warn(e);
                     showToast('error', 'Failed to delete university.');
                 }
             }
@@ -127,28 +128,30 @@ export default function SuperAdminDashboard() {
         <ProtectedRoute allowedRoles={['SUPERADMIN']}>
             <DashboardLayout navItems={navItems} title="Super Admin Dashboard">
 
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex justify-between items-center mb-10 relative z-20">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight text-slate-800">Universities Overview</h2>
-                        <p className="text-slate-500">Manage all registered universities and their credentials.</p>
+                        <h2 className="text-3xl font-heading font-extrabold tracking-tight text-slate-900 dark:text-white glow-cyan">Universities Overview</h2>
+                        <p className="text-slate-600 dark:text-slate-400 font-light mt-1">Manage global university partitions securely via the Neural Constraint Solver matrix.</p>
                     </div>
-                    <Button onClick={() => setIsAddUniOpen(true)} className="bg-primary shadow-md hover:bg-primary/90">
-                        <LuPlus className="w-4 h-4 mr-2" /> Add University
+                    <Button onClick={() => setIsAddUniOpen(true)} className="bg-neon-cyan text-white dark:text-slate-900 shadow-md dark:shadow-[0_0_15px_rgba(57,193,239,0.4)] hover:shadow-lg hover:bg-cyan-600 dark:hover:bg-white font-bold transition-all px-6">
+                        <LuPlus className="w-5 h-5 mr-2" /> Provision Partition
                     </Button>
                 </div>
 
                 {loading ? (
-                    <div className="flex justify-center p-12"><div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin" /></div>
+                    <div className="flex justify-center p-12"><div className="w-10 h-10 rounded-full border-4 border-neon-cyan border-t-transparent animate-spin shadow-[0_0_15px_rgba(57,193,239,0.5)]" /></div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-20">
                         {universities.map(uni => (
-                            <Card key={uni.id} className="shadow-sm hover:shadow-md transition-all border-slate-200 group">
-                                <CardHeader className="pb-3 border-b bg-slate-50/50 rounded-t-xl relative">
-                                    <div className="absolute right-2 top-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div key={uni.id} className="glass-card rounded-[1.5rem] overflow-hidden group hover:border-cyan-500/30 dark:hover:border-neon-cyan/40 transition-all duration-500 hover:shadow-lg dark:hover:shadow-[0_0_30px_rgba(57,193,239,0.15)] relative">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-neon-cyan/10 blur-[40px] rounded-full group-hover:bg-neon-cyan/25 dark:bg-neon-cyan/5 dark:group-hover:bg-neon-cyan/15 transition-colors duration-500" />
+
+                                <div className="p-6 border-b border-slate-200 dark:border-white/5 relative z-10">
+                                    <div className="absolute right-4 top-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8 text-slate-500 hover:text-primary"
+                                            className="h-8 w-8 text-slate-500 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-neon-cyan hover:bg-cyan-50 dark:hover:bg-neon-cyan/10 rounded-lg"
                                             onClick={() => openEditDialog(uni)}
                                         >
                                             <LuPencil className="h-4 w-4" />
@@ -156,34 +159,34 @@ export default function SuperAdminDashboard() {
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8 text-slate-500 hover:text-red-600"
+                                            className="h-8 w-8 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg"
                                             onClick={() => handleDeleteUniversity(uni.id, uni.name)}
                                         >
                                             <LuTrash2 className="h-4 w-4" />
                                         </Button>
                                     </div>
-                                    <CardTitle className="flex items-start justify-between pr-16 text-slate-800">
-                                        <span className="font-semibold text-lg">{uni.shortName}</span>
-                                        <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full shrink-0">ACTIVE</span>
-                                    </CardTitle>
-                                    <CardDescription className="line-clamp-1">{uni.name}</CardDescription>
-                                </CardHeader>
-                                <CardContent className="pt-4 pb-4">
-                                    <div className="flex justify-between text-sm text-slate-600 mb-2">
-                                        <span className="flex items-center"><LuBuilding2 className="w-4 h-4 mr-2 text-primary/70" /> Departments</span>
-                                        <span className="font-semibold px-2 bg-slate-100 rounded-md">{uni._count?.departments || 0}</span>
+                                    <div className="flex items-start justify-between pr-16 text-slate-900 dark:text-white mb-2">
+                                        <span className="font-heading font-extrabold text-2xl tracking-tight">{uni.shortName}</span>
+                                        <span className="px-3 py-1 bg-cyan-100 dark:bg-neon-cyan/10 border border-cyan-200 dark:border-neon-cyan/20 text-cyan-700 dark:text-neon-cyan text-xs font-bold uppercase rounded-full shrink-0 shadow-sm dark:shadow-[0_0_10px_rgba(57,193,239,0.1)]">ACTIVE</span>
                                     </div>
-                                    <div className="flex justify-between text-sm text-slate-600 mb-2">
-                                        <span className="flex items-center"><LuUsers className="w-4 h-4 mr-2 text-primary/70" /> Faculty</span>
-                                        <span className="font-semibold px-2 bg-slate-100 rounded-md">{uni._count?.faculty || 0}</span>
+                                    <p className="line-clamp-1 text-slate-600 dark:text-slate-400 font-medium text-sm">{uni.name}</p>
+                                </div>
+                                <div className="p-6 pt-4 relative z-10">
+                                    <div className="flex justify-between items-center text-sm mb-3 group/stat">
+                                        <span className="flex items-center text-slate-600 dark:text-slate-400 font-medium group-hover/stat:text-cyan-600 dark:group-hover/stat:text-neon-cyan transition-colors"><LuBuilding2 className="w-4 h-4 mr-2" /> Topology Sectors</span>
+                                        <span className="font-bold text-slate-900 dark:text-white px-2.5 py-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg group-hover/stat:border-cyan-300 dark:group-hover/stat:border-neon-cyan/30 transition-colors">{uni._count?.departments || 0}</span>
                                     </div>
-                                </CardContent>
-                            </Card>
+                                    <div className="flex justify-between items-center text-sm group/stat">
+                                        <span className="flex items-center text-slate-600 dark:text-slate-400 font-medium group-hover/stat:text-cyan-600 dark:group-hover/stat:text-neon-cyan transition-colors"><LuUsers className="w-4 h-4 mr-2" /> Active Resources</span>
+                                        <span className="font-bold text-slate-900 dark:text-white px-2.5 py-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg group-hover/stat:border-cyan-300 dark:group-hover/stat:border-neon-cyan/30 transition-colors">{uni._count?.faculty || 0}</span>
+                                    </div>
+                                </div>
+                            </div>
                         ))}
 
                         {universities.length === 0 && (
-                            <div className="col-span-full py-12 text-center text-slate-500 bg-white rounded-xl border border-dashed border-slate-300">
-                                No universities found. Please add one to get started.
+                            <div className="col-span-full py-16 text-center text-slate-600 dark:text-slate-400 glass-card rounded-[2rem] border-dashed border-slate-300 dark:border-white/20">
+                                No partitions allocated. Initialize a new matrix to commence optimization.
                             </div>
                         )}
                     </div>

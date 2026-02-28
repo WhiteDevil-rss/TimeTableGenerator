@@ -4,7 +4,7 @@ import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import {
     LuMonitor, LuLayoutDashboard, LuUsers, LuBuilding2,
-    LuPlus, LuTrash2, LuPencil, LuFlaskConical, LuMic2, LuSchool, LuSearch
+    LuPlus, LuTrash2, LuPencil, LuFlaskConical, LuMic, LuSchool, LuSearch
 } from 'react-icons/lu';
 import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/lib/api';
@@ -22,10 +22,10 @@ const emptyForm = { name: '', type: 'Classroom', capacity: 30, floor: '', buildi
 type ResourceForm = typeof emptyForm;
 
 const typeConfig: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
-    Classroom: { icon: <LuSchool className="w-5 h-5" />, color: 'text-blue-600', bg: 'bg-blue-100' },
-    Lab: { icon: <LuFlaskConical className="w-5 h-5" />, color: 'text-purple-600', bg: 'bg-purple-100' },
-    'Seminar Hall': { icon: <LuMic2 className="w-5 h-5" />, color: 'text-amber-600', bg: 'bg-amber-100' },
-    Auditorium: { icon: <LuBuilding2 className="w-5 h-5" />, color: 'text-rose-600', bg: 'bg-rose-100' },
+    Classroom: { icon: <LuSchool className="w-5 h-5" />, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-500/10' },
+    Lab: { icon: <LuFlaskConical className="w-5 h-5" />, color: 'text-purple-600 dark:text-neon-purple', bg: 'bg-purple-100 dark:bg-neon-purple/10' },
+    'Seminar Hall': { icon: <LuMic className="w-5 h-5" />, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-500/10' },
+    Auditorium: { icon: <LuBuilding2 className="w-5 h-5" />, color: 'text-rose-600 dark:text-neon-pink', bg: 'bg-rose-100 dark:bg-neon-pink/10' },
 };
 
 function ResourceFormFields({ form, setForm, error }: { form: ResourceForm; setForm: (f: ResourceForm) => void; error: string }) {
@@ -173,39 +173,39 @@ export default function UniResourcesDashboard() {
                 <ConfirmDialog state={confirmState} onClose={closeConfirm} />
                 <Toast toast={toast} onClose={hideToast} />
 
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 relative z-20">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight text-slate-800">Resources</h2>
-                        <p className="text-slate-500">Manage classrooms, labs, and venues available for timetable scheduling.</p>
+                        <h2 className="text-3xl font-heading font-extrabold tracking-tight text-slate-900 dark:text-white glow-cyan">Resources Dashboard</h2>
+                        <p className="text-slate-600 dark:text-slate-400 font-light mt-1">Manage classrooms, labs, and venues available for timetable scheduling.</p>
                     </div>
-                    <Button onClick={() => { setError(''); setAddForm({ ...emptyForm }); setIsAddOpen(true); }} className="bg-primary shadow-md shrink-0">
-                        <LuPlus className="w-4 h-4 mr-2" /> Add Resource
+                    <Button onClick={() => { setError(''); setAddForm({ ...emptyForm }); setIsAddOpen(true); }} className="bg-neon-cyan text-white dark:text-slate-900 shadow-md dark:shadow-[0_0_15px_rgba(57,193,239,0.4)] hover:shadow-lg hover:bg-cyan-600 dark:hover:bg-white font-bold transition-all px-6 shrink-0">
+                        <LuPlus className="w-5 h-5 mr-2" /> Add Resource
                     </Button>
                 </div>
 
                 {/* Type filter chips */}
-                <div className="flex flex-wrap gap-2 mb-5">
+                <div className="flex flex-wrap gap-2 mb-5 relative z-20">
                     {RESOURCE_TYPES.map(t => {
                         const cfg = typeConfig[t];
                         return (
                             <button key={t}
                                 onClick={() => setFilterType(filterType === t ? '' : t)}
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold border transition-all
+                                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border transition-all glass-card
                                     ${filterType === t
-                                        ? `${cfg.bg} ${cfg.color} border-current ring-2 ring-offset-1 ring-current`
-                                        : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'}`}>
-                                <span className={cfg.color}>{cfg.icon}</span>
+                                        ? `${cfg.bg} ${cfg.color} border-current ring-2 ring-offset-2 ring-offset-background dark:ring-offset-background ring-current`
+                                        : 'text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:text-slate-900 dark:hover:text-white'}`}>
+                                <span className={filterType === t ? cfg.color : ''}>{cfg.icon}</span>
                                 {t}
-                                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${cfg.bg} ${cfg.color}`}>{typeCounts[t]}</span>
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${filterType === t ? 'bg-white/50 dark:bg-black/20' : cfg.bg} ${cfg.color}`}>{typeCounts[t]}</span>
                             </button>
                         );
                     })}
                 </div>
 
                 {/* Search */}
-                <div className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2 shadow-sm mb-6 max-w-sm">
-                    <LuSearch className="w-4 h-4 text-slate-400 shrink-0" />
-                    <input className="flex-1 text-sm bg-transparent outline-none placeholder:text-slate-400"
+                <div className="flex items-center gap-2 glass-card rounded-xl px-4 py-3 shadow-sm mb-6 max-w-sm relative z-20 border border-slate-200 dark:border-white/10">
+                    <LuSearch className="w-5 h-5 text-slate-400 dark:text-slate-500 shrink-0" />
+                    <input className="flex-1 text-sm bg-transparent outline-none text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
                         placeholder="Search by name or building…" value={search}
                         onChange={(e) => setSearch(e.target.value)} />
                 </div>
@@ -213,67 +213,69 @@ export default function UniResourcesDashboard() {
                 {loading ? (
                     <div className="flex justify-center p-12"><div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin" /></div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 relative z-20">
                         {filtered.map(r => {
-                            const cfg = typeConfig[r.type] || { icon: <LuMonitor className="w-5 h-5" />, color: 'text-slate-600', bg: 'bg-slate-100' };
+                            const cfg = typeConfig[r.type] || { icon: <LuMonitor className="w-5 h-5" />, color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-100 dark:bg-white/5' };
                             return (
-                                <Card key={r.id} className="shadow-sm border-slate-200 hover:shadow-md transition-shadow">
-                                    <CardHeader className="pb-3 border-b bg-slate-50/50 rounded-t-xl">
-                                        <div className="flex items-center gap-2">
-                                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${cfg.bg}`}>
+                                <div key={r.id} className="glass-card rounded-[1.5rem] overflow-hidden group hover:border-cyan-500/30 dark:hover:border-neon-cyan/40 transition-all duration-500 hover:shadow-lg dark:hover:shadow-[0_0_30px_rgba(57,193,239,0.15)] relative flex flex-col">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-neon-cyan/10 blur-[40px] rounded-full group-hover:bg-neon-cyan/25 dark:bg-neon-cyan/5 dark:group-hover:bg-neon-cyan/15 transition-colors duration-500" />
+
+                                    <div className="p-5 border-b border-slate-200 dark:border-white/5 relative z-10 bg-slate-50/50 dark:bg-transparent">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${cfg.bg} border border-white/50 dark:border-white/5 shadow-sm`}>
                                                 <span className={cfg.color}>{cfg.icon}</span>
                                             </div>
                                             <div className="min-w-0">
-                                                <CardTitle className="text-sm font-bold text-slate-800 line-clamp-1">{r.name}</CardTitle>
-                                                <CardDescription className="text-xs">{r.type}</CardDescription>
+                                                <h3 className="font-heading font-extrabold text-lg text-slate-900 dark:text-white tracking-tight line-clamp-1">{r.name}</h3>
+                                                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{r.type}</span>
                                             </div>
                                         </div>
-                                    </CardHeader>
-                                    <CardContent className="pt-4 pb-4">
+                                    </div>
+                                    <div className="p-5 pt-4 relative z-10 flex-1 flex flex-col">
                                         <div className="grid grid-cols-3 gap-2 mb-4 text-center">
-                                            <div className="bg-slate-50 rounded-lg p-2">
-                                                <div className="text-[10px] text-slate-400 font-bold uppercase">Seats</div>
-                                                <div className="text-sm font-bold text-emerald-600">{r.capacity}</div>
+                                            <div className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl p-2">
+                                                <div className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">Seats</div>
+                                                <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{r.capacity}</div>
                                             </div>
-                                            <div className="bg-slate-50 rounded-lg p-2">
-                                                <div className="text-[10px] text-slate-400 font-bold uppercase">Building</div>
-                                                <div className="text-sm font-bold text-indigo-600 truncate">{r.building || '—'}</div>
+                                            <div className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl p-2">
+                                                <div className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">Building</div>
+                                                <div className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mt-0.5 truncate">{r.building || '—'}</div>
                                             </div>
-                                            <div className="bg-slate-50 rounded-lg p-2">
-                                                <div className="text-[10px] text-slate-400 font-bold uppercase">Floor</div>
-                                                <div className="text-sm font-bold text-slate-700">{r.floor || '—'}</div>
+                                            <div className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl p-2">
+                                                <div className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">Floor</div>
+                                                <div className="text-sm font-bold text-slate-700 dark:text-slate-300 mt-0.5">{r.floor || '—'}</div>
                                             </div>
                                         </div>
-                                        <div className="flex gap-2">
-                                            <Button variant="outline" size="sm" className="flex-1 text-xs hover:text-indigo-600 hover:bg-indigo-50"
+                                        <div className="flex gap-2 mt-auto pt-2">
+                                            <Button variant="ghost" size="sm" className="flex-1 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10 hover:text-cyan-700 dark:hover:text-neon-cyan hover:bg-cyan-50 dark:hover:bg-neon-cyan/10"
                                                 onClick={() => {
                                                     setSelectedId(r.id);
                                                     setEditForm({ name: r.name, type: r.type, capacity: r.capacity, floor: r.floor || '', building: r.building || '' });
                                                     setError('');
                                                     setIsEditOpen(true);
                                                 }}>
-                                                <LuPencil className="w-3 h-3 mr-1" /> Edit
+                                                <LuPencil className="w-4 h-4 mr-1" /> Edit
                                             </Button>
-                                            <Button variant="outline" size="sm" className="flex-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                            <Button variant="ghost" size="sm" className="flex-1 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10"
                                                 onClick={() => handleDelete(r.id, r.name)}>
-                                                <LuTrash2 className="w-3 h-3 mr-1" /> Delete
+                                                <LuTrash2 className="w-4 h-4 mr-1" /> Delete
                                             </Button>
                                         </div>
-                                    </CardContent>
-                                </Card>
+                                    </div>
+                                </div>
                             );
                         })}
 
                         {filtered.length === 0 && (
-                            <div className="col-span-full py-20 text-center text-slate-500 bg-white rounded-xl border-dashed border-2 border-slate-200">
-                                <LuMonitor className="w-14 h-14 text-slate-300 mx-auto mb-4" />
-                                <h3 className="text-xl font-semibold text-slate-700">{search || filterType ? 'No matches found' : 'No resources yet'}</h3>
-                                <p className="text-sm mt-2 max-w-sm mx-auto">
+                            <div className="col-span-full py-20 text-center text-slate-600 dark:text-slate-400 glass-card rounded-[2rem] border-dashed border-slate-300 dark:border-white/20">
+                                <LuMonitor className="w-14 h-14 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                                <h3 className="text-2xl font-semibold text-slate-700 dark:text-white font-heading tracking-tight">{search || filterType ? 'No matches found' : 'No resources yet'}</h3>
+                                <p className="text-sm mt-2 max-w-sm mx-auto font-light">
                                     {search || filterType ? 'Try clearing the filter or search.' : 'Add classrooms, labs, and halls to make them available for timetable scheduling.'}
                                 </p>
                                 {!search && !filterType && (
-                                    <Button className="mt-5" onClick={() => setIsAddOpen(true)}>
-                                        <LuPlus className="w-4 h-4 mr-2" /> Add First Resource
+                                    <Button className="mt-6 bg-neon-cyan text-white dark:text-slate-900 shadow-md dark:shadow-[0_0_15px_rgba(57,193,239,0.4)] hover:shadow-lg hover:bg-cyan-600 dark:hover:bg-white font-bold transition-all px-6" onClick={() => setIsAddOpen(true)}>
+                                        <LuPlus className="w-5 h-5 mr-2" /> Add First Resource
                                     </Button>
                                 )}
                             </div>

@@ -66,7 +66,6 @@ model Faculty {
   email           String          @unique
   phone           String?
   designation     String?
-  maxHrsPerDay    Int             @default(4)
   userId          String?
   user            User?           @relation(fields: [userId], references: [id])
   createdAt       DateTime        @default(now())

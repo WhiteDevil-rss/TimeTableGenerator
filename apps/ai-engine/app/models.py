@@ -16,7 +16,6 @@ class FacultySubject(BaseModel):
 class Faculty(BaseModel):
     id: str
     name: str
-    maxHrsPerDay: int
     subjects: List[FacultySubject]
 
 class Course(BaseModel):

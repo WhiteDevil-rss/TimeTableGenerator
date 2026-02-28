@@ -91,15 +91,19 @@ class TimetableScheduler:
                                 self.vars[key] = self.model.NewBoolVar(f"d{d}p{p}c{c.id}f{f.id}r{r.id}b{b.id}")
 
     def _add_hard_constraints(self):
-        # 1. Weekly hours matching per course (Scoped by Program)
+        # 1. Weekly hours matching per course (Scoped by Program and Semester)
         for b in self.request.batches:
             for c in self.request.courses:
                 course_slots = []
                 
-                # Verify if the Course explicitly belongs to this Batch's Program
+                # Verify if the Course explicitly belongs to this Batch's Program & Semester
                 program_mismatch = False
                 if c.program and b.program and c.program != b.program:
                     program_mismatch = True
+                    
+                semester_mismatch = False
+                if c.semester and b.semester and c.semester != b.semester:
+                    semester_mismatch = True
 
                 # Check if any faculty can teach this course
                 can_be_taught = any(c.id in [sub.courseId for sub in f.subjects] for f in self.request.faculty)
@@ -110,8 +114,8 @@ class TimetableScheduler:
                             for r in self.request.resources:
                                 course_slots.append(self.vars[(d, p, c.id, f.id, r.id, b.id)])
                 
-                if program_mismatch or not can_be_taught:
-                    # If this Course isn't for this Batch's Program, or no Faculty exist, strictly 0 slots
+                if program_mismatch or semester_mismatch or not can_be_taught:
+                    # If this Course isn't for this Batch's Program/Semester, or no Faculty exist, strictly 0 slots
                     self.model.Add(sum(course_slots) == 0)
                 else:
                     self.model.AddExactlyOne(course_slots) if c.weeklyHrs == 1 else self.model.Add(sum(course_slots) == c.weeklyHrs)
@@ -170,16 +174,7 @@ class TimetableScheduler:
                                 for b in self.request.batches:
                                     self.model.Add(self.vars[(d, p, c.id, f.id, r.id, b.id)] == 0)
 
-        # 7. Faculty MAX daily hours limit
-        for f in self.request.faculty:
-            for d in self.days:
-                daily_slots = []
-                for p in self.lecture_slots:
-                    for c in self.request.courses:
-                        for r in self.request.resources:
-                            for b in self.request.batches:
-                                daily_slots.append(self.vars[(d, p, c.id, f.id, r.id, b.id)])
-                self.model.Add(sum(daily_slots) <= f.maxHrsPerDay)
+
 
         # 8. Special Timetable Exclusions
         for d in self.days:

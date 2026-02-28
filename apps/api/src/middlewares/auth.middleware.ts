@@ -19,12 +19,21 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const token = authHeader.split(' ')[1];
+    const parts = authHeader.split(' ');
+    if (parts.length !== 2) {
+        console.warn(`Auth Middleware: Malformed Authorization header. Parts: ${parts.length}`);
+        return res.status(401).json({ error: 'Unauthorized: Malformed token format' });
+    }
+
+    const token = parts[1];
 
     // Debug logging (safely)
-    console.log('Auth Middleware: Token received, length:', token?.length);
+    console.log('Auth Middleware: Token received, length:', token?.length || 0);
     if (token) {
         console.log('Auth Middleware: Token start:', token.substring(0, 15), '... end:', token.substring(token.length - 15));
+    } else {
+        console.error('Auth Middleware: Token extraction resulted in null/undefined!');
+        return res.status(401).json({ error: 'Unauthorized: Token missing' });
     }
 
     try {
@@ -66,7 +75,7 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
         next();
     } catch (err) {
         console.error('Auth Error:', err);
-        return res.status(401).json({ error: 'Invalid or expired Firebase token' });
+        return res.status(401).json({ error: `Invalid Firebase token. Received: [${token.substring(0, 20)}...] Length: ${token.length}` });
     }
 };
 

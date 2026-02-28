@@ -29,7 +29,8 @@ export const getBatches = async (req: AuthRequest, res: Response) => {
 
 export const getBatchById = async (req: AuthRequest, res: Response) => {
     try {
-        const batch = await prisma.batch.findUnique({ where: { id: req.params.id } });
+        const id = req.params.id as string;
+        const batch = await prisma.batch.findUnique({ where: { id } });
         if (!batch) return res.status(404).json({ error: 'Not found' });
 
         if (req.user!.role === 'UNI_ADMIN' && req.user!.universityId !== batch.universityId) {
@@ -68,9 +69,10 @@ export const createBatch = async (req: AuthRequest, res: Response) => {
 
 export const updateBatch = async (req: AuthRequest, res: Response) => {
     try {
+        const id = req.params.id as string;
         const { name, program, semester, division, year, strength, totalStudents } = req.body;
 
-        const targetBatch = await prisma.batch.findUnique({ where: { id: req.params.id } });
+        const targetBatch = await prisma.batch.findUnique({ where: { id } });
         if (!targetBatch) return res.status(404).json({ error: 'Not found' });
 
         if (req.user!.role === 'UNI_ADMIN' && req.user!.universityId !== targetBatch.universityId) {
@@ -81,7 +83,7 @@ export const updateBatch = async (req: AuthRequest, res: Response) => {
         }
 
         const batch = await prisma.batch.update({
-            where: { id: req.params.id },
+            where: { id },
             data: { name, program, semester, division, year, strength, totalStudents }
         });
 
@@ -93,7 +95,8 @@ export const updateBatch = async (req: AuthRequest, res: Response) => {
 
 export const deleteBatch = async (req: AuthRequest, res: Response) => {
     try {
-        const targetBatch = await prisma.batch.findUnique({ where: { id: req.params.id } });
+        const id = req.params.id as string;
+        const targetBatch = await prisma.batch.findUnique({ where: { id } });
         if (!targetBatch) return res.status(404).json({ error: 'Not found' });
 
         if (req.user!.role === 'UNI_ADMIN' && req.user!.universityId !== targetBatch.universityId) {
@@ -104,15 +107,15 @@ export const deleteBatch = async (req: AuthRequest, res: Response) => {
         }
 
         // Cascade-delete: remove dependent timetable slots first, then timetable references
-        await prisma.timetableSlot.deleteMany({ where: { batchId: req.params.id } });
+        await prisma.timetableSlot.deleteMany({ where: { batchId: id } });
 
         // Remove this batch from any timetables that reference it
         await prisma.timetable.updateMany({
-            where: { batchId: req.params.id },
+            where: { batchId: id },
             data: { batchId: null }
         });
 
-        await prisma.batch.delete({ where: { id: req.params.id } });
+        await prisma.batch.delete({ where: { id } });
         res.status(204).send();
     } catch (error: any) {
         console.error('Delete batch error:', error);

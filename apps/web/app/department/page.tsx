@@ -59,54 +59,54 @@ export default function DeptAdminDashboard() {
                 ) : (
                     <>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                            <Card className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden border-slate-200/60">
-                                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                            <Card className="glass-card hover:shadow-[0_8px_32px_0_rgba(99,102,241,0.2)] dark:hover:shadow-[0_8px_32px_0_rgba(99,102,241,0.3)] transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden border-slate-200 dark:border-white/10">
+                                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 dark:from-indigo-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0 relative z-10">
-                                    <CardTitle className="text-sm font-semibold text-slate-600">Department Faculty</CardTitle>
-                                    <div className="p-2 bg-indigo-500/10 rounded-xl group-hover:bg-indigo-500/20 transition-colors">
-                                        <LuUsers className="w-5 h-5 text-indigo-600" />
+                                    <CardTitle className="text-sm font-semibold text-slate-600 dark:text-slate-400">Department Faculty</CardTitle>
+                                    <div className="p-2 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-xl group-hover:bg-indigo-500/20 dark:group-hover:bg-indigo-500/30 transition-colors">
+                                        <LuUsers className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                                     </div>
                                 </CardHeader>
                                 <CardContent className="relative z-10">
-                                    <div className="text-3xl font-extrabold text-slate-800 tracking-tight">{stats.faculty}</div>
+                                    <div className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{stats.faculty}</div>
                                 </CardContent>
                             </Card>
 
-                            <Card className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden border-slate-200/60">
-                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                            <Card className="glass-card hover:shadow-[0_8px_32px_0_rgba(168,85,247,0.2)] dark:hover:shadow-[0_8px_32px_0_rgba(168,85,247,0.3)] transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden border-slate-200 dark:border-white/10">
+                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 dark:from-purple-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0 relative z-10">
-                                    <CardTitle className="text-sm font-semibold text-slate-600">Department Subjects</CardTitle>
-                                    <div className="p-2 bg-purple-500/10 rounded-xl group-hover:bg-purple-500/20 transition-colors">
-                                        <LuBookOpen className="w-5 h-5 text-purple-600" />
+                                    <CardTitle className="text-sm font-semibold text-slate-600 dark:text-slate-400">Department Subjects</CardTitle>
+                                    <div className="p-2 bg-purple-500/10 dark:bg-purple-500/20 rounded-xl group-hover:bg-purple-500/20 dark:group-hover:bg-purple-500/30 transition-colors">
+                                        <LuBookOpen className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                                     </div>
                                 </CardHeader>
                                 <CardContent className="relative z-10">
-                                    <div className="text-3xl font-extrabold text-slate-800 tracking-tight">{stats.courses}</div>
+                                    <div className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{stats.courses}</div>
                                 </CardContent>
                             </Card>
 
-                            <Card className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden border-slate-200/60">
-                                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                            <Card className="glass-card hover:shadow-[0_8px_32px_0_rgba(16,185,129,0.2)] dark:hover:shadow-[0_8px_32px_0_rgba(16,185,129,0.3)] transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden border-slate-200 dark:border-white/10">
+                                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 dark:from-emerald-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0 relative z-10">
-                                    <CardTitle className="text-sm font-semibold text-slate-600">Active Batches</CardTitle>
-                                    <div className="p-2 bg-emerald-500/10 rounded-xl group-hover:bg-emerald-500/20 transition-colors">
-                                        <LuUsers className="w-5 h-5 text-emerald-600" />
+                                    <CardTitle className="text-sm font-semibold text-slate-600 dark:text-slate-400">Active Batches</CardTitle>
+                                    <div className="p-2 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-xl group-hover:bg-emerald-500/20 dark:group-hover:bg-emerald-500/30 transition-colors">
+                                        <LuUsers className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                                     </div>
                                 </CardHeader>
                                 <CardContent className="relative z-10">
-                                    <div className="text-3xl font-extrabold text-slate-800 tracking-tight">{stats.batches}</div>
+                                    <div className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{stats.batches}</div>
                                 </CardContent>
                             </Card>
                         </div>
 
                         <div className="mt-8">
-                            <h2 className="text-xl font-bold text-slate-800 mb-4">Latest Workload Summary</h2>
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Latest Workload Summary</h2>
                             {latestTimetable ? (
                                 <WorkloadChart slots={latestTimetable.slots} />
                             ) : (
-                                <Card className="bg-slate-50 border-dashed">
-                                    <CardContent className="flex flex-col items-center justify-center p-8 text-slate-500">
-                                        <LuCalendar className="w-12 h-12 text-slate-300 mb-3" />
+                                <Card className="glass-card border-dashed">
+                                    <CardContent className="flex flex-col items-center justify-center p-8 text-slate-500 dark:text-slate-400">
+                                        <LuCalendar className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" />
                                         <p>No active timetable generated yet.</p>
                                     </CardContent>
                                 </Card>

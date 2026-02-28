@@ -79,7 +79,7 @@ export const getFacultyById = async (req: AuthRequest, res: Response) => {
 
 export const createFaculty = async (req: AuthRequest, res: Response) => {
     try {
-        const { universityId, departmentIds, name, email, designation, maxHrsPerDay, password } = req.body;
+        const { universityId, departmentIds, name, email, designation, password } = req.body;
 
         // Authorization checks
         if (req.user!.role === 'UNI_ADMIN' && req.user!.universityId !== universityId) {
@@ -111,7 +111,6 @@ export const createFaculty = async (req: AuthRequest, res: Response) => {
                     name,
                     email,
                     designation,
-                    maxHrsPerDay: maxHrsPerDay || 4,
                     userId: user.id,
                     departments: {
                         create: departmentIds.map((id: string) => ({ departmentId: id }))
@@ -142,7 +141,7 @@ export const createFaculty = async (req: AuthRequest, res: Response) => {
 
 export const updateFaculty = async (req: AuthRequest, res: Response) => {
     try {
-        const { name, email, phone, designation, maxHrsPerDay, departmentIds } = req.body;
+        const { name, email, phone, designation, departmentIds, subjectIds } = req.body;
 
         const targetFac = await prisma.faculty.findUnique({
             where: { id: req.params.id as string },
@@ -166,10 +165,13 @@ export const updateFaculty = async (req: AuthRequest, res: Response) => {
                 email,
                 phone,
                 designation,
-                maxHrsPerDay,
                 departments: departmentIds ? {
                     deleteMany: {},
                     create: departmentIds.map((id: string) => ({ departmentId: id }))
+                } : undefined,
+                subjects: subjectIds ? {
+                    deleteMany: {},
+                    create: subjectIds.map((courseId: string) => ({ courseId }))
                 } : undefined
             }
         });

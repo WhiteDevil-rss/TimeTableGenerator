@@ -17,8 +17,6 @@ export interface Faculty {
     designation?: string;
     departmentId: string;
     universityId: string;
-    maxHrsPerDay: number;
-    maxHrsPerWeek: number;
     subjects: FacultySubject[];
 }
 

@@ -94,7 +94,7 @@ export const createUser = async (req: Request, res: Response) => {
 
 export const updateUserStatus = async (req: Request, res: Response) => {
     try {
-        const { id } = req.params;
+        const id = req.params.id as string;
         const { isActive } = req.body;
         const actor = (req as any).user;
 
@@ -120,7 +120,7 @@ export const updateUserStatus = async (req: Request, res: Response) => {
 
 export const resetUserPassword = async (req: Request, res: Response) => {
     try {
-        const { id } = req.params;
+        const id = req.params.id as string;
         const { newPassword } = req.body;
         const actor = (req as any).user;
 
@@ -145,7 +145,7 @@ export const resetUserPassword = async (req: Request, res: Response) => {
 
 export const updateUser = async (req: Request, res: Response) => {
     try {
-        const { id } = req.params;
+        const id = req.params.id as string;
         const actor = (req as any).user;
         const data = req.body;
 
@@ -173,7 +173,7 @@ export const updateUser = async (req: Request, res: Response) => {
 
 export const deleteUser = async (req: Request, res: Response) => {
     try {
-        const { id } = req.params;
+        const id = req.params.id as string;
         const actor = (req as any).user;
 
         if (actor.id === id) {

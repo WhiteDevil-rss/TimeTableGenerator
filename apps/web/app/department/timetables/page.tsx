@@ -3,7 +3,7 @@
 import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { LuPlusCircle, LuTriangleAlert, LuEye, LuArrowRight } from 'react-icons/lu';
+import { LuCirclePlus, LuTriangleAlert, LuEye, LuArrowRight } from 'react-icons/lu';
 import Link from 'next/link';
 import { DEPT_ADMIN_NAV } from '@/lib/constants/nav-config';
 
@@ -12,7 +12,7 @@ export default function TimetablesMenuPage() {
         {
             title: "Regular timetable",
             description: "Configure global parameters and trigger the AI scheduler to generate a primary timetable for the department.",
-            icon: <LuPlusCircle className="w-8 h-8 text-indigo-500" />,
+            icon: <LuCirclePlus className="w-8 h-8 text-indigo-500" />,
             href: "/department/timetables/create",
             color: "border-indigo-200 bg-indigo-50/30 hover:bg-indigo-50",
             iconBg: "bg-indigo-100"

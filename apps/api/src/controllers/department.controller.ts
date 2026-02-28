@@ -8,11 +8,11 @@ const hashPassword = async (password: string) => bcrypt.hash(password, 12);
 
 export const getDepartments = async (req: AuthRequest, res: Response) => {
     try {
-        const { universityId } = req.params;
+        const { universityId } = req.params as { universityId: string };
         console.log('[DEBUG] GET /departments -> universityId param:', universityId, 'User:', req.user?.universityId);
 
-        // Authorization Check: SUPERADMIN can see all, UNI_ADMIN can see own
-        if (req.user!.role === 'UNI_ADMIN' && String(req.user!.universityId) !== String(universityId)) {
+        // Authorization Check: SUPERADMIN can see all, others can see own university
+        if (req.user!.role !== 'SUPERADMIN' && String(req.user!.universityId) !== String(universityId)) {
             return res.status(403).json({ error: 'Forbidden' });
         }
 
@@ -32,15 +32,15 @@ export const getDepartments = async (req: AuthRequest, res: Response) => {
 
 export const getDepartmentById = async (req: AuthRequest, res: Response) => {
     try {
-        const { id } = req.params;
+        const { id } = req.params as { id: string };
         const department = await prisma.department.findUnique({
             where: { id },
         });
 
         if (!department) return res.status(404).json({ error: 'Not found' });
 
-        // Authorization Check
-        if (req.user!.role === 'UNI_ADMIN' && req.user!.universityId !== department.universityId) {
+        // Authorization Check: SUPERADMIN can see all, others can see own university
+        if (req.user!.role !== 'SUPERADMIN' && String(req.user!.universityId) !== String(department.universityId)) {
             return res.status(403).json({ error: 'Forbidden' });
         }
 
@@ -52,7 +52,7 @@ export const getDepartmentById = async (req: AuthRequest, res: Response) => {
 
 export const createDepartment = async (req: AuthRequest, res: Response) => {
     try {
-        const { universityId } = req.params;
+        const { universityId } = req.params as { universityId: string };
         const { name, shortName, hod, email, adminUsername, adminPassword } = req.body;
 
         if (req.user!.role === 'UNI_ADMIN' && String(req.user!.universityId) !== String(universityId)) {
@@ -105,7 +105,7 @@ export const createDepartment = async (req: AuthRequest, res: Response) => {
 
 export const updateDepartment = async (req: AuthRequest, res: Response) => {
     try {
-        const { id } = req.params;
+        const { id } = req.params as { id: string };
         const { name, shortName, hod, email } = req.body;
 
         const targetDept = await prisma.department.findUnique({ where: { id } });
@@ -135,7 +135,7 @@ export const updateDepartment = async (req: AuthRequest, res: Response) => {
 
 export const deleteDepartment = async (req: AuthRequest, res: Response) => {
     try {
-        const { id } = req.params;
+        const { id } = req.params as { id: string };
 
         const targetDept = await prisma.department.findUnique({ where: { id } });
         if (!targetDept) return res.status(404).json({ error: 'Not found' });

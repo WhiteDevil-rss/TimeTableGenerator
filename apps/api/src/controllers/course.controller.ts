@@ -31,7 +31,8 @@ export const getCourses = async (req: AuthRequest, res: Response) => {
 
 export const getCourseById = async (req: AuthRequest, res: Response) => {
     try {
-        const course = await prisma.course.findUnique({ where: { id: req.params.id } });
+        const id = req.params.id as string;
+        const course = await prisma.course.findUnique({ where: { id } });
         if (!course) return res.status(404).json({ error: 'Not found' });
 
         // Authorization checks
@@ -72,9 +73,10 @@ export const createCourse = async (req: AuthRequest, res: Response) => {
 
 export const updateCourse = async (req: AuthRequest, res: Response) => {
     try {
+        const id = req.params.id as string;
         const { name, code, program, credits, weeklyHrs, type, semester } = req.body;
 
-        const targetCourse = await prisma.course.findUnique({ where: { id: req.params.id } });
+        const targetCourse = await prisma.course.findUnique({ where: { id } });
         if (!targetCourse) return res.status(404).json({ error: 'Not found' });
 
         if (req.user!.role === 'UNI_ADMIN' && req.user!.universityId !== targetCourse.universityId) {
@@ -85,7 +87,7 @@ export const updateCourse = async (req: AuthRequest, res: Response) => {
         }
 
         const course = await prisma.course.update({
-            where: { id: req.params.id },
+            where: { id },
             data: { name, code, program, credits, weeklyHrs, type, semester: semester ?? null }
         });
 
@@ -97,7 +99,8 @@ export const updateCourse = async (req: AuthRequest, res: Response) => {
 
 export const deleteCourse = async (req: AuthRequest, res: Response) => {
     try {
-        const targetCourse = await prisma.course.findUnique({ where: { id: req.params.id } });
+        const id = req.params.id as string;
+        const targetCourse = await prisma.course.findUnique({ where: { id } });
         if (!targetCourse) return res.status(404).json({ error: 'Not found' });
 
         if (req.user!.role === 'UNI_ADMIN' && req.user!.universityId !== targetCourse.universityId) {
@@ -107,7 +110,7 @@ export const deleteCourse = async (req: AuthRequest, res: Response) => {
             return res.status(403).json({ error: 'Forbidden' });
         }
 
-        await prisma.course.delete({ where: { id: req.params.id } });
+        await prisma.course.delete({ where: { id } });
         res.status(204).send();
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete course' });

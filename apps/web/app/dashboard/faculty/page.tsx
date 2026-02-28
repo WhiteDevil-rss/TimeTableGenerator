@@ -28,8 +28,7 @@ interface Faculty {
     name: string;
     email: string;
     designation?: string;
-    maxHrsPerDay: number;
-    maxHrsPerWeek: number;
+
     departments?: FacultyDepartment[];
 }
 
@@ -47,10 +46,10 @@ export default function FacultyDashboard() {
 
     const [newFacForm, setNewFacForm] = useState({
         departmentIds: [] as string[], name: '', email: '', designation: '',
-        maxHrsPerDay: 4, maxHrsPerWeek: 20, password: ''
+        password: ''
     });
     const [editFacForm, setEditFacForm] = useState({
-        name: '', email: '', designation: '', maxHrsPerDay: 4, maxHrsPerWeek: 20, departmentIds: [] as string[]
+        name: '', email: '', designation: '', departmentIds: [] as string[]
     });
 
     const fetchData = useCallback(async () => {
@@ -78,7 +77,7 @@ export default function FacultyDashboard() {
             const payload = { ...newFacForm, universityId: user?.universityId };
             await api.post(`/faculty`, payload);
             setIsAddOpen(false);
-            setNewFacForm({ departmentIds: [], name: '', email: '', designation: '', maxHrsPerDay: 4, maxHrsPerWeek: 20, password: '' });
+            setNewFacForm({ departmentIds: [], name: '', email: '', designation: '', password: '' });
             fetchData();
             showToast('success', 'Faculty provisioned successfully!');
         } catch (e) {
@@ -135,64 +134,57 @@ export default function FacultyDashboard() {
             <DashboardLayout navItems={navItems} title="University Faculty">
                 <ConfirmDialog state={confirmState} onClose={closeConfirm} />
                 <Toast toast={toast} onClose={hideToast} />
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 relative z-20">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight text-slate-800">Faculty Directory</h2>
-                        <p className="text-slate-500">Manage all registered teaching bodies and their workload capacities.</p>
+                        <h2 className="text-3xl font-heading font-extrabold tracking-tight text-slate-900 dark:text-white glow-cyan">Faculty Directory</h2>
+                        <p className="text-slate-600 dark:text-slate-400 font-light mt-1">Manage all registered teaching bodies and their workload capacities.</p>
                     </div>
-                    <Button onClick={() => setIsAddOpen(true)} className="bg-primary shadow-md hover:bg-primary/90">
-                        <LuPlus className="w-4 h-4 mr-2" /> Register Faculty
+                    <Button onClick={() => setIsAddOpen(true)} className="bg-neon-cyan text-white dark:text-slate-900 shadow-md dark:shadow-[0_0_15px_rgba(57,193,239,0.4)] hover:shadow-lg hover:bg-cyan-600 dark:hover:bg-white font-bold transition-all px-6 shrink-0">
+                        <LuPlus className="w-5 h-5 mr-2" /> Register Faculty
                     </Button>
                 </div>
 
                 {loading ? (
                     <div className="flex justify-center p-12"><div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin" /></div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-20">
                         {faculties.map(fac => (
-                            <Card key={fac.id} className="shadow-sm border-slate-200">
-                                <CardHeader className="pb-3 border-b bg-slate-50/50 rounded-t-xl group">
-                                    <CardTitle className="flex items-start justify-between">
+                            <div key={fac.id} className="glass-card rounded-[1.5rem] overflow-hidden group hover:border-cyan-500/30 dark:hover:border-neon-cyan/40 transition-all duration-500 hover:shadow-lg dark:hover:shadow-[0_0_30px_rgba(57,193,239,0.15)] relative">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-neon-cyan/10 blur-[40px] rounded-full group-hover:bg-neon-cyan/25 dark:bg-neon-cyan/5 dark:group-hover:bg-neon-cyan/15 transition-colors duration-500" />
+
+                                <div className="p-6 border-b border-slate-200 dark:border-white/5 relative z-10 bg-slate-50/50 dark:bg-transparent">
+                                    <div className="flex items-start justify-between">
                                         <div className="flex flex-col">
-                                            <span className="font-semibold text-lg">{fac.name}</span>
-                                            <CardDescription className="line-clamp-1 mt-1 font-medium text-emerald-600">{fac.designation || 'Lecturer'}</CardDescription>
-                                        </div>
-                                        <div className="flex flex-wrap gap-1 mt-2">
-                                            {fac.departments?.map((fd) => (
-                                                <span key={fd.departmentId} className="px-2 py-0.5 bg-slate-200 text-slate-700 text-[10px] font-bold rounded-full flex items-center uppercase tracking-tight">
-                                                    <LuBuilding2 className="w-2.5 h-2.5 mr-1" />
-                                                    {departments.find(d => d.id === fd.departmentId)?.shortName || '???'}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="pt-4 pb-4">
-                                    <div className="flex justify-between text-sm text-slate-600 mb-2">
-                                        <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Contact</span>
-                                        <span className="font-medium text-slate-700">{fac.email}</span>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2 border-t pt-4">
-                                        <div className="text-center">
-                                            <div className="text-xl font-bold text-slate-800">{fac.maxHrsPerDay}h</div>
-                                            <div className="text-xs text-slate-500 font-medium">Daily Limit</div>
-                                        </div>
-                                        <div className="text-center border-l">
-                                            <div className="text-xl font-bold text-slate-800">{fac.maxHrsPerWeek}h</div>
-                                            <div className="text-xs text-slate-500 font-medium">Weekly Limit</div>
+                                            <span className="font-heading font-extrabold text-xl text-slate-900 dark:text-white tracking-tight">{fac.name}</span>
+                                            <span className="line-clamp-1 mt-1 font-medium text-emerald-600 dark:text-emerald-400 text-sm">{fac.designation || 'Lecturer'}</span>
                                         </div>
                                     </div>
+                                    <div className="flex flex-wrap gap-1 mt-3">
+                                        {fac.departments?.map((fd) => (
+                                            <span key={fd.departmentId} className="px-2 py-0.5 bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[10px] font-bold rounded-full flex items-center uppercase tracking-tight border border-slate-300 dark:border-white/10">
+                                                <LuBuilding2 className="w-2.5 h-2.5 mr-1" />
+                                                {departments.find(d => d.id === fd.departmentId)?.shortName || '???'}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="p-6 pt-4 relative z-10">
+                                    <div className="flex justify-between items-center text-sm mb-4 group/stat">
+                                        <span className="text-slate-500 dark:text-slate-500 text-xs font-semibold uppercase tracking-wider group-hover/stat:text-cyan-600 dark:group-hover/stat:text-neon-cyan transition-colors">Contact</span>
+                                        <span className="font-medium text-slate-700 dark:text-slate-300 line-clamp-1">{fac.email}</span>
+                                    </div>
+
 
                                     <div className="flex gap-2 mt-5">
                                         <Button
-                                            variant="outline"
-                                            className="w-1/2 text-slate-600"
+                                            variant="ghost"
+                                            className="w-1/2 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10 hover:text-cyan-700 dark:hover:text-neon-cyan hover:bg-cyan-50 dark:hover:bg-neon-cyan/10"
                                             size="sm"
                                             onClick={() => {
                                                 setSelectedFacId(fac.id);
                                                 setEditFacForm({
                                                     name: fac.name, email: fac.email, designation: fac.designation || '',
-                                                    maxHrsPerDay: fac.maxHrsPerDay, maxHrsPerWeek: fac.maxHrsPerWeek,
+
                                                     departmentIds: fac.departments?.map((d) => d.departmentId) || [],
                                                 });
                                                 setIsEditOpen(true);
@@ -201,20 +193,20 @@ export default function FacultyDashboard() {
                                             <LuPencil className="w-4 h-4 mr-2" /> Edit
                                         </Button>
                                         <Button
-                                            variant="outline"
-                                            className="w-1/2 text-red-600 border-red-200 hover:bg-red-50"
+                                            variant="ghost"
+                                            className="w-1/2 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10"
                                             size="sm"
                                             onClick={() => handleDeleteFaculty(fac.id)}
                                         >
                                             <LuTrash2 className="w-4 h-4 mr-2" /> Delete
                                         </Button>
                                     </div>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
                         ))}
 
                         {faculties.length === 0 && (
-                            <div className="col-span-full py-12 text-center text-slate-500 bg-white rounded-xl border border-dashed border-slate-300">
+                            <div className="col-span-full py-16 text-center text-slate-600 dark:text-slate-400 glass-card rounded-[2rem] border-dashed border-slate-300 dark:border-white/20">
                                 No faculty members found. Provision teaching personnel to construct schedules.
                             </div>
                         )}
@@ -278,31 +270,6 @@ export default function FacultyDashboard() {
                                 )}
                             </div>
 
-                            <hr className="my-2" />
-                            <h4 className="text-sm font-semibold text-slate-800">Workload Capacity Logic</h4>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Max Hrs / Day</label>
-                                    <Input
-                                        type="number"
-                                        min="1"
-                                        max="12"
-                                        value={newFacForm.maxHrsPerDay}
-                                        onChange={(e) => setNewFacForm({ ...newFacForm, maxHrsPerDay: parseInt(e.target.value) || 4 })}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Max Hrs / Week</label>
-                                    <Input
-                                        type="number"
-                                        min="1"
-                                        max="50"
-                                        value={newFacForm.maxHrsPerWeek}
-                                        onChange={(e) => setNewFacForm({ ...newFacForm, maxHrsPerWeek: parseInt(e.target.value) || 20 })}
-                                    />
-                                </div>
-                            </div>
 
                             <hr className="my-2" />
                             <div className="space-y-2">
@@ -368,22 +335,6 @@ export default function FacultyDashboard() {
                                             <span className="truncate">{dept.name}</span>
                                         </label>
                                     ))}
-                                </div>
-                            </div>
-
-                            <hr className="my-2" />
-                            <h4 className="text-sm font-semibold text-slate-800">Capacity Constraints</h4>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Max Hrs / Day</label>
-                                    <Input type="number" min="1" max="12" value={editFacForm.maxHrsPerDay}
-                                        onChange={(e) => setEditFacForm({ ...editFacForm, maxHrsPerDay: parseInt(e.target.value) || 4 })} />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Max Hrs / Week</label>
-                                    <Input type="number" min="1" max="50" value={editFacForm.maxHrsPerWeek}
-                                        onChange={(e) => setEditFacForm({ ...editFacForm, maxHrsPerWeek: parseInt(e.target.value) || 20 })} />
                                 </div>
                             </div>
                         </div>

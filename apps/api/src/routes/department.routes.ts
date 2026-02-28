@@ -4,15 +4,14 @@ import { authenticate, requireRole } from '../middlewares/auth.middleware';
 
 const router = Router({ mergeParams: true });
 
-// Universities and SUPERADMIN can manage departments
+// Universities and SUPERADMIN can manage departments, but anyone in the university can view them
 router.use(authenticate);
-router.use(requireRole(['SUPERADMIN', 'UNI_ADMIN']));
 
 // These routes assume they are mounted on /universities/:universityId/departments
-router.get('/', getDepartments);
-router.get('/:id', getDepartmentById);
-router.post('/', createDepartment);
-router.put('/:id', updateDepartment);
-router.delete('/:id', deleteDepartment);
+router.get('/', requireRole(['SUPERADMIN', 'UNI_ADMIN', 'DEPT_ADMIN', 'FACULTY']), getDepartments);
+router.get('/:id', requireRole(['SUPERADMIN', 'UNI_ADMIN', 'DEPT_ADMIN', 'FACULTY']), getDepartmentById);
+router.post('/', requireRole(['SUPERADMIN', 'UNI_ADMIN']), createDepartment);
+router.put('/:id', requireRole(['SUPERADMIN', 'UNI_ADMIN']), updateDepartment);
+router.delete('/:id', requireRole(['SUPERADMIN', 'UNI_ADMIN']), deleteDepartment);
 
 export default router;

@@ -54,8 +54,8 @@ def solve_timetable(request: GenerateRequest):
             # We filter courses tailored to this specific batch's path
             relevant_courses = [
                 c for c in request.courses 
-                if (c.program == b.program or not c.program or not b.program) and
-                   (c.semester == b.semester or c.semester is None)
+                if (not c.program or not b.program or c.program == b.program) and
+                   (not c.semester or not b.semester or c.semester == b.semester)
             ]
             total_b_slots = sum(c.weeklyHrs for c in relevant_courses)
             batch_load[b.name] = total_b_slots

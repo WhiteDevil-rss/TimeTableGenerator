@@ -20,7 +20,8 @@ export const getPrograms = async (req: AuthRequest, res: Response) => {
 
 export const getProgramById = async (req: AuthRequest, res: Response) => {
     try {
-        const program = await prisma.program.findUnique({ where: { id: req.params.id } });
+        const id = req.params.id as string;
+        const program = await prisma.program.findUnique({ where: { id } });
         if (!program) return res.status(404).json({ error: 'Program not found' });
         res.json(program);
     } catch {
@@ -69,9 +70,10 @@ export const createProgram = async (req: AuthRequest, res: Response) => {
 
 export const updateProgram = async (req: AuthRequest, res: Response) => {
     try {
+        const id = req.params.id as string;
         const { name, shortName, type, duration, totalSems } = req.body;
         const program = await prisma.program.update({
-            where: { id: req.params.id },
+            where: { id },
             data: { name, shortName, type, duration, totalSems },
         });
         res.json(program);
@@ -83,7 +85,8 @@ export const updateProgram = async (req: AuthRequest, res: Response) => {
 
 export const deleteProgram = async (req: AuthRequest, res: Response) => {
     try {
-        await prisma.program.delete({ where: { id: req.params.id } });
+        const id = req.params.id as string;
+        await prisma.program.delete({ where: { id } });
         res.json({ message: 'Program deleted' });
     } catch (error: any) {
         if (error.code === 'P2025') return res.status(404).json({ error: 'Program not found' });

@@ -49,8 +49,6 @@ export const WorkloadSummary: React.FC<WorkloadSummaryProps> = ({ slots }) => {
                                 <th className="px-4 py-3 border-b">Faculty Name</th>
                                 <th className="px-4 py-3 border-b">Designation</th>
                                 <th className="px-4 py-3 border-b">Total Workload</th>
-                                <th className="px-4 py-3 border-b">Weekly Limit</th>
-                                <th className="px-4 py-3 border-b text-right">Status Indicator</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 bg-white">
@@ -59,13 +57,6 @@ export const WorkloadSummary: React.FC<WorkloadSummaryProps> = ({ slots }) => {
                                     <td className="px-4 py-3 font-medium text-slate-800">{stat.faculty.name}</td>
                                     <td className="px-4 py-3 text-slate-500">{stat.faculty.designation || 'Faculty'}</td>
                                     <td className="px-4 py-3 font-semibold text-slate-700">{stat.assignedHours} hrs</td>
-                                    <td className="px-4 py-3 text-slate-500">{stat.faculty.maxHrsPerWeek} hrs</td>
-                                    <td className="px-4 py-3 text-right">
-                                        <WorkloadBadge
-                                            assignedHours={stat.assignedHours}
-                                            maxHours={stat.faculty.maxHrsPerWeek}
-                                        />
-                                    </td>
                                 </tr>
                             ))}
                         </tbody>

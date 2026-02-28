@@ -49,6 +49,16 @@ const config: Config = {
 					'3': 'hsl(var(--chart-3))',
 					'4': 'hsl(var(--chart-4))',
 					'5': 'hsl(var(--chart-5))'
+				},
+				'neon-cyan': 'hsl(var(--neon-cyan))',
+				'neon-purple': 'hsl(var(--neon-purple))',
+				'neon-pink': 'hsl(var(--neon-pink))',
+				sidebar: {
+					bg: 'hsl(var(--sidebar-bg))',
+					fg: 'hsl(var(--sidebar-fg))',
+					border: 'hsl(var(--sidebar-border))',
+					accent: 'hsl(var(--sidebar-accent))',
+					'accent-fg': 'hsl(var(--sidebar-accent-fg))'
 				}
 			},
 			borderRadius: {
@@ -75,6 +85,10 @@ const config: Config = {
 					'0%': { transform: 'translateY(20px)', opacity: '0' },
 					'100%': { transform: 'translateY(0)', opacity: '1' },
 				},
+			},
+			fontFamily: {
+				sans: ['var(--font-manrope)', 'var(--font-space-grotesk)', 'sans-serif'],
+				heading: ['var(--font-space-grotesk)', 'sans-serif'],
 			},
 		}
 	},

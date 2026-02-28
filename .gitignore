@@ -33,3 +33,11 @@ apps/web/node_modules/
 apps/api/node_modules/
 apps/ai-engine/__pycache__/
 *.pyc
+
+
+apps/api/timetable-ai-42c6d-firebase-adminsdk-fbsvc-88d42de2b7.json
+*timetable-ai-42c6d-firebase-adminsdk-fbsvc-88d42de2b7.json
+timetable-ai-42c6d-firebase-adminsdk-fbsvc-d730822f2e.json
+*.json
+# Firebase Service Account
+apps/api/timetable-ai-42c6d-firebase-adminsdk-fbsvc-88d42de2b7.json

@@ -46,8 +46,13 @@ export default function LoginPage() {
             console.log('Firebase login successful', userCredential.user.uid);
 
             // 2. Sync with Backend to get Metadata (Role, EntityId, etc)
+            const token = await userCredential.user.getIdToken();
             console.log('Syncing with backend @ /auth/login...');
-            const response = await api.post('/auth/login');
+            const response = await api.post('/auth/login', {}, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             console.log('Backend sync successful:', response.data);
             const { user } = response.data;
 

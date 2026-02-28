@@ -49,50 +49,54 @@ function ResourceFormFields({
 }) {
     return (
         <div className="space-y-4 py-4">
-            {error && <div className="p-3 bg-red-50 text-red-600 rounded text-sm">{error}</div>}
+            {error && <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded text-sm border dark:border-red-900/50">{error}</div>}
             <div className="space-y-2">
-                <label className="text-sm font-medium">Resource Name</label>
+                <label className="text-sm font-medium dark:text-slate-300">Resource Name</label>
                 <Input
                     placeholder="e.g. Room 101 or Computer Lab A"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="dark:bg-slate-900/50 dark:border-white/10 dark:text-white"
                 />
             </div>
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Type</label>
+                    <label className="text-sm font-medium dark:text-slate-300">Type</label>
                     <select
-                        className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        className="w-full h-10 rounded-md border border-input dark:border-white/10 bg-background dark:bg-slate-900/50 px-3 py-2 text-sm dark:text-white"
                         value={form.type}
                         onChange={(e) => setForm({ ...form, type: e.target.value })}
                     >
-                        {RESOURCE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                        {RESOURCE_TYPES.map(t => <option key={t} value={t} className="dark:bg-slate-800">{t}</option>)}
                     </select>
                 </div>
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Capacity (seats)</label>
+                    <label className="text-sm font-medium dark:text-slate-300">Capacity (seats)</label>
                     <Input
                         type="number" min="1" max="1000"
                         value={form.capacity}
                         onChange={(e) => setForm({ ...form, capacity: parseInt(e.target.value) || 1 })}
+                        className="dark:bg-slate-900/50 dark:border-white/10 dark:text-white"
                     />
                 </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Building</label>
+                    <label className="text-sm font-medium dark:text-slate-300">Building</label>
                     <Input
                         placeholder="e.g. Main Block"
                         value={form.building}
                         onChange={(e) => setForm({ ...form, building: e.target.value })}
+                        className="dark:bg-slate-900/50 dark:border-white/10 dark:text-white"
                     />
                 </div>
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Floor</label>
+                    <label className="text-sm font-medium dark:text-slate-300">Floor</label>
                     <Input
                         placeholder="e.g. Ground / 1st"
                         value={form.floor}
                         onChange={(e) => setForm({ ...form, floor: e.target.value })}
+                        className="dark:bg-slate-900/50 dark:border-white/10 dark:text-white"
                     />
                 </div>
             </div>
@@ -208,10 +212,10 @@ export default function DeptResourcesDashboard() {
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight text-slate-800">Resources</h2>
-                        <p className="text-slate-500">Classrooms, labs, and venues available for timetable scheduling.</p>
+                        <h2 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">Resources</h2>
+                        <p className="text-slate-500 dark:text-slate-400">Classrooms, labs, and venues available for timetable scheduling.</p>
                     </div>
-                    <Button onClick={() => { setError(''); setAddForm({ ...emptyForm }); setIsAddOpen(true); }} className="bg-primary shadow-md shrink-0">
+                    <Button onClick={() => { setError(''); setAddForm({ ...emptyForm }); setIsAddOpen(true); }} className="bg-primary shadow-md shrink-0 text-white">
                         <LuPlus className="w-4 h-4 mr-2" /> Add Resource
                     </Button>
                 </div>
@@ -224,14 +228,14 @@ export default function DeptResourcesDashboard() {
                             <button
                                 key={t}
                                 onClick={() => setFilterType(filterType === t ? '' : t)}
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold border transition-all
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold border transition-all dark:bg-transparent
                                     ${filterType === t
-                                        ? `${cfg.bg} ${cfg.color} border-current ring-2 ring-offset-1 ring-current`
-                                        : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'}`}
+                                        ? `${cfg.bg} ${cfg.color} border-current ring-2 ring-offset-1 ring-offset-background ring-current dark:opacity-90`
+                                        : 'bg-white text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 dark:hover:bg-white/5'}`}
                             >
                                 <span className={cfg.color}>{cfg.icon}</span>
                                 {t}
-                                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${cfg.bg} ${cfg.color}`}>
+                                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${cfg.bg} ${cfg.color} dark:bg-opacity-20`}>
                                     {typeCounts[t]}
                                 </span>
                             </button>
@@ -240,10 +244,10 @@ export default function DeptResourcesDashboard() {
                 </div>
 
                 {/* Search */}
-                <div className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2 shadow-sm mb-6 max-w-sm">
-                    <LuSearch className="w-4 h-4 text-slate-400 shrink-0" />
+                <div className="flex items-center gap-2 glass border rounded-lg px-3 py-2 shadow-sm mb-6 max-w-sm">
+                    <LuSearch className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
                     <input
-                        className="flex-1 text-sm bg-transparent outline-none placeholder:text-slate-400"
+                        className="flex-1 text-sm bg-transparent outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 dark:text-white"
                         placeholder="Search by name or building…"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -258,37 +262,37 @@ export default function DeptResourcesDashboard() {
                         {filtered.map(r => {
                             const cfg = typeConfig[r.type] || { icon: <LuMonitor className="w-5 h-5" />, color: 'text-slate-600', bg: 'bg-slate-100' };
                             return (
-                                <Card key={r.id} className="shadow-sm border-slate-200 hover:shadow-md transition-shadow">
-                                    <CardHeader className="pb-3 border-b bg-slate-50/50 rounded-t-xl">
+                                <Card key={r.id} className="glass-card shadow-sm border-slate-200 dark:border-white/10 hover:shadow-md transition-shadow">
+                                    <CardHeader className="pb-3 border-b bg-gradient-to-r from-slate-50 dark:from-slate-800/50 to-slate-50/30 dark:to-transparent border-slate-100 dark:border-white/5 rounded-t-xl">
                                         <div className="flex items-start justify-between gap-2">
                                             <div className="flex items-center gap-2 min-w-0">
-                                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${cfg.bg}`}>
+                                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${cfg.bg} dark:bg-opacity-20`}>
                                                     <span className={cfg.color}>{cfg.icon}</span>
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <CardTitle className="text-sm font-bold text-slate-800 line-clamp-1">{r.name}</CardTitle>
-                                                    <CardDescription className="text-xs">{r.type}</CardDescription>
+                                                    <CardTitle className="text-sm font-bold text-slate-800 dark:text-slate-200 line-clamp-1">{r.name}</CardTitle>
+                                                    <CardDescription className="text-xs dark:text-slate-400">{r.type}</CardDescription>
                                                 </div>
                                             </div>
                                         </div>
                                     </CardHeader>
                                     <CardContent className="pt-4 pb-4">
                                         <div className="grid grid-cols-3 gap-2 mb-4 text-center">
-                                            <div className="bg-slate-50 rounded-lg p-2">
+                                            <div className="bg-slate-50 dark:bg-slate-900/50 border dark:border-white/5 rounded-lg p-2">
                                                 <div className="text-[10px] text-slate-400 font-bold uppercase">Seats</div>
-                                                <div className="text-sm font-bold text-emerald-600">{r.capacity}</div>
+                                                <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{r.capacity}</div>
                                             </div>
-                                            <div className="bg-slate-50 rounded-lg p-2">
+                                            <div className="bg-slate-50 dark:bg-slate-900/50 border dark:border-white/5 rounded-lg p-2">
                                                 <div className="text-[10px] text-slate-400 font-bold uppercase">Building</div>
-                                                <div className="text-sm font-bold text-indigo-600 truncate">{r.building || '—'}</div>
+                                                <div className="text-sm font-bold text-indigo-600 dark:text-indigo-400 truncate">{r.building || '—'}</div>
                                             </div>
-                                            <div className="bg-slate-50 rounded-lg p-2">
+                                            <div className="bg-slate-50 dark:bg-slate-900/50 border dark:border-white/5 rounded-lg p-2">
                                                 <div className="text-[10px] text-slate-400 font-bold uppercase">Floor</div>
-                                                <div className="text-sm font-bold text-slate-700">{r.floor || '—'}</div>
+                                                <div className="text-sm font-bold text-slate-700 dark:text-slate-300">{r.floor || '—'}</div>
                                             </div>
                                         </div>
                                         <div className="flex gap-2">
-                                            <Button variant="outline" size="sm" className="flex-1 text-xs hover:text-indigo-600 hover:bg-indigo-50"
+                                            <Button variant="outline" size="sm" className="flex-1 text-xs hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 border-slate-200 dark:border-white/10 dark:bg-transparent dark:text-slate-300"
                                                 onClick={() => {
                                                     setSelectedId(r.id);
                                                     setEditForm({ name: r.name, type: r.type, capacity: r.capacity, floor: r.floor || '', building: r.building || '' });
@@ -297,7 +301,7 @@ export default function DeptResourcesDashboard() {
                                                 }}>
                                                 <LuPencil className="w-3 h-3 mr-1" /> Edit
                                             </Button>
-                                            <Button variant="outline" size="sm" className="flex-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                            <Button variant="outline" size="sm" className="flex-1 text-xs text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-500/10 dark:bg-transparent"
                                                 onClick={() => handleDelete(r.id, r.name)}>
                                                 <LuTrash2 className="w-3 h-3 mr-1" /> Delete
                                             </Button>
@@ -308,14 +312,14 @@ export default function DeptResourcesDashboard() {
                         })}
 
                         {filtered.length === 0 && (
-                            <div className="col-span-full py-20 text-center text-slate-500 bg-white rounded-xl border-dashed border-2 border-slate-200">
-                                <LuMonitor className="w-14 h-14 text-slate-300 mx-auto mb-4" />
-                                <h3 className="text-xl font-semibold text-slate-700">{search || filterType ? 'No matches found' : 'No resources yet'}</h3>
+                            <div className="col-span-full py-20 text-center text-slate-500 dark:text-slate-400 glass-card rounded-xl border-dashed border-2 border-slate-200 dark:border-white/10">
+                                <LuMonitor className="w-14 h-14 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                                <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-300">{search || filterType ? 'No matches found' : 'No resources yet'}</h3>
                                 <p className="text-sm mt-2 max-w-sm mx-auto">
                                     {search || filterType ? 'Try clearing the filter or search.' : 'Add classrooms, labs, and halls to make them available for timetable scheduling.'}
                                 </p>
                                 {!search && !filterType && (
-                                    <Button className="mt-5" onClick={() => setIsAddOpen(true)}>
+                                    <Button className="mt-5 text-white shadow-md bg-primary hover:bg-primary/90" onClick={() => setIsAddOpen(true)}>
                                         <LuPlus className="w-4 h-4 mr-2" /> Add First Resource
                                     </Button>
                                 )}
@@ -326,24 +330,24 @@ export default function DeptResourcesDashboard() {
 
                 {/* Add Dialog */}
                 <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-                    <DialogContent className="sm:max-w-md">
-                        <DialogHeader><DialogTitle>Add New Resource</DialogTitle></DialogHeader>
+                    <DialogContent className="sm:max-w-md glass-card dark:border-white/10">
+                        <DialogHeader><DialogTitle className="dark:text-white">Add New Resource</DialogTitle></DialogHeader>
                         <ResourceFormFields form={addForm} setForm={setAddForm} error={error} />
-                        <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
-                            <Button onClick={handleCreate} disabled={!addForm.name}>Add Resource</Button>
+                        <DialogFooter className="border-t dark:border-white/5 pt-4">
+                            <Button variant="outline" className="dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-800" onClick={() => setIsAddOpen(false)}>Cancel</Button>
+                            <Button className="bg-primary hover:bg-primary/90 text-white" onClick={handleCreate} disabled={!addForm.name}>Add Resource</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
 
                 {/* Edit Dialog */}
                 <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                    <DialogContent className="sm:max-w-md">
-                        <DialogHeader><DialogTitle>Edit Resource</DialogTitle></DialogHeader>
+                    <DialogContent className="sm:max-w-md glass-card dark:border-white/10">
+                        <DialogHeader><DialogTitle className="dark:text-white">Edit Resource</DialogTitle></DialogHeader>
                         <ResourceFormFields form={editForm} setForm={setEditForm} error={error} />
-                        <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
-                            <Button onClick={handleEdit} disabled={!editForm.name}>Save Changes</Button>
+                        <DialogFooter className="border-t dark:border-white/5 pt-4">
+                            <Button variant="outline" className="dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-800" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+                            <Button className="bg-primary hover:bg-primary/90 text-white" onClick={handleEdit} disabled={!editForm.name}>Save Changes</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
