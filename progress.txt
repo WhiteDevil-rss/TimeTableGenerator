@@ -1,9 +1,0 @@
-Date: 2026-02-22
-Learnings:
-- The Next.js frontend has been verified to route correctly natively using js-cookie.
-- The Python AI solver successfully routes via the Node.js API orchestrator.
-- Multi-stage Docker files are set up for deployment.
-- Playwright E2E tests are available for frontend coverage.
-- GSD Context engineering and Ralph looping scripts are integrated.
-- Strict ESLint checks disabled on the Node Backend due to unused variable catch blocks.
-- [Ralph Loop Executed]: Returning 404 on uninitialized endpoints (like empty timetables) crashes frontend DOM parsing logic. Resolved by rewriting `/latest` REST checks to gracefully return `200 null`.
