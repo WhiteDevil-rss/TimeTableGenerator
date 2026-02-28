@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import prisma from '../lib/prisma';
 import bcrypt from 'bcrypt';
 import { AuthRequest } from '../middlewares/auth.middleware';
+import { logActivity } from '../utils/activity-logger';
 
 const hashPassword = async (password: string) => bcrypt.hash(password, 12);
 
@@ -89,6 +90,13 @@ export const createDepartment = async (req: AuthRequest, res: Response) => {
         });
 
         res.status(201).json(department);
+
+        logActivity(
+            req.user!.id,
+            req.user!.role,
+            'DEPARTMENT_CREATE',
+            { departmentId: department?.id, name: department?.name }
+        );
     } catch (error) {
         console.error('Create Department Error:', error);
         res.status(500).json({ error: 'Failed to create department', details: error instanceof Error ? error.message : 'Unknown error' });
@@ -113,6 +121,13 @@ export const updateDepartment = async (req: AuthRequest, res: Response) => {
         });
 
         res.json(department);
+
+        logActivity(
+            req.user!.id,
+            req.user!.role,
+            'DEPARTMENT_UPDATE',
+            { departmentId: department.id, name: department.name }
+        );
     } catch (error) {
         res.status(500).json({ error: 'Failed to update department' });
     }
@@ -131,6 +146,13 @@ export const deleteDepartment = async (req: AuthRequest, res: Response) => {
 
         await prisma.department.delete({ where: { id } });
         res.status(204).send();
+
+        logActivity(
+            req.user!.id,
+            req.user!.role,
+            'DEPARTMENT_DELETE',
+            { departmentId: id, name: targetDept.name }
+        );
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete department' });
     }

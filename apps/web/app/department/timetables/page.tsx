@@ -3,25 +3,16 @@
 import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { LayoutDashboard, Users, BookOpen, Calendar, GraduationCap, Network, Monitor, PlusCircle, AlertTriangle, Eye, ArrowRight } from 'lucide-react';
+import { LuPlusCircle, LuTriangleAlert, LuEye, LuArrowRight } from 'react-icons/lu';
 import Link from 'next/link';
+import { DEPT_ADMIN_NAV } from '@/lib/constants/nav-config';
 
 export default function TimetablesMenuPage() {
-    const navItems = [
-        { title: 'Dashboard', href: '/department', icon: <LayoutDashboard className="w-5 h-5" /> },
-        { title: 'Faculty', href: '/department/faculty', icon: <Users className="w-5 h-5" /> },
-        { title: 'Courses', href: '/department/courses', icon: <GraduationCap className="w-5 h-5" /> },
-        { title: 'Subjects', href: '/department/subjects', icon: <BookOpen className="w-5 h-5" /> },
-        { title: 'Batches', href: '/department/batches', icon: <Network className="w-5 h-5" /> },
-        { title: 'Resources', href: '/department/resources', icon: <Monitor className="w-5 h-5" /> },
-        { title: 'Timetables', href: '/department/timetables', icon: <Calendar className="w-5 h-5 text-indigo-500" /> },
-    ];
-
     const options = [
         {
             title: "Regular timetable",
             description: "Configure global parameters and trigger the AI scheduler to generate a primary timetable for the department.",
-            icon: <PlusCircle className="w-8 h-8 text-indigo-500" />,
+            icon: <LuPlusCircle className="w-8 h-8 text-indigo-500" />,
             href: "/department/timetables/create",
             color: "border-indigo-200 bg-indigo-50/30 hover:bg-indigo-50",
             iconBg: "bg-indigo-100"
@@ -29,7 +20,7 @@ export default function TimetablesMenuPage() {
         {
             title: "Special timetable",
             description: "Select unavailable faculty members or rooms to reconstruct an active timetable using remaining resources.",
-            icon: <AlertTriangle className="w-8 h-8 text-amber-500" />,
+            icon: <LuTriangleAlert className="w-8 h-8 text-amber-500" />,
             href: "/department/special",
             color: "border-amber-200 bg-amber-50/30 hover:bg-amber-50",
             iconBg: "bg-amber-100"
@@ -37,7 +28,7 @@ export default function TimetablesMenuPage() {
         {
             title: "View time table",
             description: "View the most recently generated active timetable and workload summary.",
-            icon: <Eye className="w-8 h-8 text-emerald-500" />,
+            icon: <LuEye className="w-8 h-8 text-emerald-500" />,
             href: "/department/timetables/view",
             color: "border-emerald-200 bg-emerald-50/30 hover:bg-emerald-50",
             iconBg: "bg-emerald-100"
@@ -46,7 +37,7 @@ export default function TimetablesMenuPage() {
 
     return (
         <ProtectedRoute allowedRoles={['DEPT_ADMIN']}>
-            <DashboardLayout navItems={navItems} title="Timetables Menu">
+            <DashboardLayout navItems={DEPT_ADMIN_NAV} title="Timetables Menu">
                 <div className="max-w-5xl mx-auto space-y-6">
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight text-slate-800">Manage Timetables</h2>
@@ -70,7 +61,7 @@ export default function TimetablesMenuPage() {
                                     </CardHeader>
                                     <CardContent>
                                         <div className="flex items-center text-sm font-bold text-slate-500 group-hover:text-indigo-600">
-                                            Go to action <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                            Go to action <LuArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                                         </div>
                                     </CardContent>
                                 </Card>

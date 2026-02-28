@@ -40,7 +40,7 @@ model Department {
   email        String?
   adminUserId  String?
   createdAt    DateTime    @default(now())
-  faculty      Faculty[]
+  faculty      FacultyDepartment[]
   courses      Course[]
   batches      Batch[]
   timetables   Timetable[]
@@ -48,22 +48,30 @@ model Department {
   @@map("departments")
 }
 
+model FacultyDepartment {
+  facultyId    String
+  departmentId String
+  faculty      Faculty    @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@id([facultyId, departmentId])
+  @@map("faculty_departments")
+}
+
 model Faculty {
   id              String          @id @default(uuid())
-  departmentId    String
   universityId    String
-  department      Department      @relation(fields: [departmentId], references: [id], onDelete: Cascade)
-  university      University      @relation(fields: [universityId], references: [id])
+  university      University      @relation(fields: [universityId], references: [id], onDelete: Cascade)
   name            String
   email           String          @unique
   phone           String?
   designation     String?
   maxHrsPerDay    Int             @default(4)
-  maxHrsPerWeek   Int             @default(20)
   userId          String?
   user            User?           @relation(fields: [userId], references: [id])
   createdAt       DateTime        @default(now())
   subjects        FacultySubject[]
+  departments     FacultyDepartment[]
   timetableSlots  TimetableSlot[]
 
   @@map("faculty")
@@ -87,7 +95,7 @@ model Course {
   departmentId   String?
   universityId   String
   department     Department?     @relation(fields: [departmentId], references: [id])
-  university     University      @relation(fields: [universityId], references: [id])
+  university     University      @relation(fields: [universityId], references: [id], onDelete: Cascade)
   name           String
   code           String
   program        String?
@@ -107,7 +115,7 @@ model Batch {
   departmentId   String?
   universityId   String
   department     Department?     @relation(fields: [departmentId], references: [id])
-  university     University      @relation(fields: [universityId], references: [id])
+  university     University      @relation(fields: [universityId], references: [id], onDelete: Cascade)
   name           String
   program        String?
   semester       Int?
@@ -125,7 +133,7 @@ model Batch {
 model Resource {
   id             String          @id @default(uuid())
   universityId   String
-  university     University      @relation(fields: [universityId], references: [id])
+  university     University      @relation(fields: [universityId], references: [id], onDelete: Cascade)
   name           String
   type           String          // Classroom | Lab | Seminar Hall | Auditorium
   capacity       Int             @default(30)
@@ -140,7 +148,7 @@ model Resource {
 model Program {
   id           String     @id @default(uuid())
   universityId String
-  university   University @relation(fields: [universityId], references: [id])
+  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
   name         String
   shortName    String
   type         String     // UG | PG | Diploma | Ph.D
@@ -155,7 +163,7 @@ model Timetable {
   universityId    String
   departmentId    String?
   batchId         String?
-  university      University      @relation(fields: [universityId], references: [id])
+  university      University      @relation(fields: [universityId], references: [id], onDelete: Cascade)
   department      Department?     @relation(fields: [departmentId], references: [id])
   batch           Batch?          @relation(fields: [batchId], references: [id])
   name            String?
@@ -198,15 +206,17 @@ model User {
   id           String     @id @default(uuid())
   username     String     @unique
   email        String?    @unique
-  passwordHash String
+  passwordHash String?    // Optional now because Firebase handles password
+  firebaseUid  String?    @unique
   role         String     // SUPERADMIN | UNI_ADMIN | DEPT_ADMIN | FACULTY
   entityId     String?    // universityId | departmentId | facultyId
   universityId String?
-  university   University? @relation(fields: [universityId], references: [id])
+  university   University? @relation(fields: [universityId], references: [id], onDelete: Cascade)
   faculty      Faculty[]
   isActive     Boolean    @default(true)
   createdAt    DateTime   @default(now())
   lastLogin    DateTime?
+  logs         AuditLog[]
 
   @@map("users")
 }
@@ -214,10 +224,15 @@ model User {
 model AuditLog {
   id         String   @id @default(uuid())
   userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
   action     String
   entityType String?
   entityId   String?
   changes    Json?
+  status     String   @default("SUCCESS") // SUCCESS | FAILURE
+  endpoint   String?
+  method     String?
+  durationMs Int?
   ipAddress  String?
   userAgent  String?
   createdAt  DateTime @default(now())

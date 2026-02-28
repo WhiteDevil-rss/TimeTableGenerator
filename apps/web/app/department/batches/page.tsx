@@ -2,7 +2,11 @@
 
 import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
-import { Network, Plus, LayoutDashboard, Users, GraduationCap, BookOpen, Calendar, Trash2, Edit, ChevronDown, ChevronUp, UserCheck, AlertTriangle, Monitor } from 'lucide-react';
+import {
+    LuGraduationCap, LuPlus, LuTrash2, LuPencil,
+    LuSearch, LuTriangleAlert, LuUserCheck,
+    LuChevronDown, LuChevronUp, LuNetwork
+} from 'react-icons/lu';
 import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/store/useAuthStore';
@@ -17,8 +21,25 @@ const emptyDivForm = { division: '', strength: 30 };
 type BatchForm = typeof emptyBatchForm;
 type DivForm = typeof emptyDivForm;
 
+interface Program {
+    id: string;
+    name: string;
+    shortName: string;
+}
+
+interface Batch {
+    id: string;
+    name: string;
+    program: string | null;
+    semester: number | null;
+    year: string | null;
+    totalStudents: number;
+    division?: string;
+    strength?: number;
+}
+
 // ── Sub-components OUTSIDE parent (prevents focus loss on re-render) ───────────
-function ProgramSelect({ value, onChange, programs }: { value: string; onChange: (v: string) => void; programs: any[] }) {
+function ProgramSelect({ value, onChange, programs }: { value: string; onChange: (v: string) => void; programs: Program[] }) {
     return (
         <select
             className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -40,7 +61,7 @@ function DivisionFill({ used, total }: { used: number; total: number }) {
         <div className="mt-3">
             <div className="flex justify-between text-xs mb-1">
                 <span className={over ? 'text-red-600 font-bold' : 'text-slate-500'}>
-                    {over && <AlertTriangle className="w-3 h-3 inline mr-1" />}
+                    {over && <LuTriangleAlert className="w-3 h-3 inline mr-1" />}
                     {used} / {total} students assigned
                 </span>
                 <span className={over ? 'text-red-600 font-bold' : 'text-slate-400'}>{pct}%</span>
@@ -65,7 +86,7 @@ function ConfirmDialog({ state, onClose }: { state: ConfirmState; onClose: () =>
             <DialogContent className="sm:max-w-sm">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-red-600">
-                        <Trash2 className="w-5 h-5" /> {state.title}
+                        <LuTrash2 className="w-5 h-5" /> {state.title}
                     </DialogTitle>
                 </DialogHeader>
                 <p className="text-sm text-slate-600 py-2">{state.message}</p>
@@ -83,20 +104,13 @@ function ConfirmDialog({ state, onClose }: { state: ConfirmState; onClose: () =>
     );
 }
 
-const navItems = [
-    { title: 'Dashboard', href: '/department', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { title: 'Faculty', href: '/department/faculty', icon: <Users className="w-5 h-5" /> },
-    { title: 'Courses', href: '/department/courses', icon: <GraduationCap className="w-5 h-5" /> },
-    { title: 'Subjects', href: '/department/subjects', icon: <BookOpen className="w-5 h-5" /> },
-    { title: 'Batches', href: '/department/batches', icon: <Network className="w-5 h-5 text-indigo-500" /> },
-    { title: 'Resources', href: '/department/resources', icon: <Monitor className="w-5 h-5" /> },
-    { title: 'Timetables', href: '/department/timetables', icon: <Calendar className="w-5 h-5" /> },
-];
+import { DEPT_ADMIN_NAV } from '@/lib/constants/nav-config';
 
 export default function DeptBatchesDashboard() {
     const { user } = useAuthStore();
-    const [batches, setBatches] = useState<any[]>([]);
-    const [programs, setSubjects] = useState<any[]>([]);
+    const [batches, setBatches] = useState<Batch[]>([]);
+    const [programs, setPrograms] = useState<Program[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [expandedBatch, setExpandedBatch] = useState<string | null>(null);
 
@@ -121,17 +135,24 @@ export default function DeptBatchesDashboard() {
         if (!user?.entityId) return;
         setLoading(true);
         try {
-            const [batchRes, progRes] = await Promise.all([api.get('/batches'), api.get('/courses')]);
+            const [batchRes, progRes] = await Promise.all([api.get('/batches'), api.get('/programs')]);
             setBatches(batchRes.data);
-            setSubjects(progRes.data);
+            setPrograms(progRes.data);
         } catch (e) { console.error(e); }
         finally { setLoading(false); }
     }, [user?.entityId]);
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
+    // Filter batches based on search term
+    const filteredBatches = batches.filter(batch =>
+        !searchTerm ||
+        batch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (batch.program && batch.program.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
     // Group batches by "program__name" key — each group is one logical batch, rows are divisions
-    const batchGroups: Record<string, any[]> = batches.reduce((acc, batch) => {
+    const batchGroups: Record<string, Batch[]> = filteredBatches.reduce((acc: Record<string, Batch[]>, batch) => {
         const key = `${batch.program || 'general'}__${batch.name}`;
         if (!acc[key]) acc[key] = [];
         acc[key].push(batch);
@@ -154,8 +175,9 @@ export default function DeptBatchesDashboard() {
             setIsAddOpen(false);
             setAddForm({ ...emptyBatchForm });
             fetchData();
-        } catch (e: any) {
-            setError(e.response?.data?.error || 'Failed to create batch.');
+        } catch (e) {
+            const errorMsg = (e as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to create batch.';
+            setError(errorMsg);
         }
     };
 
@@ -195,8 +217,9 @@ export default function DeptBatchesDashboard() {
             setIsAddDivOpen(false);
             setAddDivForm({ ...emptyDivForm });
             fetchData();
-        } catch (e: any) {
-            setError(e.response?.data?.error || 'Failed to add division.');
+        } catch (e) {
+            const errorMsg = (e as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to add division.';
+            setError(errorMsg);
         }
     };
 
@@ -231,8 +254,9 @@ export default function DeptBatchesDashboard() {
             });
             setIsEditDivOpen(false);
             fetchData();
-        } catch (e: any) {
-            setError(e.response?.data?.error || 'Failed to edit division.');
+        } catch (e) {
+            const errorMsg = (e as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to edit division.';
+            setError(errorMsg);
         }
     };
 
@@ -267,13 +291,14 @@ export default function DeptBatchesDashboard() {
             );
             setIsEditOpen(false);
             fetchData();
-        } catch (e: any) {
-            setError(e.response?.data?.error || 'Failed to update batch.');
+        } catch (e) {
+            const errorMsg = (e as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to update batch.';
+            setError(errorMsg);
         }
     };
 
     // ── Delete entire batch (all its divisions) ────────────────────────────
-    const handleDeleteBatch = (divisions: any[], batchName: string) => {
+    const handleDeleteBatch = (divisions: Batch[], batchName: string) => {
         setConfirmDialog({
             open: true,
             title: 'Delete Batch',
@@ -282,8 +307,9 @@ export default function DeptBatchesDashboard() {
                 try {
                     await Promise.all(divisions.map(div => api.delete(`/batches/${div.id}`)));
                     fetchData();
-                } catch (e: any) {
-                    setError(e.response?.data?.error || 'Failed to delete batch.');
+                } catch (e) {
+                    const errorMsg = (e as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to delete batch.';
+                    setError(errorMsg);
                 }
             },
         });
@@ -299,8 +325,9 @@ export default function DeptBatchesDashboard() {
                 try {
                     await api.delete(`/batches/${id}`);
                     fetchData();
-                } catch (e: any) {
-                    setError(e.response?.data?.error || 'Failed to delete division.');
+                } catch (e) {
+                    const errorMsg = (e as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to delete division.';
+                    setError(errorMsg);
                 }
             },
         });
@@ -308,15 +335,26 @@ export default function DeptBatchesDashboard() {
 
     return (
         <ProtectedRoute allowedRoles={['DEPT_ADMIN']}>
-            <DashboardLayout navItems={navItems} title="Student Batches">
-                <div className="flex justify-between items-center mb-6">
+            <DashboardLayout navItems={DEPT_ADMIN_NAV} title="Student Batches">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight text-slate-800">Batch Management</h2>
-                        <p className="text-slate-500">Manage batches like "MCA 25-27" with divisions (A, B, C) and student counts.</p>
+                        <p className="text-slate-500">Manage batches like &quot;MCA 25-27&quot; with divisions (A, B, C) and student counts.</p>
                     </div>
-                    <Button onClick={() => { setError(''); setAddForm({ ...emptyBatchForm }); setIsAddOpen(true); }} className="bg-primary shadow-md">
-                        <Plus className="w-4 h-4 mr-2" /> New Batch
-                    </Button>
+                    <div className="flex gap-2 w-full sm:w-auto">
+                        <div className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2 shadow-sm w-full sm:w-64">
+                            <LuSearch className="w-4 h-4 text-slate-400 shrink-0" />
+                            <Input
+                                placeholder="Search batches..."
+                                className="border-0 p-0 h-auto focus-visible:ring-0 text-sm placeholder:text-slate-400"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <Button onClick={() => { setError(''); setAddForm({ ...emptyBatchForm }); setIsAddOpen(true); }} className="bg-primary shadow-md">
+                            <LuPlus className="w-4 h-4 mr-2" /> New Batch
+                        </Button>
+                    </div>
                 </div>
 
                 {loading ? (
@@ -336,7 +374,7 @@ export default function DeptBatchesDashboard() {
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
-                                                        <GraduationCap className="w-5 h-5 text-indigo-600" />
+                                                        <LuGraduationCap className="w-5 h-5 text-indigo-600" />
                                                     </div>
                                                     <div>
                                                         <CardTitle className="text-lg font-bold text-slate-800">{first.name}</CardTitle>
@@ -358,15 +396,15 @@ export default function DeptBatchesDashboard() {
                                                             setError('');
                                                             setIsEditOpen(true);
                                                         }}>
-                                                        <Edit className="w-4 h-4 text-slate-500" />
+                                                        <LuPencil className="w-4 h-4 text-slate-500" />
                                                     </Button>
                                                     <Button variant="ghost" size="sm"
                                                         className="text-red-500 hover:text-red-700 hover:bg-red-50"
                                                         onClick={() => handleDeleteBatch(divisions, first.name)}>
-                                                        <Trash2 className="w-4 h-4" />
+                                                        <LuTrash2 className="w-4 h-4" />
                                                     </Button>
                                                     <Button variant="ghost" size="sm" onClick={() => setExpandedBatch(isExpanded ? null : groupKey)}>
-                                                        {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                                        {isExpanded ? <LuChevronUp className="w-4 h-4" /> : <LuChevronDown className="w-4 h-4" />}
                                                     </Button>
                                                 </div>
                                             </div>
@@ -389,7 +427,7 @@ export default function DeptBatchesDashboard() {
                                                                 <div>
                                                                     <div className="text-sm font-bold text-slate-700">Div {div.division || 'Default'}</div>
                                                                     <div className="text-xs text-slate-400 flex items-center gap-1">
-                                                                        <UserCheck className="w-3 h-3" /> {div.strength} students
+                                                                        <LuUserCheck className="w-3 h-3" /> {div.strength} students
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -399,15 +437,15 @@ export default function DeptBatchesDashboard() {
                                                                 onClick={() => {
                                                                     setSelectedDivId(div.id);
                                                                     setSelectedBatchId(first.id);
-                                                                    setEditDivForm({ division: div.division || '', strength: div.strength });
+                                                                    setEditDivForm({ division: div.division || '', strength: div.strength || 0 });
                                                                     setError('');
                                                                     setIsEditDivOpen(true);
                                                                 }}>
-                                                                <Edit className="w-3 h-3 mr-1" /> Edit
+                                                                <LuPencil className="w-3 h-3 mr-1" /> Edit
                                                             </Button>
                                                             <Button variant="outline" size="sm" className="flex-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
                                                                 onClick={() => handleDeleteDivision(div.id, div.division || '?')}>
-                                                                <Trash2 className="w-3 h-3 mr-1" /> Delete
+                                                                <LuTrash2 className="w-3 h-3 mr-1" /> Delete
                                                             </Button>
                                                         </div>
                                                     </div>
@@ -425,7 +463,7 @@ export default function DeptBatchesDashboard() {
                                                     setError('');
                                                     setIsAddDivOpen(true);
                                                 }}>
-                                                <Plus className="w-4 h-4 mr-2" /> Add Division to {first.name}
+                                                <LuPlus className="w-4 h-4 mr-2" /> Add Division to {first.name}
                                             </Button>
                                         </CardContent>
                                     )}
@@ -435,11 +473,11 @@ export default function DeptBatchesDashboard() {
 
                         {Object.keys(batchGroups).length === 0 && (
                             <div className="py-20 text-center text-slate-500 bg-white rounded-xl border-dashed border-2 border-slate-200">
-                                <Network className="w-14 h-14 text-slate-300 mx-auto mb-4" />
+                                <LuNetwork className="w-14 h-14 text-slate-300 mx-auto mb-4" />
                                 <h3 className="text-xl font-semibold text-slate-700">No batches yet</h3>
-                                <p className="text-sm mt-2 max-w-sm mx-auto">Create a batch like "MCA 25-27" with a total student count, then add divisions within it.</p>
+                                <p className="text-sm mt-2 max-w-sm mx-auto">Create a batch like &quot;MCA 25-27&quot; with a total student count, then add divisions within it.</p>
                                 <Button className="mt-5" onClick={() => { setError(''); setIsAddOpen(true); }}>
-                                    <Plus className="w-4 h-4 mr-2" /> Create First Batch
+                                    <LuPlus className="w-4 h-4 mr-2" /> Create First Batch
                                 </Button>
                             </div>
                         )}
@@ -454,7 +492,7 @@ export default function DeptBatchesDashboard() {
                     <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
                         <DialogHeader><DialogTitle>Create New Batch</DialogTitle></DialogHeader>
                         <div className="space-y-4 py-4">
-                            {error && <div className="p-3 bg-red-50 text-red-600 rounded text-sm flex gap-2"><AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />{error}</div>}
+                            {error && <div className="p-3 bg-red-50 text-red-600 rounded text-sm flex gap-2"><LuTriangleAlert className="w-4 h-4 shrink-0 mt-0.5" />{error}</div>}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Batch Name</label>
                                 <Input placeholder="e.g. MCA 25-27" value={addForm.name}
@@ -502,11 +540,11 @@ export default function DeptBatchesDashboard() {
                             const base = batches.find(b => b.id === selectedBatchId);
                             if (!base) return null;
                             const groupKey = `${base.program || 'general'}__${base.name}`;
-                            const used = (batchGroups[groupKey] || []).reduce((s: number, d: any) => s + (d.strength || 0), 0);
+                            const used = (batchGroups[groupKey] || []).reduce((s: number, d) => s + (d.strength || 0), 0);
                             const remaining = (base.totalStudents || 0) - used;
                             return (
                                 <div className="space-y-4 py-4">
-                                    {error && <div className="p-3 bg-red-50 text-red-600 rounded text-sm flex gap-2"><AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />{error}</div>}
+                                    {error && <div className="p-3 bg-red-50 text-red-600 rounded text-sm flex gap-2"><LuTriangleAlert className="w-4 h-4 shrink-0 mt-0.5" />{error}</div>}
                                     <div className="rounded-lg bg-slate-50 border px-3 py-2 text-sm text-slate-600">
                                         <strong>{base.name}</strong> — {used} of {base.totalStudents} students allocated.
                                         <span className={`ml-2 font-semibold ${remaining <= 0 ? 'text-red-600' : 'text-emerald-600'}`}>
@@ -545,11 +583,11 @@ export default function DeptBatchesDashboard() {
                             const div = batches.find(b => b.id === selectedDivId);
                             if (!base || !div) return null;
                             const groupKey = `${base.program || 'general'}__${base.name}`;
-                            const usedExcl = (batchGroups[groupKey] || []).filter((d: any) => d.id !== selectedDivId).reduce((s: number, d: any) => s + (d.strength || 0), 0);
+                            const usedExcl = (batchGroups[groupKey] || []).filter((d: Batch) => d.id !== selectedDivId).reduce((s: number, d: Batch) => s + (d.strength || 0), 0);
                             const maxAllowed = (base.totalStudents || 0) - usedExcl;
                             return (
                                 <div className="space-y-4 py-4">
-                                    {error && <div className="p-3 bg-red-50 text-red-600 rounded text-sm flex gap-2"><AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />{error}</div>}
+                                    {error && <div className="p-3 bg-red-50 text-red-600 rounded text-sm flex gap-2"><LuTriangleAlert className="w-4 h-4 shrink-0 mt-0.5" />{error}</div>}
                                     <div className="space-y-2">
                                         <label className="text-sm font-medium">Division Label</label>
                                         <Input value={editDivForm.division}
@@ -577,7 +615,7 @@ export default function DeptBatchesDashboard() {
                     <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
                         <DialogHeader><DialogTitle>Edit Batch Details</DialogTitle></DialogHeader>
                         <div className="space-y-4 py-4">
-                            {error && <div className="p-3 bg-red-50 text-red-600 rounded text-sm flex gap-2"><AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />{error}</div>}
+                            {error && <div className="p-3 bg-red-50 text-red-600 rounded text-sm flex gap-2"><LuTriangleAlert className="w-4 h-4 shrink-0 mt-0.5" />{error}</div>}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Batch Name</label>
                                 <Input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />

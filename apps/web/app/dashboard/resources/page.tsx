@@ -3,9 +3,9 @@
 import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import {
-    Monitor, LayoutDashboard, Users, Building2,
-    Plus, Trash2, Edit, FlaskConical, Mic2, School, Search
-} from 'lucide-react';
+    LuMonitor, LuLayoutDashboard, LuUsers, LuBuilding2,
+    LuPlus, LuTrash2, LuPencil, LuFlaskConical, LuMic2, LuSchool, LuSearch
+} from 'react-icons/lu';
 import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/store/useAuthStore';
@@ -22,10 +22,10 @@ const emptyForm = { name: '', type: 'Classroom', capacity: 30, floor: '', buildi
 type ResourceForm = typeof emptyForm;
 
 const typeConfig: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
-    Classroom: { icon: <School className="w-5 h-5" />, color: 'text-blue-600', bg: 'bg-blue-100' },
-    Lab: { icon: <FlaskConical className="w-5 h-5" />, color: 'text-purple-600', bg: 'bg-purple-100' },
-    'Seminar Hall': { icon: <Mic2 className="w-5 h-5" />, color: 'text-amber-600', bg: 'bg-amber-100' },
-    Auditorium: { icon: <Building2 className="w-5 h-5" />, color: 'text-rose-600', bg: 'bg-rose-100' },
+    Classroom: { icon: <LuSchool className="w-5 h-5" />, color: 'text-blue-600', bg: 'bg-blue-100' },
+    Lab: { icon: <LuFlaskConical className="w-5 h-5" />, color: 'text-purple-600', bg: 'bg-purple-100' },
+    'Seminar Hall': { icon: <LuMic2 className="w-5 h-5" />, color: 'text-amber-600', bg: 'bg-amber-100' },
+    Auditorium: { icon: <LuBuilding2 className="w-5 h-5" />, color: 'text-rose-600', bg: 'bg-rose-100' },
 };
 
 function ResourceFormFields({ form, setForm, error }: { form: ResourceForm; setForm: (f: ResourceForm) => void; error: string }) {
@@ -68,15 +68,24 @@ function ResourceFormFields({ form, setForm, error }: { form: ResourceForm; setF
 }
 
 const navItems = [
-    { title: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { title: 'Departments', href: '/dashboard/departments', icon: <Building2 className="w-5 h-5" /> },
-    { title: 'Faculty', href: '/dashboard/faculty', icon: <Users className="w-5 h-5" /> },
-    { title: 'Resources', href: '/dashboard/resources', icon: <Monitor className="w-5 h-5 text-indigo-500" /> },
+    { title: 'Dashboard', href: '/dashboard', icon: <LuLayoutDashboard className="w-5 h-5" /> },
+    { title: 'Departments', href: '/dashboard/departments', icon: <LuBuilding2 className="w-5 h-5" /> },
+    { title: 'Faculty', href: '/dashboard/faculty', icon: <LuUsers className="w-5 h-5" /> },
+    { title: 'Resources', href: '/dashboard/resources', icon: <LuMonitor className="w-5 h-5 text-indigo-500" /> },
 ];
+
+interface Resource {
+    id: string;
+    name: string;
+    type: string;
+    capacity: number;
+    floor?: string;
+    building?: string;
+}
 
 export default function UniResourcesDashboard() {
     const { user } = useAuthStore();
-    const [resources, setResources] = useState<any[]>([]);
+    const [resources, setResources] = useState<Resource[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [filterType, setFilterType] = useState('');
@@ -117,8 +126,9 @@ export default function UniResourcesDashboard() {
             setAddForm({ ...emptyForm });
             fetchData();
             showToast('success', 'Resource added successfully!');
-        } catch (e: any) {
-            setError(e.response?.data?.error || 'Failed to create resource.');
+        } catch (e) {
+            const errorMsg = (e as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to create resource.';
+            setError(errorMsg);
         }
     };
 
@@ -130,8 +140,9 @@ export default function UniResourcesDashboard() {
             setIsEditOpen(false);
             fetchData();
             showToast('success', 'Resource updated successfully!');
-        } catch (e: any) {
-            setError(e.response?.data?.error || 'Failed to update resource.');
+        } catch (e) {
+            const errorMsg = (e as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to update resource.';
+            setError(errorMsg);
         }
     };
 
@@ -143,8 +154,9 @@ export default function UniResourcesDashboard() {
                 try {
                     await api.delete(`/resources/${id}`);
                     fetchData();
-                } catch (e: any) {
-                    showToast('error', e.response?.data?.error || 'Failed to delete resource.');
+                } catch (e) {
+                    const errorMsg = (e as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to delete resource.';
+                    showToast('error', errorMsg);
                 }
             },
         });
@@ -167,7 +179,7 @@ export default function UniResourcesDashboard() {
                         <p className="text-slate-500">Manage classrooms, labs, and venues available for timetable scheduling.</p>
                     </div>
                     <Button onClick={() => { setError(''); setAddForm({ ...emptyForm }); setIsAddOpen(true); }} className="bg-primary shadow-md shrink-0">
-                        <Plus className="w-4 h-4 mr-2" /> Add Resource
+                        <LuPlus className="w-4 h-4 mr-2" /> Add Resource
                     </Button>
                 </div>
 
@@ -192,7 +204,7 @@ export default function UniResourcesDashboard() {
 
                 {/* Search */}
                 <div className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2 shadow-sm mb-6 max-w-sm">
-                    <Search className="w-4 h-4 text-slate-400 shrink-0" />
+                    <LuSearch className="w-4 h-4 text-slate-400 shrink-0" />
                     <input className="flex-1 text-sm bg-transparent outline-none placeholder:text-slate-400"
                         placeholder="Search by name or building…" value={search}
                         onChange={(e) => setSearch(e.target.value)} />
@@ -203,7 +215,7 @@ export default function UniResourcesDashboard() {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                         {filtered.map(r => {
-                            const cfg = typeConfig[r.type] || { icon: <Monitor className="w-5 h-5" />, color: 'text-slate-600', bg: 'bg-slate-100' };
+                            const cfg = typeConfig[r.type] || { icon: <LuMonitor className="w-5 h-5" />, color: 'text-slate-600', bg: 'bg-slate-100' };
                             return (
                                 <Card key={r.id} className="shadow-sm border-slate-200 hover:shadow-md transition-shadow">
                                     <CardHeader className="pb-3 border-b bg-slate-50/50 rounded-t-xl">
@@ -240,11 +252,11 @@ export default function UniResourcesDashboard() {
                                                     setError('');
                                                     setIsEditOpen(true);
                                                 }}>
-                                                <Edit className="w-3 h-3 mr-1" /> Edit
+                                                <LuPencil className="w-3 h-3 mr-1" /> Edit
                                             </Button>
                                             <Button variant="outline" size="sm" className="flex-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
                                                 onClick={() => handleDelete(r.id, r.name)}>
-                                                <Trash2 className="w-3 h-3 mr-1" /> Delete
+                                                <LuTrash2 className="w-3 h-3 mr-1" /> Delete
                                             </Button>
                                         </div>
                                     </CardContent>
@@ -254,14 +266,14 @@ export default function UniResourcesDashboard() {
 
                         {filtered.length === 0 && (
                             <div className="col-span-full py-20 text-center text-slate-500 bg-white rounded-xl border-dashed border-2 border-slate-200">
-                                <Monitor className="w-14 h-14 text-slate-300 mx-auto mb-4" />
+                                <LuMonitor className="w-14 h-14 text-slate-300 mx-auto mb-4" />
                                 <h3 className="text-xl font-semibold text-slate-700">{search || filterType ? 'No matches found' : 'No resources yet'}</h3>
                                 <p className="text-sm mt-2 max-w-sm mx-auto">
                                     {search || filterType ? 'Try clearing the filter or search.' : 'Add classrooms, labs, and halls to make them available for timetable scheduling.'}
                                 </p>
                                 {!search && !filterType && (
                                     <Button className="mt-5" onClick={() => setIsAddOpen(true)}>
-                                        <Plus className="w-4 h-4 mr-2" /> Add First Resource
+                                        <LuPlus className="w-4 h-4 mr-2" /> Add First Resource
                                     </Button>
                                 )}
                             </div>

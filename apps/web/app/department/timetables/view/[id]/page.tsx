@@ -2,8 +2,8 @@
 
 import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
-import { LayoutDashboard, Users, BookOpen, Calendar, Monitor, GraduationCap, Network, AlertTriangle, ArrowLeft } from 'lucide-react';
-import { useState, useEffect, useCallback, use } from 'react';
+import { LuLayoutDashboard, LuUsers, LuBookOpen, LuCalendar, LuMonitor, LuGraduationCap, LuNetwork, LuTriangleAlert, LuArrowLeft } from 'react-icons/lu';
+import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/store/useAuthStore';
 import { TimetableGrid } from '@/components/timetable/timetable-grid';
@@ -28,7 +28,7 @@ export default function TimetableDetailView({ params }: { params: { id: string }
         try {
             const response = await api.get(`/departments/${user.entityId}/timetables/${id}`);
             setTimetable(response.data);
-        } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+        } catch {
             console.error("Error fetching timetable details.");
             setTimetable(null);
         } finally {
@@ -41,13 +41,13 @@ export default function TimetableDetailView({ params }: { params: { id: string }
     }, [fetchTimetable]);
 
     const navItems = [
-        { title: 'Dashboard', href: '/department', icon: <LayoutDashboard className="w-5 h-5" /> },
-        { title: 'Faculty', href: '/department/faculty', icon: <Users className="w-5 h-5" /> },
-        { title: 'Courses', href: '/department/courses', icon: <GraduationCap className="w-5 h-5" /> },
-        { title: 'Subjects', href: '/department/subjects', icon: <BookOpen className="w-5 h-5" /> },
-        { title: 'Batches', href: '/department/batches', icon: <Network className="w-5 h-5" /> },
-        { title: 'Resources', href: '/department/resources', icon: <Monitor className="w-5 h-5" /> },
-        { title: 'Timetables', href: '/department/timetables', icon: <Calendar className="w-5 h-5 text-indigo-500" /> },
+        { title: 'Dashboard', href: '/department', icon: <LuLayoutDashboard className="w-5 h-5" /> },
+        { title: 'Faculty', href: '/department/faculty', icon: <LuUsers className="w-5 h-5" /> },
+        { title: 'Courses', href: '/department/courses', icon: <LuGraduationCap className="w-5 h-5" /> },
+        { title: 'Subjects', href: '/department/subjects', icon: <LuBookOpen className="w-5 h-5" /> },
+        { title: 'Batches', href: '/department/batches', icon: <LuNetwork className="w-5 h-5" /> },
+        { title: 'Resources', href: '/department/resources', icon: <LuMonitor className="w-5 h-5" /> },
+        { title: 'Timetables', href: '/department/timetables', icon: <LuCalendar className="w-5 h-5 text-indigo-500" /> },
     ];
 
     return (
@@ -57,7 +57,7 @@ export default function TimetableDetailView({ params }: { params: { id: string }
                     <div className="mb-4">
                         <Link href="/department/timetables/view">
                             <Button variant="ghost" className="text-slate-500 hover:text-slate-700">
-                                <ArrowLeft className="w-4 h-4 mr-2" /> Back to Timetables List
+                                <LuArrowLeft className="w-4 h-4 mr-2" /> Back to Timetables List
                             </Button>
                         </Link>
                     </div>
@@ -73,7 +73,7 @@ export default function TimetableDetailView({ params }: { params: { id: string }
                                     <h3 className="text-2xl font-bold text-slate-800 tracking-tight">
                                         {timetable.isSpecial ? (
                                             <span className="flex items-center gap-2 text-amber-600">
-                                                <AlertTriangle className="w-6 h-6" /> Special Contingency Schedule
+                                                <LuTriangleAlert className="w-6 h-6" /> Special Contingency Schedule
                                             </span>
                                         ) : (
                                             "Department Master Schedule"
@@ -117,7 +117,7 @@ export default function TimetableDetailView({ params }: { params: { id: string }
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center p-12 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl text-center">
-                            <Calendar className="w-16 h-16 text-slate-300 mb-4" />
+                            <LuCalendar className="w-16 h-16 text-slate-300 mb-4" />
                             <h3 className="text-xl font-bold text-slate-700 mb-2">Timetable Not Found</h3>
                             <p className="text-slate-500 max-w-md">
                                 The timetable parameter could not be retrieved or it does not exist.

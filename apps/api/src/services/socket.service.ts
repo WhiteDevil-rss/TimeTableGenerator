@@ -1,8 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import { Server as HttpServer } from 'http';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key';
+import { firebaseAdmin } from '../lib/firebase-admin';
+import prisma from '../lib/prisma';
 
 class SocketService {
     private io: Server | null = null;
@@ -17,19 +16,46 @@ class SocketService {
 
         const timetablesNs = this.io.of('/timetables');
 
-        // Middleware for authentication
-        timetablesNs.use((socket, next) => {
+        // Middleware for authentication via Firebase
+        timetablesNs.use(async (socket, next) => {
             const token = socket.handshake.auth.token;
             if (!token) {
                 return next(new Error('Authentication error'));
             }
 
             try {
-                const decoded = jwt.verify(token, JWT_SECRET) as any;
-                (socket as any).user = decoded;
+                // Verify Firebase ID Token
+                const decodedToken = await firebaseAdmin.auth().verifyIdToken(token);
+                const { uid, email } = decodedToken;
+
+                // Lookup user in our local DB
+                const user = await prisma.user.findFirst({
+                    where: {
+                        OR: [
+                            { firebaseUid: uid },
+                            { email: email }
+                        ]
+                    }
+                });
+
+                if (!user) {
+                    return next(new Error('User not registered in local database'));
+                }
+
+                // Attach user data to socket
+                (socket as any).user = {
+                    id: user.id,
+                    username: user.username,
+                    role: user.role,
+                    entityId: user.entityId,
+                    universityId: user.universityId,
+                    email: user.email
+                };
+
                 next();
             } catch (err) {
-                return next(new Error('Authentication error'));
+                console.error('[Socket.io] Auth Error:', err);
+                return next(new Error('Invalid or expired Firebase token'));
             }
         });
 

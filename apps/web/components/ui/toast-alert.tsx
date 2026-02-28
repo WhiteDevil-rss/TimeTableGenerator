@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { CheckCircle, XCircle, Info, X } from 'lucide-react';
+import { LuCircleCheck, LuCircleX, LuInfo, LuX } from 'react-icons/lu';
 
 export type ToastType = 'success' | 'error' | 'info';
 
@@ -12,9 +12,9 @@ export type ToastState = {
 };
 
 const icons = {
-    success: <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />,
-    error: <XCircle className="w-5 h-5 text-red-500 shrink-0" />,
-    info: <Info className="w-5 h-5 text-blue-500 shrink-0" />,
+    success: <LuCircleCheck className="w-5 h-5 text-emerald-600 shrink-0" />,
+    error: <LuCircleX className="w-5 h-5 text-red-500 shrink-0" />,
+    info: <LuInfo className="w-5 h-5 text-blue-500 shrink-0" />,
 };
 
 const styles = {
@@ -40,7 +40,7 @@ export function Toast({ toast, onClose }: { toast: ToastState; onClose: () => vo
                 {icons[toast.type]}
                 <p className="flex-1 text-sm font-medium leading-snug">{toast.message}</p>
                 <button onClick={onClose} className="shrink-0 opacity-60 hover:opacity-100 transition-opacity">
-                    <X className="w-4 h-4" />
+                    <LuX className="w-4 h-4" />
                 </button>
             </div>
         </div>

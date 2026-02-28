@@ -2,7 +2,7 @@
 
 import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
-import { BookOpen, Plus, LayoutDashboard, Users, GraduationCap, Network, Calendar, Trash2, Edit, Filter, Monitor } from 'lucide-react';
+import { LuPlus, LuTrash2, LuPencil, LuSearch, LuFilter, LuBookOpen } from 'react-icons/lu';
 import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/store/useAuthStore';
@@ -16,8 +16,24 @@ import { Toast, useToast } from '@/components/ui/toast-alert';
 const emptyForm = { name: '', code: '', program: '', semester: 0, credits: 4, weeklyHrs: 4, type: 'Theory' };
 type SubjectForm = typeof emptyForm;
 
+interface Program {
+    id: string;
+    name: string;
+    shortName: string;
+}
+
+interface Subject {
+    id: string;
+    name: string;
+    code: string;
+    program?: string;
+    semester?: number;
+    credits: number;
+    type: string;
+}
+
 // ALL sub-components defined OUTSIDE the parent — fixes focus loss on typing
-function ProgramSelect({ value, onChange, programs }: { value: string; onChange: (v: string) => void; programs: any[] }) {
+function ProgramSelect({ value, onChange, programs }: { value: string; onChange: (v: string) => void; programs: Program[] }) {
     return (
         <select
             className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -33,7 +49,7 @@ function ProgramSelect({ value, onChange, programs }: { value: string; onChange:
 function SubjectFormFields({
     form, setForm, error, programs,
 }: {
-    form: SubjectForm; setForm: (f: SubjectForm) => void; error: string; programs: any[];
+    form: SubjectForm; setForm: (f: SubjectForm) => void; error: string; programs: Program[];
 }) {
     return (
         <div className="space-y-4 py-4">
@@ -43,7 +59,16 @@ function SubjectFormFields({
                 <Input
                     placeholder="e.g. Data Structures and Algorithms"
                     value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    onChange={(e) => {
+                        const newName = e.target.value;
+                        // auto-sync program name if it's empty or matches previous name
+                        const shouldSync = !form.program || form.program === form.name;
+                        setForm({
+                            ...form,
+                            name: newName,
+                            program: shouldSync ? newName : form.program
+                        });
+                    }}
                 />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -109,23 +134,16 @@ const typeColor: Record<string, string> = {
     'Theory+Lab': 'bg-purple-100 text-purple-700 border-purple-200',
 };
 
-const navItems = [
-    { title: 'Dashboard', href: '/department', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { title: 'Faculty', href: '/department/faculty', icon: <Users className="w-5 h-5" /> },
-    { title: 'Courses', href: '/department/courses', icon: <GraduationCap className="w-5 h-5" /> },
-    { title: 'Subjects', href: '/department/subjects', icon: <BookOpen className="w-5 h-5 text-indigo-500" /> },
-    { title: 'Batches', href: '/department/batches', icon: <Network className="w-5 h-5" /> },
-    { title: 'Resources', href: '/department/resources', icon: <Monitor className="w-5 h-5" /> },
-    { title: 'Timetables', href: '/department/timetables', icon: <Calendar className="w-5 h-5" /> },
-];
+import { DEPT_ADMIN_NAV } from '@/lib/constants/nav-config';
 
 export default function DeptSubjectsDashboard() {
     const { user } = useAuthStore();
-    const [courses, setCourses] = useState<any[]>([]);
-    const [programs, setPrograms] = useState<any[]>([]);
+    const [courses, setCourses] = useState<Subject[]>([]);
+    const [programs, setPrograms] = useState<Program[]>([]);
 
     const [loading, setLoading] = useState(true);
     const [filterProgram, setFilterProgram] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -152,12 +170,18 @@ export default function DeptSubjectsDashboard() {
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
-    const filtered = filterProgram ? courses.filter(c => c.program === filterProgram) : courses;
+    const filtered = courses.filter(c => {
+        const matchesProgram = !filterProgram || c.program === filterProgram;
+        const matchesSearch = !searchTerm ||
+            c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.code.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesProgram && matchesSearch;
+    });
 
     const handleCreate = async () => {
         setError('');
         try {
-            await api.post('/subjects', {
+            await api.post('/courses', {
                 ...addForm,
                 departmentId: user?.entityId,
                 universityId: user?.universityId,
@@ -165,8 +189,9 @@ export default function DeptSubjectsDashboard() {
             setIsAddOpen(false);
             setAddForm({ ...emptyForm });
             fetchData();
-        } catch (e: any) {
-            setError(e.response?.data?.error || 'Failed to create subject.');
+        } catch (e) {
+            const errorMsg = (e as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to create subject.';
+            setError(errorMsg);
         }
     };
 
@@ -174,11 +199,12 @@ export default function DeptSubjectsDashboard() {
         if (!selectedId) return;
         setError('');
         try {
-            await api.put(`/subjects/${selectedId}`, editForm);
+            await api.put(`/courses/${selectedId}`, editForm);
             setIsEditOpen(false);
             fetchData();
-        } catch (e: any) {
-            setError(e.response?.data?.error || 'Failed to update subject.');
+        } catch (e) {
+            const errorMsg = (e as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to update subject.';
+            setError(errorMsg);
         }
     };
 
@@ -188,10 +214,11 @@ export default function DeptSubjectsDashboard() {
             message: 'Delete this subject? Faculty assignments for this subject will also be removed. This cannot be undone.',
             onConfirm: async () => {
                 try {
-                    await api.delete(`/subjects/${id}`);
+                    await api.delete(`/courses/${id}`);
                     fetchData();
-                } catch (e: any) {
-                    showToast('error', e.response?.data?.error || 'Failed to delete subject.');
+                } catch (e) {
+                    const errorMsg = (e as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to delete subject.';
+                    showToast('error', errorMsg);
                 }
             },
         });
@@ -199,7 +226,7 @@ export default function DeptSubjectsDashboard() {
 
     return (
         <ProtectedRoute allowedRoles={['DEPT_ADMIN']}>
-            <DashboardLayout navItems={navItems} title="Subjects / Subjects">
+            <DashboardLayout navItems={DEPT_ADMIN_NAV} title="Academic Subjects">
                 <ConfirmDialog state={confirmState} onClose={closeConfirm} />
                 <Toast toast={toast} onClose={hideToast} />
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -208,20 +235,32 @@ export default function DeptSubjectsDashboard() {
                         <p className="text-slate-500">Manage all subjects offered across programs in your department.</p>
                     </div>
                     <Button onClick={() => { setError(''); setAddForm({ ...emptyForm }); setIsAddOpen(true); }} className="bg-primary shadow-md hover:bg-primary/90 shrink-0">
-                        <Plus className="w-4 h-4 mr-2" /> Add Subject
+                        <LuPlus className="w-4 h-4 mr-2" /> Add Subject
                     </Button>
                 </div>
 
-                <div className="flex items-center gap-2 mb-6 bg-white border rounded-lg px-3 py-2 shadow-sm w-full max-w-sm">
-                    <Filter className="w-4 h-4 text-slate-400 shrink-0" />
-                    <select
-                        className="flex-1 text-sm bg-transparent outline-none"
-                        value={filterProgram}
-                        onChange={(e) => setFilterProgram(e.target.value)}
-                    >
-                        <option value="">All Subjects</option>
-                        {programs.map(p => <option key={p.id} value={p.shortName}>{p.name} ({p.shortName})</option>)}
-                    </select>
+                <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+                    <div className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2 shadow-sm w-full max-w-sm">
+                        <LuFilter className="w-4 h-4 text-slate-400 shrink-0" />
+                        <select
+                            className="flex-1 text-sm bg-transparent outline-none"
+                            value={filterProgram}
+                            onChange={(e) => setFilterProgram(e.target.value)}
+                        >
+                            <option value="">All Subjects</option>
+                            {programs.map(p => <option key={p.id} value={p.shortName}>{p.name} ({p.shortName})</option>)}
+                        </select>
+                    </div>
+
+                    <div className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2 shadow-sm w-full max-w-sm">
+                        <LuSearch className="w-4 h-4 text-slate-400 shrink-0" />
+                        <Input
+                            placeholder="Search by name or code..."
+                            className="border-0 p-0 h-auto focus-visible:ring-0 text-sm placeholder:text-slate-400"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
                 </div>
 
                 {loading ? (
@@ -264,11 +303,11 @@ export default function DeptSubjectsDashboard() {
                                                 setError('');
                                                 setIsEditOpen(true);
                                             }}>
-                                            <Edit className="w-4 h-4 mr-1" /> Edit
+                                            <LuPencil className="w-4 h-4 mr-1" /> Edit
                                         </Button>
                                         <Button variant="outline" size="sm" className="w-1/2 text-red-600 border-red-200 hover:bg-red-50"
                                             onClick={() => handleDelete(course.id)}>
-                                            <Trash2 className="w-4 h-4 mr-1" /> Delete
+                                            <LuTrash2 className="w-4 h-4 mr-1" /> Delete
                                         </Button>
                                     </div>
                                 </CardContent>
@@ -276,7 +315,7 @@ export default function DeptSubjectsDashboard() {
                         ))}
                         {filtered.length === 0 && (
                             <div className="col-span-full py-16 text-center text-slate-500 bg-white rounded-xl border-dashed border-2 border-slate-200">
-                                <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                                <LuBookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                                 <h3 className="text-lg font-semibold text-slate-700">{filterProgram ? `No subjects for ${filterProgram}` : 'No subjects added yet'}</h3>
                                 <p className="text-sm mt-1">Add subjects and link them to programs to enable timetable generation.</p>
                             </div>

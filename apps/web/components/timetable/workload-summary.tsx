@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { WorkloadBadge } from './workload-badge';
-import { Users } from 'lucide-react';
+import { LuUsers } from 'react-icons/lu';
 
 interface WorkloadSummaryProps {
     slots: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -37,7 +37,7 @@ export const WorkloadSummary: React.FC<WorkloadSummaryProps> = ({ slots }) => {
         <Card className="mt-6 shadow-sm border-slate-200 print:hidden">
             <CardHeader className="bg-slate-50/50 border-b pb-4">
                 <CardTitle className="text-lg flex items-center gap-2">
-                    <Users className="w-5 h-5 text-indigo-500" />
+                    <LuUsers className="w-5 h-5 text-indigo-500" />
                     Faculty Workload Summary
                 </CardTitle>
             </CardHeader>

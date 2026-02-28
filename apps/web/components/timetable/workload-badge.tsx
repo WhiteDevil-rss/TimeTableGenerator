@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Clock } from 'lucide-react';
+import { LuClock } from 'react-icons/lu';
 
 interface WorkloadBadgeProps {
     assignedHours: number;
@@ -27,7 +27,7 @@ export const WorkloadBadge: React.FC<WorkloadBadgeProps> = ({ assignedHours, max
 
     return (
         <div className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-semibold tracking-wide", colorClass, className)}>
-            <Clock className={cn("w-3.5 h-3.5", iconColor)} />
+            <LuClock className={cn("w-3.5 h-3.5", iconColor)} />
             <span>{assignedHours} / {maxHours} hrs</span>
         </div>
     );

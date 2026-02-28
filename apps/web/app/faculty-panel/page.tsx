@@ -2,7 +2,7 @@
 
 import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
-import { User, Calendar, Clock, BookOpen } from 'lucide-react';
+import { LuUser, LuCalendar, LuClock, LuBookOpen } from 'react-icons/lu';
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
@@ -32,8 +32,8 @@ export default function FacultyDashboard() {
     }, [user, fetchData]);
 
     const navItems = [
-        { title: 'My Profile', href: '/faculty-panel', icon: <User className="w-5 h-5" /> },
-        { title: 'My Schedule', href: '/faculty-panel/schedule', icon: <Calendar className="w-5 h-5 text-indigo-500" /> },
+        { title: 'My Profile', href: '/faculty-panel', icon: <LuUser className="w-5 h-5" /> },
+        { title: 'My Schedule', href: '/faculty-panel/schedule', icon: <LuCalendar className="w-5 h-5 text-indigo-500" /> },
     ];
 
     return (
@@ -68,7 +68,7 @@ export default function FacultyDashboard() {
                                 <div className="flex justify-between items-center pb-2">
                                     <span className="text-slate-500">Max Workload</span>
                                     <span className="font-medium text-slate-800 flex items-center">
-                                        <Clock className="w-4 h-4 mr-2" />
+                                        <LuClock className="w-4 h-4 mr-2" />
                                         {facultyData.maxHrsPerWeek} hrs/week
                                     </span>
                                 </div>
@@ -78,7 +78,7 @@ export default function FacultyDashboard() {
                         {/* Teaching Subjects */}
                         <Card className="shadow-sm border-slate-200">
                             <CardHeader className="bg-slate-50/50 border-b">
-                                <CardTitle className="text-xl flex items-center"><BookOpen className="w-5 h-5 mr-2 text-primary" /> Assigned Subjects</CardTitle>
+                                <CardTitle className="text-xl flex items-center"><LuBookOpen className="w-5 h-5 mr-2 text-primary" /> Assigned Subjects</CardTitle>
                             </CardHeader>
                             <CardContent className="pt-6">
                                 {facultyData.subjects && facultyData.subjects.length > 0 ? (

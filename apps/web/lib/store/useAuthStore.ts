@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import Cookies from 'js-cookie';
 
 export interface User {
     id: string;
     username: string;
+    email: string;
     role: 'SUPERADMIN' | 'UNI_ADMIN' | 'DEPT_ADMIN' | 'FACULTY';
     entityId: string | null;
     universityId: string | null;
@@ -13,7 +13,11 @@ export interface User {
 interface AuthState {
     user: User | null;
     isAuthenticated: boolean;
-    login: (user: User, token: string) => void;
+    hasHydrated: boolean;
+    isAuthReady: boolean;
+    setHasHydrated: (state: boolean) => void;
+    setAuthReady: (state: boolean) => void;
+    login: (user: User) => void;
     logout: () => void;
 }
 
@@ -22,17 +26,26 @@ export const useAuthStore = create<AuthState>()(
         (set) => ({
             user: null,
             isAuthenticated: false,
-            login: (user, token) => {
-                Cookies.set('token', token, { expires: 1 }); // 1 day
-                set({ user, isAuthenticated: true });
+            hasHydrated: false,
+            isAuthReady: false,
+            setHasHydrated: (state) => set({ hasHydrated: state }),
+            setAuthReady: (state) => set({ isAuthReady: state }),
+            login: (user) => {
+                set({ user, isAuthenticated: true, isAuthReady: true });
             },
             logout: () => {
-                Cookies.remove('token');
-                set({ user: null, isAuthenticated: false });
+                set({ user: null, isAuthenticated: false, isAuthReady: true });
             },
         }),
         {
             name: 'auth-storage',
+            partialize: (state) => ({
+                user: state.user,
+                isAuthenticated: state.isAuthenticated,
+            }),
+            onRehydrateStorage: () => (state) => {
+                state?.setHasHydrated(true);
+            },
         }
     )
 );

@@ -1,44 +1,16 @@
-import { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import { Response } from 'express';
 import prisma from '../lib/prisma';
+import { logActivity } from '../utils/activity-logger';
+import { AuthRequest } from '../middlewares/auth.middleware';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key';
-
-export const login = async (req: Request, res: Response) => {
+/**
+ * Sync point for frontend after Firebase login.
+ * The 'authenticate' middleware already verified the token 
+ * and attached the local user record to req.user.
+ */
+export const login = async (req: AuthRequest, res: Response) => {
     try {
-        const { username, password } = req.body;
-
-        const user = await prisma.user.findUnique({
-            where: { username },
-        });
-
-
-        if (!user) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        if (!user.isActive) {
-            return res.status(403).json({ error: 'Account disabled. Please contact an administrator.' });
-        }
-
-        const isValid = await bcrypt.compare(password, user.passwordHash);
-        if (!isValid) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-
-        const token = jwt.sign(
-            {
-                id: user.id,
-                role: user.role,
-                entityId: user.entityId,
-                universityId: user.universityId,
-            },
-            JWT_SECRET,
-            { expiresIn: '8h' }
-        );
-
+        const user = req.user!;
 
         // Update lastLogin footprint
         await prisma.user.update({
@@ -46,14 +18,22 @@ export const login = async (req: Request, res: Response) => {
             data: { lastLogin: new Date() },
         });
 
+        // Persistent Activity Log
+        logActivity(
+            user.id,
+            user.role,
+            'USER_LOGIN_FIREBASE',
+            { method: 'firebase-auth', email: user.email, ip: req.ip }
+        );
+
         res.json({
-            token,
             user: {
                 id: user.id,
-                username: user.username,
+                username: user.email?.split('@')[0] || 'user',
                 role: user.role,
                 entityId: user.entityId,
                 universityId: user.universityId,
+                email: user.email
             },
         });
     } catch (err) {
@@ -62,10 +42,10 @@ export const login = async (req: Request, res: Response) => {
     }
 };
 
-export const getMe = async (req: any, res: Response) => {
+export const getMe = async (req: AuthRequest, res: Response) => {
     try {
         const user = await prisma.user.findUnique({
-            where: { id: req.user.id },
+            where: { id: req.user!.id },
             select: {
                 id: true,
                 username: true,

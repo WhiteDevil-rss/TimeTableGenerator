@@ -2,7 +2,7 @@
 
 import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
-import { User, Calendar } from 'lucide-react';
+import { LuUser, LuCalendar } from 'react-icons/lu';
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/store/useAuthStore';
@@ -38,8 +38,8 @@ export default function FacultySchedulePage() {
     }, [user, fetchSchedule]);
 
     const navItems = [
-        { title: 'My Profile', href: '/faculty-panel', icon: <User className="w-5 h-5" /> },
-        { title: 'My Schedule', href: '/faculty-panel/schedule', icon: <Calendar className="w-5 h-5 text-indigo-500" /> },
+        { title: 'My Profile', href: '/faculty-panel', icon: <LuUser className="w-5 h-5" /> },
+        { title: 'My Schedule', href: '/faculty-panel/schedule', icon: <LuCalendar className="w-5 h-5 text-indigo-500" /> },
     ];
 
     return (

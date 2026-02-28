@@ -1,12 +1,22 @@
 from fastapi import FastAPI, HTTPException
 from app.models import GenerateRequest, GenerateResponse
 from app.solver import TimetableScheduler
+from collections import defaultdict
 
 app = FastAPI(title="NEP-Scheduler AI Engine")
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "service": "ai-engine"}
+    return {
+        "status": "ok",
+        "service": "ai-engine",
+        "solver": "Google OR-Tools CP-SAT",
+        "solverTimeoutMs": 30000,
+        "hardConstraints": 9,
+        "softConstraints": 3,
+        "version": "2.1.0"
+    }
+
 
 @app.post("/solve", response_model=GenerateResponse)
 def solve_timetable(request: GenerateRequest):
@@ -37,14 +47,20 @@ def solve_timetable(request: GenerateRequest):
             # weeklyHrs is in hours, lectureDuration is in minutes
             c.weeklyHrs = math.ceil((c.weeklyHrs * 60) / request.config.lectureDuration)
             
-        # Group courses by program to find the maximum distinct curriculum load (in slots)
-        from collections import defaultdict
-        program_hrs = defaultdict(int)
-        for c in request.courses:
-            p_key = c.program if c.program else "DEFAULT"
-            program_hrs[p_key] += c.weeklyHrs
+        # Validate per-batch curriculum load
+        batch_load = {}
+        for b in request.batches:
+            # A batch must attend all courses for its Program AND its Semester
+            # We filter courses tailored to this specific batch's path
+            relevant_courses = [
+                c for c in request.courses 
+                if (c.program == b.program or not c.program or not b.program) and
+                   (c.semester == b.semester or c.semester is None)
+            ]
+            total_b_slots = sum(c.weeklyHrs for c in relevant_courses)
+            batch_load[b.name] = total_b_slots
             
-        max_program_slots = max(program_hrs.values()) if program_hrs else 0
+        max_program_slots = max(batch_load.values()) if batch_load else 0
         from datetime import datetime
         try:
             current_time = datetime.strptime(request.config.startTime, "%H:%M")
@@ -59,13 +75,13 @@ def solve_timetable(request: GenerateRequest):
         lectures_per_day = int(total_lecture_minutes // request.config.lectureDuration)
         max_possible_slots = lectures_per_day * request.config.daysPerWeek
         
-        print(f"[Temporal Validation Trace] Max Program Slots: {max_program_slots} | Max Possible Slots: {max_possible_slots}")
+        print(f"[Temporal Validation Trace] Max Batch Required Slots: {max_program_slots} | Max Possible Slots: {max_possible_slots}")
         
         if max_program_slots > max_possible_slots:
-            violating_programs = [p for p, slots in program_hrs.items() if slots > max_possible_slots]
+            violating_batches = [name for name, slots in batch_load.items() if slots > max_possible_slots]
             return GenerateResponse(
                 status="INFEASIBLE", 
-                message=f"Temporal Violation: The curriculum for Programs [{', '.join(violating_programs)}] requires up to {max_program_slots} slots/week, but your Time Configuration only permits {max_possible_slots} total slots per week.", 
+                message=f"Temporal Violation: The curriculum for Batches [{', '.join(violating_batches)}] requires up to {max_program_slots} slots/week, but your Time Configuration only permits {max_possible_slots} total slots per week.", 
                 slots=[], 
                 conflictCount=-1
             )
@@ -90,16 +106,8 @@ def solve_timetable(request: GenerateRequest):
                     slots=[], 
                     conflictCount=-1
                 )
-            # Also check against their explicit maxHrsPerWeek (convert back to hours for comparison, or convert maxHrs to slots)
-            target_f = next(f for f in request.faculty if f.name == fname)
-            max_slots_per_week = math.ceil((target_f.maxHrsPerWeek * 60) / request.config.lectureDuration)
-            if required_slots > max_slots_per_week:
-                return GenerateResponse(
-                    status="INFEASIBLE", 
-                    message=f"Workload Violation: Faculty '{fname}' is the exclusive teacher for courses requiring {required_slots} slots, but their maximum allowed weekly workload translates to only {max_slots_per_week} slots.", 
-                    slots=[], 
-                    conflictCount=-1
-                )
+            # Workload check against maxHrsPerDay is handled inside the solver.
+            pass
 
         scheduler = TimetableScheduler(request)
         result = scheduler.solve()

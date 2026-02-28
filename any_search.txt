@@ -1,0 +1,50 @@
+apps/web/app/department/faculty/page.tsx:20:    const [faculties, setFaculties] = useState<any[]>([]);
+apps/web/app/department/faculty/page.tsx:30:    const [departments, setDepartments] = useState<any[]>([]);
+apps/web/app/department/faculty/page.tsx:81:        } catch (e: any) {
+apps/web/app/department/faculty/page.tsx:93:        } catch (e: any) {
+apps/web/app/department/faculty/page.tsx:151:                                                {fac.departments?.map((fd: any) => (
+apps/web/app/department/faculty/page.tsx:186:                                                    departmentIds: fac.departments?.map((d: any) => d.departmentId) || [],
+apps/web/app/department/timetables/view/[id]/page.tsx:22:    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+apps/web/app/department/timetables/view/[id]/page.tsx:23:    const [timetable, setTimetable] = useState<any>(null);
+apps/web/app/department/timetables/view/page.tsx:18:    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+apps/web/app/department/timetables/view/page.tsx:19:    const [timetables, setTimetables] = useState<any[]>([]);
+apps/web/app/department/timetables/view/page.tsx:27:        } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+apps/web/app/department/timetables/view/page.tsx:57:    const getFileName = (tt: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+apps/web/app/department/timetables/create/page.tsx:143:        } catch (err: any) {
+apps/web/app/department/resources/page.tsx:108:    const [resources, setResources] = useState<any[]>([]);
+apps/web/app/department/resources/page.tsx:152:        } catch (e: any) {
+apps/web/app/department/resources/page.tsx:165:        } catch (e: any) {
+apps/web/app/department/resources/page.tsx:178:                } catch (e: any) {
+apps/web/app/department/special/page.tsx:20:    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+apps/web/app/department/special/page.tsx:21:    const [faculty, setFaculty] = useState<any[]>([]);
+apps/web/app/department/special/page.tsx:22:    const [resources, setResources] = useState<any[]>([]);
+apps/web/app/department/special/page.tsx:23:    const [batches, setBatches] = useState<any[]>([]);
+apps/web/app/department/special/page.tsx:38:    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+apps/web/app/department/special/page.tsx:39:    const [specialTimetable, setSpecialTimetable] = useState<any>(null);
+apps/web/app/department/special/page.tsx:40:    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+apps/web/app/department/special/page.tsx:41:    const [baselineTimetable, setBaselineTimetable] = useState<any>(null);
+apps/web/app/department/special/page.tsx:54:        } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+apps/web/app/department/special/page.tsx:62:        } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+apps/web/app/department/special/page.tsx:78:    const toggleExclusion = (id: any, type: 'faculty' | 'room' | 'day' | 'batch') => {
+apps/web/app/department/special/page.tsx:129:            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+apps/web/app/department/special/page.tsx:130:        } catch (err: any) {
+apps/web/app/department/special/page.tsx:469:                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+apps/web/app/department/courses/page.tsx:96:    const [programs, setPrograms] = useState<any[]>([]);
+apps/web/app/department/courses/page.tsx:136:        } catch (e: any) {
+apps/web/app/department/courses/page.tsx:148:        } catch (e: any) {
+apps/web/app/department/courses/page.tsx:161:                } catch (e: any) {
+apps/web/app/department/subjects/page.tsx:20:function ProgramSelect({ value, onChange, programs }: { value: string; onChange: (v: string) => void; programs: any[] }) {
+apps/web/app/department/subjects/page.tsx:36:    form: SubjectForm; setForm: (f: SubjectForm) => void; error: string; programs: any[];
+apps/web/app/department/subjects/page.tsx:125:    const [courses, setCourses] = useState<any[]>([]);
+apps/web/app/department/subjects/page.tsx:126:    const [programs, setPrograms] = useState<any[]>([]);
+apps/web/app/department/subjects/page.tsx:176:        } catch (e: any) {
+apps/web/app/department/subjects/page.tsx:188:        } catch (e: any) {
+apps/web/app/department/subjects/page.tsx:201:                } catch (e: any) {
+apps/web/app/department/batches/page.tsx:174:        } catch (e: any) {
+apps/web/app/department/batches/page.tsx:216:        } catch (e: any) {
+apps/web/app/department/batches/page.tsx:253:        } catch (e: any) {
+apps/web/app/department/batches/page.tsx:290:        } catch (e: any) {
+apps/web/app/department/batches/page.tsx:306:                } catch (e: any) {
+apps/web/app/department/batches/page.tsx:324:                } catch (e: any) {
+apps/web/app/department/page.tsx:18:    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+apps/web/app/department/page.tsx:19:    const [latestTimetable, setLatestTimetable] = useState<any>(null);

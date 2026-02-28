@@ -2,8 +2,8 @@
 
 import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
-import { Building2, Users, LayoutDashboard, UserPlus, ShieldAlert, KeyRound, Power, PowerOff } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { LuBuilding2, LuUsers, LuLayoutDashboard, LuUserPlus, LuShieldAlert, LuKeyRound, LuPower, LuPowerOff, LuClipboardList } from 'react-icons/lu';
+import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,8 +12,24 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { ConfirmDialog, useConfirm } from '@/components/ui/confirm-dialog';
 import { Toast, useToast } from '@/components/ui/toast-alert';
 
+interface User {
+    id: string;
+    username: string;
+    email: string;
+    role: string;
+    universityId?: string;
+    university?: University;
+    isActive: boolean;
+}
+
+interface University {
+    id: string;
+    name: string;
+    shortName: string;
+}
+
 export default function SuperAdminUsers() {
-    const [usersList, setUsersList] = useState<any[]>([]);
+    const [usersList, setUsersList] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const { confirmState, closeConfirm, askConfirm } = useConfirm();
     const { toast, showToast, hideToast } = useToast();
@@ -24,28 +40,24 @@ export default function SuperAdminUsers() {
     const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
-    const [universitiesList, setUniversitiesList] = useState<any[]>([]);
+    const [universitiesList, setUniversitiesList] = useState<University[]>([]);
 
     // Form inputs
     const [newUserForm, setNewUserForm] = useState({ username: '', email: '', password: '', role: 'SUPERADMIN', universityId: '' });
     const [editUserForm, setEditUserForm] = useState({ username: '', email: '', role: 'SUPERADMIN', universityId: '' });
     const [newPassword, setNewPassword] = useState('');
 
-    useEffect(() => {
-        fetchUsers();
-        fetchUniversities();
-    }, []);
 
-    const fetchUniversities = async () => {
+    const fetchUniversities = useCallback(async () => {
         try {
             const { data } = await api.get('/universities');
             setUniversitiesList(data);
         } catch (e) {
             console.error('Failed to load universities:', e);
         }
-    };
+    }, []);
 
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         setLoading(true);
         try {
             const { data } = await api.get('/users');
@@ -55,7 +67,12 @@ export default function SuperAdminUsers() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        fetchUsers();
+        fetchUniversities();
+    }, [fetchUsers, fetchUniversities]);
 
     const handleCreateUser = async () => {
         try {
@@ -122,10 +139,12 @@ export default function SuperAdminUsers() {
         }
     };
 
+
     const navItems = [
-        { title: 'Overview', href: '/superadmin', icon: <LayoutDashboard className="w-5 h-5" /> },
-        { title: 'Universities', href: '/superadmin/universities', icon: <Building2 className="w-5 h-5" /> },
-        { title: 'Users', href: '/superadmin/users', icon: <Users className="w-5 h-5" /> },
+        { title: 'Overview', href: '/superadmin', icon: <LuLayoutDashboard className="w-5 h-5" /> },
+        { title: 'Universities', href: '/superadmin/universities', icon: <LuBuilding2 className="w-5 h-5" /> },
+        { title: 'Users', href: '/superadmin/users', icon: <LuUsers className="w-5 h-5" /> },
+        { title: 'Audit Logs', href: '/superadmin/logs', icon: <LuClipboardList className="w-5 h-5" /> },
     ];
 
     return (
@@ -140,7 +159,7 @@ export default function SuperAdminUsers() {
                         <p className="text-slate-500">Manage platform access, roles, and reset credentials securely.</p>
                     </div>
                     <Button onClick={() => setIsAddUserOpen(true)} className="bg-primary shadow-md hover:bg-primary/90">
-                        <UserPlus className="w-4 h-4 mr-2" /> Add User
+                        <LuUserPlus className="w-4 h-4 mr-2" /> Add User
                     </Button>
                 </div>
 
@@ -212,7 +231,7 @@ export default function SuperAdminUsers() {
                                                         size="sm"
                                                         onClick={() => { setSelectedUserId(user.id); setIsResetPasswordOpen(true); }}
                                                     >
-                                                        <KeyRound className="w-3.5 h-3.5 mr-1" /> Reset
+                                                        <LuKeyRound className="w-3.5 h-3.5 mr-1" /> Reset
                                                     </Button>
                                                     <Button
                                                         variant={user.isActive ? "outline" : "default"}
@@ -220,7 +239,7 @@ export default function SuperAdminUsers() {
                                                         size="sm"
                                                         onClick={() => handleToggleStatus(user.id, user.isActive)}
                                                     >
-                                                        {user.isActive ? <PowerOff className="w-3.5 h-3.5 mr-1" /> : <Power className="w-3.5 h-3.5 mr-1" />}
+                                                        {user.isActive ? <LuPowerOff className="w-3.5 h-3.5 mr-1" /> : <LuPower className="w-3.5 h-3.5 mr-1" />}
                                                         {user.isActive ? 'Disable' : 'Enable'}
                                                     </Button>
                                                     <Button
@@ -237,7 +256,7 @@ export default function SuperAdminUsers() {
                                         {usersList.length === 0 && (
                                             <tr>
                                                 <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
-                                                    <ShieldAlert className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+                                                    <LuShieldAlert className="w-8 h-8 mx-auto text-slate-300 mb-2" />
                                                     No users found in the system.
                                                 </td>
                                             </tr>

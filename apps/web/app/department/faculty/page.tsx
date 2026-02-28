@@ -2,7 +2,7 @@
 
 import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
-import { Users, Plus, LayoutDashboard, BookOpen, Calendar, Trash2, Edit, GraduationCap, Network, Monitor } from 'lucide-react';
+import { LuPlus, LuTrash2, LuPencil, LuSearch } from 'react-icons/lu';
 import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/store/useAuthStore';
@@ -13,9 +13,32 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { ConfirmDialog, useConfirm } from '@/components/ui/confirm-dialog';
 import { Toast, useToast } from '@/components/ui/toast-alert';
 
+import { DEPT_ADMIN_NAV } from '@/lib/constants/nav-config';
+
+interface Department {
+    id: string;
+    name: string;
+    shortName: string;
+}
+
+interface FacultyDepartment {
+    departmentId: string;
+}
+
+interface Faculty {
+    id: string;
+    name: string;
+    email: string;
+    designation?: string;
+    maxHrsPerDay: number;
+    maxHrsPerWeek: number;
+    departments?: FacultyDepartment[];
+}
+
 export default function DeptFacultyDashboard() {
     const { user } = useAuthStore();
-    const [faculties, setFaculties] = useState<any[]>([]);
+    const [faculties, setFaculties] = useState<Faculty[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const { confirmState, closeConfirm, askConfirm } = useConfirm();
     const { toast, showToast, hideToast } = useToast();
@@ -24,23 +47,30 @@ export default function DeptFacultyDashboard() {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [selectedFacId, setSelectedFacId] = useState<string | null>(null);
 
-    const [departments, setDepartments] = useState<any[]>([]);
+    const [departments, setDepartments] = useState<Department[]>([]);
     const [newFacForm, setNewFacForm] = useState({
         name: '', email: '', designation: '',
         maxHrsPerDay: 4, maxHrsPerWeek: 20, password: ''
     });
     const [editFacForm, setEditFacForm] = useState({
-        name: '', email: '', designation: '', maxHrsPerDay: 4, maxHrsPerWeek: 20, departmentId: ''
+        name: '', email: '', designation: '', maxHrsPerDay: 4, maxHrsPerWeek: 20, departmentIds: [] as string[]
     });
 
     const fetchData = useCallback(async () => {
-        if (!user?.entityId || !user?.universityId) return;
+        if (!user?.entityId) return;
         try {
+            // Build query params — only include universityId if it's set (uni admins)
+            const params = new URLSearchParams();
+            if (user.universityId) params.set('universityId', user.universityId);
+            if (user.entityId) params.set('departmentId', user.entityId);
+
             const [facRes, deptRes] = await Promise.all([
-                api.get(`/faculty?universityId=${user.universityId}`),
-                api.get(`/universities/${user.universityId}/departments`),
+                api.get(`/faculty?${params.toString()}`),
+                user.universityId
+                    ? api.get(`/universities/${user.universityId}/departments`)
+                    : api.get(`/faculty`).then(() => ({ data: [] })).catch(() => ({ data: [] })),
             ]);
-            setFaculties(facRes.data.filter((f: any) => f.departmentId === user.entityId));
+            setFaculties(facRes.data);
             setDepartments(deptRes.data);
         } catch (e) {
             console.error(e);
@@ -53,16 +83,24 @@ export default function DeptFacultyDashboard() {
         fetchData();
     }, [fetchData]);
 
+    const filtered = faculties.filter(fac =>
+        !searchTerm ||
+        fac.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        fac.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (fac.designation && fac.designation.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
     const handleCreateFaculty = async () => {
         try {
-            const payload = { ...newFacForm, departmentId: user?.entityId, universityId: user?.universityId };
+            const payload = { ...newFacForm, departmentIds: [user?.entityId], universityId: user?.universityId };
             await api.post(`/faculty`, payload);
             setIsAddOpen(false);
             setNewFacForm({ name: '', email: '', designation: '', maxHrsPerDay: 4, maxHrsPerWeek: 20, password: '' });
             fetchData();
             showToast('success', 'Faculty provisioned successfully!');
-        } catch (e: any) {
-            showToast('error', e.response?.data?.error || 'Failed to provision faculty.');
+        } catch (e) {
+            const errorMsg = (e as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to provision faculty.';
+            showToast('error', errorMsg);
         }
     };
 
@@ -73,8 +111,9 @@ export default function DeptFacultyDashboard() {
             setIsEditOpen(false);
             fetchData();
             showToast('success', 'Faculty updated successfully!');
-        } catch (e: any) {
-            showToast('error', e.response?.data?.error || 'Failed to update faculty.');
+        } catch (e) {
+            const errorMsg = (e as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to update faculty.';
+            showToast('error', errorMsg);
         }
     };
 
@@ -93,42 +132,50 @@ export default function DeptFacultyDashboard() {
         });
     };
 
-    const navItems = [
-        { title: 'Dashboard', href: '/department', icon: <LayoutDashboard className="w-5 h-5" /> },
-        { title: 'Faculty', href: '/department/faculty', icon: <Users className="w-5 h-5 text-indigo-500" /> },
-        { title: 'Programs', href: '/department/courses', icon: <GraduationCap className="w-5 h-5" /> },
-        { title: 'Subjects', href: '/department/subjects', icon: <BookOpen className="w-5 h-5" /> },
-        { title: 'Batches', href: '/department/batches', icon: <Network className="w-5 h-5" /> },
-        { title: 'Resources', href: '/department/resources', icon: <Monitor className="w-5 h-5" /> },
-        { title: 'Timetables', href: '/department/timetables', icon: <Calendar className="w-5 h-5" /> },
-    ];
-
     return (
         <ProtectedRoute allowedRoles={['DEPT_ADMIN']}>
-            <DashboardLayout navItems={navItems} title="Department Faculty">
+            <DashboardLayout navItems={DEPT_ADMIN_NAV} title="Department Faculty">
                 <ConfirmDialog state={confirmState} onClose={closeConfirm} />
                 <Toast toast={toast} onClose={hideToast} />
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight text-slate-800">Faculty Directory</h2>
                         <p className="text-slate-500">Manage all registered teaching bodies and workload capacities for your department.</p>
                     </div>
-                    <Button onClick={() => setIsAddOpen(true)} className="bg-primary shadow-md hover:bg-primary/90">
-                        <Plus className="w-4 h-4 mr-2" /> Register Faculty
-                    </Button>
+                    <div className="flex gap-2 w-full sm:w-auto">
+                        <div className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2 shadow-sm w-full sm:w-64">
+                            <LuSearch className="w-4 h-4 text-slate-400 shrink-0" />
+                            <Input
+                                placeholder="Search faculty..."
+                                className="border-0 p-0 h-auto focus-visible:ring-0 text-sm placeholder:text-slate-400"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <Button onClick={() => setIsAddOpen(true)} className="bg-primary shadow-md hover:bg-primary/90">
+                            <LuPlus className="w-4 h-4 mr-2" /> Register Faculty
+                        </Button>
+                    </div>
                 </div>
 
                 {loading ? (
                     <div className="flex justify-center p-12"><div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin" /></div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {faculties.map(fac => (
+                        {filtered.map(fac => (
                             <Card key={fac.id} className="shadow-sm border-slate-200">
                                 <CardHeader className="pb-3 border-b bg-slate-50/50 rounded-t-xl group">
                                     <CardTitle className="flex items-start justify-between">
                                         <div className="flex flex-col">
                                             <span className="font-semibold text-lg">{fac.name}</span>
                                             <CardDescription className="line-clamp-1 mt-1 font-medium text-emerald-600">{fac.designation || 'Lecturer'}</CardDescription>
+                                            <div className="flex flex-wrap gap-1 mt-1">
+                                                {fac.departments?.map((fd) => (
+                                                    <span key={fd.departmentId} className="px-2 py-0.5 bg-slate-200 text-slate-700 text-[10px] font-bold rounded-full flex items-center uppercase tracking-tight">
+                                                        {departments.find(d => d.id === fd.departmentId)?.shortName || '???'}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         </div>
                                     </CardTitle>
                                 </CardHeader>
@@ -158,12 +205,12 @@ export default function DeptFacultyDashboard() {
                                                 setEditFacForm({
                                                     name: fac.name, email: fac.email, designation: fac.designation || '',
                                                     maxHrsPerDay: fac.maxHrsPerDay, maxHrsPerWeek: fac.maxHrsPerWeek,
-                                                    departmentId: fac.departmentId || '',
+                                                    departmentIds: fac.departments?.map((d) => d.departmentId) || [],
                                                 });
                                                 setIsEditOpen(true);
                                             }}
                                         >
-                                            <Edit className="w-4 h-4 mr-2" /> Edit
+                                            <LuPencil className="w-4 h-4 mr-2" /> Edit
                                         </Button>
                                         <Button
                                             variant="outline"
@@ -171,16 +218,16 @@ export default function DeptFacultyDashboard() {
                                             size="sm"
                                             onClick={() => handleDeleteFaculty(fac.id)}
                                         >
-                                            <Trash2 className="w-4 h-4 mr-2" /> Delete
+                                            <LuTrash2 className="w-4 h-4 mr-2" /> Delete
                                         </Button>
                                     </div>
                                 </CardContent>
                             </Card>
                         ))}
 
-                        {faculties.length === 0 && (
+                        {filtered.length === 0 && (
                             <div className="col-span-full py-12 text-center text-slate-500 bg-white rounded-xl border border-dashed border-slate-300">
-                                No faculty members found. Provision teaching personnel to construct schedules.
+                                {searchTerm ? `No results found for "${searchTerm}"` : 'No faculty members found. Provision teaching personnel to construct schedules.'}
                             </div>
                         )}
                     </div>
@@ -281,13 +328,25 @@ export default function DeptFacultyDashboard() {
                                     onChange={(e) => setEditFacForm({ ...editFacForm, designation: e.target.value })} />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium">Department</label>
-                                <select className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                    value={editFacForm.departmentId}
-                                    onChange={(e) => setEditFacForm({ ...editFacForm, departmentId: e.target.value })}>
-                                    <option value="">-- Keep current department --</option>
-                                    {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-                                </select>
+                                <label className="text-sm font-medium">Department Assignment(s)</label>
+                                <div className="grid grid-cols-2 gap-2 p-3 border rounded-md bg-slate-50/50">
+                                    {departments.map(dept => (
+                                        <label key={dept.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-slate-100 p-1 rounded transition-colors">
+                                            <input
+                                                type="checkbox"
+                                                className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
+                                                checked={editFacForm.departmentIds.includes(dept.id)}
+                                                onChange={(e) => {
+                                                    const ids = e.target.checked
+                                                        ? [...editFacForm.departmentIds, dept.id]
+                                                        : editFacForm.departmentIds.filter(id => id !== dept.id);
+                                                    setEditFacForm({ ...editFacForm, departmentIds: ids });
+                                                }}
+                                            />
+                                            <span className="truncate">{dept.name}</span>
+                                        </label>
+                                    ))}
+                                </div>
                             </div>
 
                             <hr className="my-2" />

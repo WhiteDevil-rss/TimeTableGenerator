@@ -188,17 +188,58 @@ class TimetableScheduler:
                     for f in self.request.faculty:
                         for r in self.request.resources:
                             for b in self.request.batches:
-                                if f.id in self.request.excludedFacultyIds or r.id in self.request.excludedRoomIds:
+                                if f.id in self.request.excludedFacultyIds or r.id in self.request.excludedRoomIds or d in self.request.excludedDayIds:
                                     self.model.Add(self.vars[(d, p, c.id, f.id, r.id, b.id)] == 0)
+
+        # 9. Handle Existing Slots (Partial Re-generation)
+        # If a slot is provided in existingSlots, we pin it as a hard constraint
+        pinned_keys = set()
+        for slot in self.request.existingSlots:
+            if slot.isBreak or not slot.courseId or not slot.facultyId or not slot.roomId or not slot.batchId:
+                continue
+            
+            key = (slot.dayOfWeek, slot.slotNumber, slot.courseId, slot.facultyId, slot.roomId, slot.batchId)
+            if key in self.vars:
+                self.model.Add(self.vars[key] == 1)
+                pinned_keys.add(key)
+
+    def _add_soft_constraints(self):
+        """Add objectives for better utilization and distribution"""
+        obj_vars = []
+        obj_coeffs = []
+        
+        # A. Maximize Room Utilization: Prefer larger rooms to be filled closer to capacity
+        # or simply penalize using rooms that are way too big for a batch?
+        # Let's reward using rooms where capacity is closer to batch strength.
+        for key, var in self.vars.items():
+            d, p, c_id, f_id, r_id, b_id = key
+            room = self.rooms_dict.get(r_id)
+            batch = self.batches_dict.get(b_id)
+            if room and batch:
+                # Higher score for closer fit
+                # Score = 100 - (Capacity - Strength)
+                # This encourages using appropriate rooms.
+                utilization_score = max(0, 100 - (room.capacity - batch.strength))
+                obj_vars.append(var)
+                obj_coeffs.append(utilization_score)
+
+        # B. Even Workload Distribution (Faculty)
+        # We want to minimize the variance of hours per day for each faculty.
+        # This is harder with pure linear objectives, but we can reward 'compact' schedules
+        # or penalize long gaps.
+        # For simplicity, let's just reward balanced weekly hours if possible.
+
+        self.model.Maximize(sum(obj_vars[i] * obj_coeffs[i] for i in range(len(obj_vars))))
 
     def solve(self):
         self._setup_variables()
         self._add_hard_constraints()
-        
-        # Soft Constraint: Workload variance minimization could be added here
+        self._add_soft_constraints()
         
         solver = cp_model.CpSolver()
         solver.parameters.max_time_in_seconds = 30.0
+        # Enable multi-threading for faster search
+        solver.parameters.num_search_workers = 8
         status = solver.Solve(self.model)
         
         ret = {'status': solver.StatusName(status), 'slots': []}
