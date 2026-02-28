@@ -2,7 +2,7 @@
 
 import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
-import { Building2, Plus, Users, LayoutDashboard, Settings2, Trash2, Edit, Monitor } from 'lucide-react';
+import { LuBuilding2, LuPlus, LuUsers, LuLayoutDashboard, LuTrash2, LuPencil, LuMonitor } from 'react-icons/lu';
 import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/store/useAuthStore';
@@ -13,9 +13,22 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { ConfirmDialog, useConfirm } from '@/components/ui/confirm-dialog';
 import { Toast, useToast } from '@/components/ui/toast-alert';
 
+interface Department {
+    id: string;
+    name: string;
+    shortName: string;
+    hod?: string;
+    email: string;
+    _count?: {
+        faculty: number;
+        courses: number;
+        batches: number;
+    };
+}
+
 export default function DepartmentsDashboard() {
     const { user } = useAuthStore();
-    const [departments, setDepartments] = useState<any[]>([]);
+    const [departments, setDepartments] = useState<Department[]>([]);
     const [loading, setLoading] = useState(true);
     const { confirmState, closeConfirm, askConfirm } = useConfirm();
     const { toast, showToast, hideToast } = useToast();
@@ -54,8 +67,9 @@ export default function DepartmentsDashboard() {
             setNewDeptForm({ name: '', shortName: '', hod: '', email: '', adminUsername: '', adminPassword: '' });
             fetchDepartments();
             showToast('success', 'Department and Admin account provisioned successfully!');
-        } catch (e: any) {
-            showToast('error', e.response?.data?.error || 'Failed to create department. Verify the Admin username is unique globally.');
+        } catch (e) {
+            const errorMsg = (e as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to create department. Verify the Admin username is unique globally.';
+            showToast('error', errorMsg);
         }
     };
 
@@ -87,10 +101,10 @@ export default function DepartmentsDashboard() {
     };
 
     const navItems = [
-        { title: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
-        { title: 'Departments', href: '/dashboard/departments', icon: <Building2 className="w-5 h-5 text-indigo-500" /> },
-        { title: 'Faculty', href: '/dashboard/faculty', icon: <Users className="w-5 h-5" /> },
-        { title: 'Resources', href: '/dashboard/resources', icon: <Monitor className="w-5 h-5" /> },
+        { title: 'Dashboard', href: '/dashboard', icon: <LuLayoutDashboard className="w-5 h-5" /> },
+        { title: 'Departments', href: '/dashboard/departments', icon: <LuBuilding2 className="w-5 h-5 text-indigo-500" /> },
+        { title: 'Faculty', href: '/dashboard/faculty', icon: <LuUsers className="w-5 h-5" /> },
+        { title: 'Resources', href: '/dashboard/resources', icon: <LuMonitor className="w-5 h-5" /> },
     ];
 
     return (
@@ -104,7 +118,7 @@ export default function DepartmentsDashboard() {
                         <p className="text-slate-500">Manage all registered departments, faculties, and core configurations.</p>
                     </div>
                     <Button onClick={() => setIsAddOpen(true)} className="bg-primary shadow-md hover:bg-primary/90">
-                        <Plus className="w-4 h-4 mr-2" /> Add Department
+                        <LuPlus className="w-4 h-4 mr-2" /> Add Department
                     </Button>
                 </div>
 
@@ -159,7 +173,7 @@ export default function DepartmentsDashboard() {
                                                 setIsEditOpen(true);
                                             }}
                                         >
-                                            <Edit className="w-4 h-4 mr-2" /> Edit
+                                            <LuPencil className="w-4 h-4 mr-2" /> Edit
                                         </Button>
                                         <Button
                                             variant="outline"
@@ -167,7 +181,7 @@ export default function DepartmentsDashboard() {
                                             size="sm"
                                             onClick={() => handleDeleteDepartment(dept.id)}
                                         >
-                                            <Trash2 className="w-4 h-4 mr-2" /> Delete
+                                            <LuTrash2 className="w-4 h-4 mr-2" /> Delete
                                         </Button>
                                     </div>
                                 </CardContent>

@@ -1,26 +1,48 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import { firebaseAdmin } from '../src/lib/firebase-admin';
 
 const prisma = new PrismaClient();
 
+async function syncFirebaseUser(email: string, password: string, displayName: string): Promise<string> {
+    try {
+        const user = await firebaseAdmin.auth().createUser({
+            email,
+            password,
+            displayName,
+        });
+        return user.uid;
+    } catch (error: any) {
+        if (error.code === 'auth/email-already-exists') {
+            const user = await firebaseAdmin.auth().getUserByEmail(email);
+            // Ensure password is reset to 'password123' for ease of use in demo environments
+            await firebaseAdmin.auth().updateUser(user.uid, { password, displayName });
+            return user.uid;
+        }
+        throw error;
+    }
+}
+
 async function main() {
-    console.log('Seeding VNSGU Demo Environment...');
+    console.log('Seeding VNSGU Demo Environment... Syncing with Firebase!');
 
     // Hash standard password for seed users
     const passwordHash = await bcrypt.hash('password123', 12);
 
     // 1. Superadmin User
+    const saUid = await syncFirebaseUser('admin@nep-scheduler.com', 'password123', 'superadmin');
     const superadmin = await prisma.user.upsert({
         where: { username: 'superadmin' },
-        update: {},
+        update: { firebaseUid: saUid },
         create: {
             username: 'superadmin',
             email: 'admin@nep-scheduler.com',
             passwordHash,
+            firebaseUid: saUid,
             role: 'SUPERADMIN',
         },
     });
-    console.log(`Created SuperAdmin: ${superadmin.username}`);
+    console.log(`Created SuperAdmin: ${superadmin.username} (Firebase UID: ${saUid})`);
 
     // 2. University
     const university = await prisma.university.upsert({
@@ -38,19 +60,21 @@ async function main() {
     console.log(`Created University: ${university.name}`);
 
     // 3. University Admin User
+    const uaUid = await syncFirebaseUser('admin@vnsgu.ac.in', 'password123', 'admin_vnsgu');
     const uniAdmin = await prisma.user.upsert({
         where: { username: 'admin_vnsgu' },
-        update: {},
+        update: { firebaseUid: uaUid },
         create: {
             username: 'admin_vnsgu',
             email: 'admin@vnsgu.ac.in',
             passwordHash,
+            firebaseUid: uaUid,
             role: 'UNI_ADMIN',
             universityId: university.id,
             entityId: university.id,
         },
     });
-    console.log(`Created Uni Admin: ${uniAdmin.username}`);
+    console.log(`Created Uni Admin: ${uniAdmin.username} (Firebase UID: ${uaUid})`);
 
     // Update University with Admin User
     await prisma.university.update({
@@ -71,19 +95,21 @@ async function main() {
     console.log(`Created Department: ${department.name}`);
 
     // 5. Department Admin User
+    const daUid = await syncFirebaseUser('admin_dcs@vnsgu.ac.in', 'password123', 'admin_dcs_vnsgu');
     const deptAdmin = await prisma.user.upsert({
         where: { username: 'admin_dcs_vnsgu' },
-        update: {},
+        update: { firebaseUid: daUid },
         create: {
             username: 'admin_dcs_vnsgu',
             email: 'admin_dcs@vnsgu.ac.in',
             passwordHash,
+            firebaseUid: daUid,
             role: 'DEPT_ADMIN',
             universityId: university.id,
             entityId: department.id,
         },
     });
-    console.log(`Created Dept Admin: ${deptAdmin.username}`);
+    console.log(`Created Dept Admin: ${deptAdmin.username} (Firebase UID: ${daUid})`);
 
     // Update Department with Admin User
     await prisma.department.update({
@@ -181,18 +207,24 @@ async function main() {
 
     for (const f of facultyList) {
         const username = f.email.split('@')[0];
+
+        // Ensure user is in Firebase Context
+        const fUid = await syncFirebaseUser(f.email, 'password123', f.name);
+
         // Upsert User for Faculty
         const user = await prisma.user.upsert({
             where: { username },
             update: {
                 email: f.email,
                 role: 'FACULTY',
+                firebaseUid: fUid,
                 universityId: university.id,
             },
             create: {
                 username,
                 email: f.email,
                 passwordHash,
+                firebaseUid: fUid,
                 role: 'FACULTY',
                 universityId: university.id,
             },
@@ -201,20 +233,33 @@ async function main() {
         const faculty = await prisma.faculty.upsert({
             where: { email: f.email },
             update: {
-                departmentId: department.id,
                 universityId: university.id,
                 name: f.name,
                 userId: user.id,
                 designation: 'Assistant Professor'
             },
             create: {
-                departmentId: department.id,
                 universityId: university.id,
                 name: f.name,
                 email: f.email,
                 userId: user.id,
                 designation: 'Assistant Professor'
             },
+        });
+
+        // Ensure Faculty is mapped to the department
+        await prisma.facultyDepartment.upsert({
+            where: {
+                facultyId_departmentId: {
+                    facultyId: faculty.id,
+                    departmentId: department.id
+                }
+            },
+            update: {},
+            create: {
+                facultyId: faculty.id,
+                departmentId: department.id
+            }
         });
 
         // Update entityId in User

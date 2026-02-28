@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle } from 'lucide-react';
+import { LuTriangleAlert } from 'react-icons/lu';
 
 // ── ConfirmDialog (controlled) ────────────────────────────────────────────────
 export type ConfirmState = {
@@ -36,7 +36,7 @@ export function ConfirmDialog({
             <DialogContent className="sm:max-w-sm">
                 <DialogHeader>
                     <DialogTitle className={`flex items-center gap-2 ${state.danger !== false ? 'text-red-600' : 'text-slate-800'}`}>
-                        <AlertTriangle className="w-5 h-5 shrink-0" />
+                        <LuTriangleAlert className="w-5 h-5 shrink-0" />
                         {state.title}
                     </DialogTitle>
                 </DialogHeader>

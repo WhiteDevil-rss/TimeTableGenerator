@@ -3,16 +3,17 @@
 import React, { useMemo, useState } from 'react';
 import { TimetableCell } from './timetable-cell';
 import { Card } from '@/components/ui/card';
-import { Users } from 'lucide-react';
+import { LuUsers } from 'react-icons/lu';
 
 interface TimetableGridProps {
     slots: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
     config: any; // eslint-disable-line @typescript-eslint/no-explicit-any
     viewMode: 'admin' | 'faculty';
     facultyId?: string;
+    baselineSlots?: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-export const TimetableGrid: React.FC<TimetableGridProps> = ({ slots, config, viewMode, facultyId }) => {
+export const TimetableGrid: React.FC<TimetableGridProps> = ({ slots, config, viewMode, facultyId, baselineSlots }) => {
     const [selectedBatch, setSelectedBatch] = useState<string>('ALL');
 
     // Extract unique batches for the filter
@@ -81,7 +82,7 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({ slots, config, vie
             {viewMode === 'admin' && uniqueBatches.length > 0 && (
                 <div className="flex items-center gap-4 p-4 bg-white/80 backdrop-blur-md border border-slate-200 rounded-xl shadow-sm sticky top-0 z-30 mb-2">
                     <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-indigo-500" />
+                        <LuUsers className="w-4 h-4 text-indigo-500" />
                         <span className="text-sm font-semibold text-slate-700">Display Batch:</span>
                     </div>
                     <select
@@ -116,7 +117,6 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({ slots, config, vie
                         <div className="divide-y divide-slate-100 bg-slate-50/30">
                             {Array.from({ length: maxSlots }).map((_, pIdx) => {
                                 const p = pIdx + 1;
-                                let timeLabel = `P${p}`;
                                 let startTime = "";
                                 let endTime = "";
 
@@ -147,9 +147,35 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({ slots, config, vie
                                                 <div key={d} className={`p-1.5 min-h-[120px] ${dIdx < days - 1 ? 'border-r border-slate-100' : ''} group-hover:bg-indigo-50/10 transition-colors`}>
                                                     {cellSlots.length > 0 ? (
                                                         <div className="flex flex-col gap-2 h-full">
-                                                            {cellSlots.map((slot, sIdx) => (
-                                                                <TimetableCell key={`${slot.slotNumber}-${sIdx}`} slot={slot} viewMode={viewMode} />
-                                                            ))}
+                                                            {cellSlots.map((slot, sIdx) => {
+                                                                // Difference Detection Logic
+                                                                let diffStatus: 'new' | 'changed' | 'unchanged' = 'unchanged';
+                                                                if (baselineSlots && !slot.isBreak) {
+                                                                    const baseline = baselineSlots.find(b =>
+                                                                        b.dayOfWeek === slot.dayOfWeek &&
+                                                                        b.slotNumber === slot.slotNumber &&
+                                                                        b.batchId === slot.batchId
+                                                                    );
+
+                                                                    if (!baseline) {
+                                                                        diffStatus = 'new';
+                                                                    } else if (
+                                                                        baseline.facultyId !== slot.facultyId ||
+                                                                        baseline.roomId !== slot.roomId
+                                                                    ) {
+                                                                        diffStatus = 'changed';
+                                                                    }
+                                                                }
+
+                                                                return (
+                                                                    <TimetableCell
+                                                                        key={`${slot.slotNumber}-${sIdx}`}
+                                                                        slot={slot}
+                                                                        viewMode={viewMode}
+                                                                        diffStatus={diffStatus}
+                                                                    />
+                                                                );
+                                                            })}
                                                         </div>
                                                     ) : (
                                                         <div className="h-full w-full rounded-md border border-dashed border-slate-200/50 flex items-center justify-center">

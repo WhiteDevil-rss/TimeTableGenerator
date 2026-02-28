@@ -2,7 +2,7 @@
 
 import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
-import { LayoutDashboard, Users, BookOpen, Calendar, Monitor, GraduationCap, Network, FileText, AlertTriangle, Eye, Clock } from 'lucide-react';
+import { LuLayoutDashboard, LuUsers, LuBookOpen, LuCalendar, LuMonitor, LuGraduationCap, LuNetwork, LuFileText, LuTriangleAlert, LuEye, LuClock } from 'react-icons/lu';
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/store/useAuthStore';
@@ -37,13 +37,13 @@ export default function TimetableListPage() {
     }, [user, fetchTimetables]);
 
     const navItems = [
-        { title: 'Dashboard', href: '/department', icon: <LayoutDashboard className="w-5 h-5" /> },
-        { title: 'Faculty', href: '/department/faculty', icon: <Users className="w-5 h-5" /> },
-        { title: 'Courses', href: '/department/courses', icon: <GraduationCap className="w-5 h-5" /> },
-        { title: 'Subjects', href: '/department/subjects', icon: <BookOpen className="w-5 h-5" /> },
-        { title: 'Batches', href: '/department/batches', icon: <Network className="w-5 h-5" /> },
-        { title: 'Resources', href: '/department/resources', icon: <Monitor className="w-5 h-5" /> },
-        { title: 'Timetables', href: '/department/timetables', icon: <Calendar className="w-5 h-5 text-indigo-500" /> },
+        { title: 'Dashboard', href: '/department', icon: <LuLayoutDashboard className="w-5 h-5" /> },
+        { title: 'Faculty', href: '/department/faculty', icon: <LuUsers className="w-5 h-5" /> },
+        { title: 'Courses', href: '/department/courses', icon: <LuGraduationCap className="w-5 h-5" /> },
+        { title: 'Subjects', href: '/department/subjects', icon: <LuBookOpen className="w-5 h-5" /> },
+        { title: 'Batches', href: '/department/batches', icon: <LuNetwork className="w-5 h-5" /> },
+        { title: 'Resources', href: '/department/resources', icon: <LuMonitor className="w-5 h-5" /> },
+        { title: 'Timetables', href: '/department/timetables', icon: <LuCalendar className="w-5 h-5 text-indigo-500" /> },
     ];
 
     const formatDate = (dateString: string) => {
@@ -75,7 +75,7 @@ export default function TimetableListPage() {
                                 </div>
                                 <Link href="/department/timetables/create">
                                     <Button variant="outline" className="border-indigo-200 text-indigo-700 hover:bg-indigo-50">
-                                        <Calendar className="w-4 h-4 mr-2" /> Generate New
+                                        <LuCalendar className="w-4 h-4 mr-2" /> Generate New
                                     </Button>
                                 </Link>
                             </div>
@@ -87,7 +87,7 @@ export default function TimetableListPage() {
                                 </div>
                             ) : timetables.length === 0 ? (
                                 <div className="text-center p-12 text-slate-500">
-                                    <FileText className="w-12 h-12 mx-auto text-slate-300 mb-3" />
+                                    <LuFileText className="w-12 h-12 mx-auto text-slate-300 mb-3" />
                                     <p>No timetables have been generated yet.</p>
                                 </div>
                             ) : (
@@ -107,14 +107,14 @@ export default function TimetableListPage() {
                                             <TableRow key={tt.id} className="hover:bg-slate-50/50 transition-colors">
                                                 <TableCell className="font-medium text-slate-700">
                                                     <div className="flex items-center gap-2">
-                                                        <FileText className="w-4 h-4 text-slate-400" />
+                                                        <LuFileText className="w-4 h-4 text-slate-400" />
                                                         {getFileName(tt)}
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
                                                     {tt.isSpecial ? (
                                                         <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                                                            <AlertTriangle className="w-3 h-3 mr-1" /> Special Constraint
+                                                            <LuTriangleAlert className="w-3 h-3 mr-1" /> Special Constraint
                                                         </Badge>
                                                     ) : (
                                                         <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
@@ -131,7 +131,7 @@ export default function TimetableListPage() {
                                                 </TableCell>
                                                 <TableCell className="text-slate-500 text-sm">
                                                     <div className="flex items-center gap-1.5">
-                                                        <Clock className="w-3.5 h-3.5" />
+                                                        <LuClock className="w-3.5 h-3.5" />
                                                         {formatDate(tt.createdAt)}
                                                     </div>
                                                 </TableCell>
@@ -141,7 +141,7 @@ export default function TimetableListPage() {
                                                 <TableCell className="text-right">
                                                     <Link href={`/department/timetables/view/${tt.id}`}>
                                                         <Button size="sm" variant="ghost" className="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50">
-                                                            <Eye className="w-4 h-4 mr-2" /> View Report
+                                                            <LuEye className="w-4 h-4 mr-2" /> View Report
                                                         </Button>
                                                     </Link>
                                                 </TableCell>

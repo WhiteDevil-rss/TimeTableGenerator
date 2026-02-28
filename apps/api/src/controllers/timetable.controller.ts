@@ -4,18 +4,18 @@ import { AuthRequest } from '../middlewares/auth.middleware';
 import { callAiEngine } from '../services/ai.service';
 import { createClient } from 'redis';
 import { socketService } from '../services/socket.service';
+import { logActivity } from '../utils/activity-logger';
 
 const redisClient = createClient({ url: process.env.REDIS_URL || 'redis://localhost:6379' });
 redisClient.connect().catch(console.error);
 
 export const generateTimetable = async (req: AuthRequest, res: Response) => {
     try {
-        let { departmentId, config, excludedFacultyIds = [], excludedRoomIds = [], semesterFilter = 'all' } = req.body;
+        const { departmentId, excludedFacultyIds = [], excludedRoomIds = [], excludedDayIds = [], semesterFilter = 'all', selectedBatchIds = [] } = req.body;
+        let { config } = req.body;
 
         // Normalize config for backward compatibility
         if (config && !config.numberOfBreaks && config.breakAfterLecture !== undefined) {
-            // If old schema is detected, map it to the new one
-            // This is a best-effort conversion to satisfy Pydantic
             config = {
                 ...config,
                 numberOfBreaks: config.numberOfBreaks ?? 1,
@@ -30,7 +30,15 @@ export const generateTimetable = async (req: AuthRequest, res: Response) => {
 
         // Attempt Redis Lock (Prevent concurrent generation for same department)
         const lockKey = `lock:generate:${departmentId}`;
-        const acquired = await redisClient.set(lockKey, 'LOCKED', { NX: true, EX: 60 });
+        let acquired: any = 'OK';
+
+        if (redisClient.isOpen) {
+            try {
+                acquired = await redisClient.set(lockKey, 'LOCKED', { NX: true, EX: 60 });
+            } catch (e) {
+                console.error('Redis Lock Error:', e);
+            }
+        }
 
         if (!acquired) {
             return res.status(409).json({ error: 'A timetable generation is already in progress for this department.' });
@@ -39,72 +47,94 @@ export const generateTimetable = async (req: AuthRequest, res: Response) => {
         try {
             // Determine Semester Filter logic
             const buildSemesterCondition = () => {
-                if (semesterFilter === 'odd') {
-                    return { in: [1, 3, 5, 7, 9] };
-                } else if (semesterFilter === 'even') {
-                    return { in: [2, 4, 6, 8, 10] };
-                }
+                if (semesterFilter === 'odd') return { in: [1, 3, 5, 7, 9] };
+                if (semesterFilter === 'even') return { in: [2, 4, 6, 8, 10] };
                 return undefined;
             };
 
             const semesterCondition = buildSemesterCondition();
 
-            // Fetch all relational data
-            const faculty = await prisma.faculty.findMany({
-                where: { departmentId },
-                include: { subjects: { include: { course: true } } }
-            });
+            // Parallel Data Fetching
+            const [batches, faculty, targetDept] = await Promise.all([
+                prisma.batch.findMany({
+                    where: {
+                        departmentId,
+                        ...(selectedBatchIds.length > 0 ? { id: { in: selectedBatchIds } } : (semesterCondition ? { semester: semesterCondition } : {}))
+                    }
+                }),
+                prisma.faculty.findMany({
+                    where: {
+                        departments: { some: { departmentId } }
+                    },
+                    include: {
+                        subjects: { include: { course: true } }
+                    }
+                }),
+                prisma.department.findUnique({ where: { id: departmentId } })
+            ]);
 
-            const courses = await prisma.course.findMany({
-                where: {
-                    departmentId,
-                    ...(semesterCondition ? { semester: semesterCondition } : {})
-                }
-            });
-            const batches = await prisma.batch.findMany({
-                where: {
-                    departmentId,
-                    ...(semesterCondition ? { semester: semesterCondition } : {})
-                }
-            });
+            if (batches.length === 0) {
+                return res.status(400).json({ error: 'No batches selected or found for the current filter.' });
+            }
 
-            // Fetch resources (Classrooms / Labs) allocated to the university pool
-            const targetDept = await prisma.department.findUnique({ where: { id: departmentId } });
-            const resources = await prisma.resource.findMany({ where: { universityId: targetDept!.universityId } });
+            // Fetch courses and resources in parallel
+            const programSemesterPairs = batches.map((b: any) => ({ program: b.program, semester: b.semester }));
+            const [courses, resources] = await Promise.all([
+                prisma.course.findMany({
+                    where: {
+                        departmentId,
+                        AND: [
+                            {
+                                OR: [
+                                    ...programSemesterPairs.map((p: any) => ({
+                                        AND: [
+                                            { OR: [{ program: p.program }, { program: null }] },
+                                            { OR: [{ semester: p.semester }, { semester: null }] }
+                                        ]
+                                    })),
+                                    { program: null, semester: null }
+                                ]
+                            }
+                        ]
+                    }
+                }),
+                prisma.resource.findMany({ where: { universityId: targetDept!.universityId } })
+            ]);
 
             // Structure Payload exactly matching Pydantic Models 
             const payload = {
                 departmentId,
                 config,
-                faculty: faculty.map(f => ({
+                faculty: faculty.map((f: any) => ({
                     id: f.id,
                     name: f.name,
                     maxHrsPerDay: f.maxHrsPerDay,
-                    maxHrsPerWeek: f.maxHrsPerWeek,
-                    subjects: f.subjects.map(s => ({ courseId: s.courseId, isPrimary: s.isPrimary }))
+                    subjects: f.subjects.map((s: any) => ({ courseId: s.courseId, isPrimary: s.isPrimary }))
                 })),
-                courses: courses.map(c => ({
+                courses: courses.map((c: any) => ({
                     id: c.id,
                     code: c.code,
                     weeklyHrs: c.weeklyHrs,
                     type: c.type,
-                    program: c.program
+                    program: c.program,
+                    semester: c.semester
                 })),
-                batches: batches.map(b => ({
+                batches: batches.map((b: any) => ({
                     id: b.id,
                     name: b.name,
                     strength: b.strength,
                     program: b.program,
                     semester: b.semester
                 })),
-                resources: resources.map(r => ({
+                resources: resources.map((r: any) => ({
                     id: r.id,
                     name: r.name,
                     type: r.type,
                     capacity: r.capacity
                 })),
                 excludedFacultyIds,
-                excludedRoomIds
+                excludedRoomIds,
+                excludedDayIds
             };
 
             const startTime = Date.now();
@@ -157,24 +187,35 @@ export const generateTimetable = async (req: AuthRequest, res: Response) => {
                 return newTt;
             });
 
-            const fullTimetable = await prisma.timetable.findUnique({
-                where: { id: savedTimetable.id },
-                include: {
-                    slots: {
-                        include: {
-                            course: true,
-                            faculty: true,
-                            room: true,
-                            batch: true
-                        }
-                    }
-                }
-            });
+            // Invalidate Redis Cache for this department
+            const cacheKey = `latest_timetable:${departmentId}`;
+            if (redisClient.isOpen) {
+                await redisClient.del(cacheKey);
+            }
 
-            res.status(200).json({ message: "Timetable Generated", timetable: fullTimetable });
+            res.status(200).json({ message: "Timetable Generated", timetable: savedTimetable });
+
+            logActivity(
+                req.user!.id,
+                req.user!.role,
+                'TIMETABLE_GENERATE',
+                {
+                    timetableId: savedTimetable.id,
+                    departmentId,
+                    isSpecial,
+                    generationMs,
+                    conflictCount: aiResponse.conflictCount
+                }
+            );
 
         } finally {
-            await redisClient.del(lockKey); // Release lock
+            if (redisClient.isOpen) {
+                try {
+                    await redisClient.del(lockKey); // Release lock
+                } catch (e) {
+                    console.error('Redis Unlock Error:', e);
+                }
+            }
         }
 
     } catch (error: any) {
@@ -185,7 +226,7 @@ export const generateTimetable = async (req: AuthRequest, res: Response) => {
 
 export const getLatestTimetable = async (req: AuthRequest, res: Response) => {
     try {
-        const { departmentId } = req.params;
+        const departmentId = String(req.params.departmentId);
         const { batchId, facultyId } = req.query;
 
         // Check permissions
@@ -194,9 +235,22 @@ export const getLatestTimetable = async (req: AuthRequest, res: Response) => {
         }
         // For Faculty, they should only be able to query their own department's timetable
         if (req.user!.role === 'FACULTY') {
-            const facultyRecord = await prisma.faculty.findUnique({ where: { id: req.user!.entityId! } });
-            if (facultyRecord?.departmentId !== departmentId) {
+            const facultyRecord = await prisma.faculty.findUnique({
+                where: { id: req.user!.entityId! },
+                include: { departments: true }
+            });
+            const hasAccess = facultyRecord?.departments.some((d: any) => d.departmentId === departmentId);
+            if (!hasAccess) {
                 return res.status(403).json({ error: 'Forbidden' });
+            }
+        }
+
+        // Try Redis Cache first
+        const cacheKey = `latest_timetable:${departmentId}`;
+        if (!batchId && !facultyId && redisClient.isOpen) {
+            const cached = await redisClient.get(cacheKey);
+            if (cached) {
+                return res.status(200).json(JSON.parse(cached));
             }
         }
 
@@ -233,6 +287,11 @@ export const getLatestTimetable = async (req: AuthRequest, res: Response) => {
             return res.status(200).json(null);
         }
 
+        // Cache if no filters applied
+        if (!batchId && !facultyId && redisClient.isOpen) {
+            await redisClient.set(cacheKey, JSON.stringify(timetable), { EX: 3600 });
+        }
+
         res.status(200).json(timetable);
     } catch (error: any) {
         console.error("Fetch Latest Error:", error);
@@ -242,20 +301,24 @@ export const getLatestTimetable = async (req: AuthRequest, res: Response) => {
 
 export const listTimetables = async (req: AuthRequest, res: Response) => {
     try {
-        const { departmentId } = req.params;
+        const departmentId = String(req.params.departmentId);
 
         if (req.user!.role === 'DEPT_ADMIN' && req.user!.entityId !== departmentId) {
             return res.status(403).json({ error: 'Forbidden' });
         }
         if (req.user!.role === 'FACULTY') {
-            const facultyRecord = await prisma.faculty.findUnique({ where: { id: req.user!.entityId! } });
-            if (facultyRecord?.departmentId !== departmentId) {
+            const facultyRecord = await prisma.faculty.findUnique({
+                where: { id: req.user!.entityId! },
+                include: { departments: true }
+            });
+            const hasAccess = facultyRecord?.departments.some((d: any) => d.departmentId === departmentId);
+            if (!hasAccess) {
                 return res.status(403).json({ error: 'Forbidden' });
             }
         }
 
         const timetables = await prisma.timetable.findMany({
-            where: { departmentId },
+            where: { departmentId: departmentId },
             orderBy: { createdAt: 'desc' },
             select: {
                 id: true,
@@ -278,15 +341,20 @@ export const listTimetables = async (req: AuthRequest, res: Response) => {
 
 export const getTimetableById = async (req: AuthRequest, res: Response) => {
     try {
-        const { departmentId, id } = req.params;
+        const departmentId = String(req.params.departmentId);
+        const id = String(req.params.id);
         const { batchId, facultyId } = req.query;
 
         if (req.user!.role === 'DEPT_ADMIN' && req.user!.entityId !== departmentId) {
             return res.status(403).json({ error: 'Forbidden' });
         }
         if (req.user!.role === 'FACULTY') {
-            const facultyRecord = await prisma.faculty.findUnique({ where: { id: req.user!.entityId! } });
-            if (facultyRecord?.departmentId !== departmentId) {
+            const facultyRecord = await prisma.faculty.findUnique({
+                where: { id: req.user!.entityId! },
+                include: { departments: true }
+            });
+            const hasAccess = facultyRecord?.departments.some((d: any) => d.departmentId === departmentId);
+            if (!hasAccess) {
                 return res.status(403).json({ error: 'Forbidden' });
             }
         }

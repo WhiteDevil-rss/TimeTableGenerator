@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, Printer, Loader2 } from 'lucide-react';
+import { LuDownload, LuPrinter, LuLoader } from 'react-icons/lu';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -67,7 +67,7 @@ export const TimetableExport: React.FC<TimetableExportProps> = ({ targetId, file
                 className="bg-white hover:bg-slate-50 border-slate-200 text-slate-700 h-9"
                 onClick={handlePrint}
             >
-                <Printer className="w-4 h-4 mr-2" />
+                <LuPrinter className="w-4 h-4 mr-2" />
                 Print
             </Button>
             <Button
@@ -75,7 +75,7 @@ export const TimetableExport: React.FC<TimetableExportProps> = ({ targetId, file
                 onClick={handleDownloadPdf}
                 disabled={isExporting}
             >
-                {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+                {isExporting ? <LuLoader className="w-4 h-4 mr-2 animate-spin" /> : <LuDownload className="w-4 h-4 mr-2" />}
                 {isExporting ? 'Generating PDF...' : 'Download PDF'}
             </Button>
         </div>

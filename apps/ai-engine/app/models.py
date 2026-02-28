@@ -17,7 +17,6 @@ class Faculty(BaseModel):
     id: str
     name: str
     maxHrsPerDay: int
-    maxHrsPerWeek: int
     subjects: List[FacultySubject]
 
 class Course(BaseModel):
@@ -26,6 +25,7 @@ class Course(BaseModel):
     weeklyHrs: int
     type: str # Theory, Lab, Theory+Lab
     program: Optional[str] = None
+    semester: Optional[int] = None
 
 class Batch(BaseModel):
     id: str
@@ -40,18 +40,6 @@ class Resource(BaseModel):
     type: str
     capacity: int
 
-class GenerateRequest(BaseModel):
-    departmentId: str
-    config: ScheduleConfig
-    faculty: List[Faculty]
-    courses: List[Course]
-    batches: List[Batch]
-    resources: List[Resource]
-    excludedFacultyIds: List[str] = []
-    excludedRoomIds: List[str] = []
-
-    model_config = ConfigDict(extra='ignore')
-
 class TimetableSlot(BaseModel):
     dayOfWeek: int
     slotNumber: int
@@ -63,6 +51,20 @@ class TimetableSlot(BaseModel):
     batchId: str
     isBreak: bool
     slotType: str
+
+class GenerateRequest(BaseModel):
+    departmentId: str
+    config: ScheduleConfig
+    faculty: List[Faculty]
+    courses: List[Course]
+    batches: List[Batch]
+    resources: List[Resource]
+    excludedFacultyIds: List[str] = []
+    excludedRoomIds: List[str] = []
+    excludedDayIds: List[int] = []
+    existingSlots: List[TimetableSlot] = []
+
+    model_config = ConfigDict(extra='ignore')
 
 class GenerateResponse(BaseModel):
     status: str

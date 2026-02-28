@@ -36,30 +36,10 @@ services:
       context: ./apps/ai-engine
       dockerfile: Dockerfile
     restart: always
+    ports:
+      - "5000:5000"
     environment:
       - PORT=5000
-
-  api:
-    build:
-      context: .
-      dockerfile: ./apps/api/Dockerfile
-    restart: always
-    ports:
-      - "8000:8000"
-    environment:
-      - NODE_ENV=production
-      - PORT=8000
-      - DATABASE_URL=postgresql://vnsgu_admin:supersecretpassword@postgres:5432/nep_scheduler
-      - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=production_secret_key_vnsgu_1234
-      - AI_ENGINE_URL=http://ai-engine:5000
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      ai-engine:
-        condition: service_started
 
 volumes:
   postgres_data:
