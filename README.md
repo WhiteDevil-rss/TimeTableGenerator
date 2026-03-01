@@ -8,7 +8,7 @@
 
 ---
 
-## 🚀 Key Enterprise Features
+## Key Enterprise Features
 
 - **Robust Firebase Auth Synchronization**: Fully automated, two-way sync between PostgreSQL and Firebase Authentication for all CRUD user operations (Super Admins, University Admins, Department Admins, and Faculty). Ensures no orphaned users and tight login integrity.
 - **Enterprise Activity Logging**: Dual-storage (Database + Filesystem) asynchronous activity monitoring. Critical mutations automatically track execution timestamps, explicit changes, IP Addresses, and Device Headers using extreme high-throughput pipelines. 
@@ -17,7 +17,7 @@
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 The project is structured as a **Polyglot Monorepo**, isolating concerns while maintaining strong type safety across the stack.
 
@@ -46,7 +46,7 @@ graph TD
 
 ---
 
-## 🧠 The AI Scheduling Engine
+## The AI Scheduling Engine
 
 The "brain" of the platform uses **Google OR-Tools CP-SAT Solver** to resolve billions of possible scheduling combinations in seconds.
 
@@ -56,7 +56,7 @@ The "brain" of the platform uses **Google OR-Tools CP-SAT Solver** to resolve bi
 
 ---
 
-## 👥 Feature Matrix
+## Feature Matrix
 
 The platform is divided into 4 specialised panels to handle the university hierarchy:
 
@@ -79,7 +79,7 @@ The platform is divided into 4 specialised panels to handle the university hiera
 
 ---
 
-## 🏁 Step-by-Step Project Start
+## Step-by-Step Project Start
 
 Follow these exact steps to launch the entire ecosystem in under 2 minutes:
 
@@ -114,7 +114,7 @@ Open `http://localhost:3000` and log in.
 
 ---
 
-## 🔑 Demo Credentials
+## Demo Credentials
 
 | Role | Email | Password |
 | :--- | :--- | :--- |
@@ -125,7 +125,7 @@ Open `http://localhost:3000` and log in.
 
 ---
 
-## ☁️ Deployment
+## Deployment
 
 This project is optimised for **Google Cloud Platform (GCP)** using:
 - **Cloud Run** for horizontal scaling of microservices.
@@ -136,7 +136,7 @@ See the [In-depth GCP Deployment Guide](./gcp_deployment_guide.md) for step-by-s
 
 ---
 
-## 📄 License
+## License
 Distributed under the MIT License. See `LICENSE` for more information.
 
 *Built By [Rajput Shivam Singh](https://github.com/WhiteDevil-rss)*
