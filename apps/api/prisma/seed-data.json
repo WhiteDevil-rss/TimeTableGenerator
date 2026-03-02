@@ -30,21 +30,6 @@
       "lastLogin": null
     },
     {
-      "id": "5cb7aec2-3991-4890-b8db-113cf8ceb420",
-      "username": "admin_dcs_vnsgu",
-      "email": "admin_dcs@vnsgu.ac.in",
-      "passwordHash": "$2b$12$rM55/aW8oZw.YwNL.WPfLu1PBOEOL24mC1K9ds/JmMcuQ2UJBADV6",
-      "firebaseUid": "lxXsUVIbf1MuH4cgIdJAhEQXAbX2",
-      "role": "DEPT_ADMIN",
-      "entityId": "123cdda3-0837-4f7c-9409-b2aec0ac6375",
-      "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
-      "phoneNumber": null,
-      "address": null,
-      "isActive": true,
-      "createdAt": "2026-03-01T22:00:12.655Z",
-      "lastLogin": null
-    },
-    {
       "id": "97e72c0a-bddc-48df-bcaa-a2bebcf2b28e",
       "username": "rustam",
       "email": "rustam@vnsgu.ac.in",
@@ -88,21 +73,6 @@
       "isActive": true,
       "createdAt": "2026-03-01T22:00:14.891Z",
       "lastLogin": null
-    },
-    {
-      "id": "d80ccd30-6362-498d-ba0a-4f935ea0db2f",
-      "username": "superadmin",
-      "email": "admin@zembaa.com",
-      "passwordHash": "$2b$12$rM55/aW8oZw.YwNL.WPfLu1PBOEOL24mC1K9ds/JmMcuQ2UJBADV6",
-      "firebaseUid": "Mr9xgrWpMQWjv1Hel4YCtR2S30w2",
-      "role": "SUPERADMIN",
-      "entityId": null,
-      "universityId": null,
-      "phoneNumber": null,
-      "address": null,
-      "isActive": true,
-      "createdAt": "2026-03-01T22:00:10.514Z",
-      "lastLogin": "2026-03-01T22:01:06.180Z"
     },
     {
       "id": "0d5e91f1-a026-4d39-afb1-415a47cbcfa7",
@@ -180,6 +150,21 @@
       "lastLogin": null
     },
     {
+      "id": "d80ccd30-6362-498d-ba0a-4f935ea0db2f",
+      "username": "Superadmin",
+      "email": "admin@zembaa.com",
+      "passwordHash": "$2b$12$rM55/aW8oZw.YwNL.WPfLu1PBOEOL24mC1K9ds/JmMcuQ2UJBADV6",
+      "firebaseUid": "Mr9xgrWpMQWjv1Hel4YCtR2S30w2",
+      "role": "SUPERADMIN",
+      "entityId": null,
+      "universityId": null,
+      "phoneNumber": null,
+      "address": null,
+      "isActive": true,
+      "createdAt": "2026-03-01T22:00:10.514Z",
+      "lastLogin": "2026-03-02T17:39:17.844Z"
+    },
+    {
       "id": "12d3d723-5842-4f8c-8e27-3f93df2afe3c",
       "username": "vimal",
       "email": "vimal@vnsgu.ac.in",
@@ -193,6 +178,21 @@
       "isActive": true,
       "createdAt": "2026-03-01T22:00:21.569Z",
       "lastLogin": null
+    },
+    {
+      "id": "5cb7aec2-3991-4890-b8db-113cf8ceb420",
+      "username": "admin_dcs_vnsgu",
+      "email": "admin_dcs@vnsgu.ac.in",
+      "passwordHash": "$2b$12$rM55/aW8oZw.YwNL.WPfLu1PBOEOL24mC1K9ds/JmMcuQ2UJBADV6",
+      "firebaseUid": "lxXsUVIbf1MuH4cgIdJAhEQXAbX2",
+      "role": "DEPT_ADMIN",
+      "entityId": "123cdda3-0837-4f7c-9409-b2aec0ac6375",
+      "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
+      "phoneNumber": null,
+      "address": null,
+      "isActive": true,
+      "createdAt": "2026-03-01T22:00:12.655Z",
+      "lastLogin": "2026-03-02T19:26:41.532Z"
     }
   ],
   "departments": [
@@ -211,52 +211,132 @@
     {
       "id": "ad79e067-9350-4e11-8a4d-20ae0eaa57d1",
       "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
-      "name": "CS Classroom 101",
+      "name": "Lecture Hall 1",
       "type": "Classroom",
       "capacity": 60,
       "floor": "1st",
-      "building": null,
+      "building": "",
       "createdAt": "2026-03-01T22:00:12.668Z"
     },
     {
       "id": "2a31ee02-e290-4d90-918c-7046e3b01922",
       "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
-      "name": "CS Classroom 102",
+      "name": "Lecture Hall 2",
       "type": "Classroom",
       "capacity": 60,
       "floor": "1st",
-      "building": null,
+      "building": "",
       "createdAt": "2026-03-01T22:00:12.673Z"
     },
     {
       "id": "a4818727-001a-4da7-88bb-27d950087ae3",
       "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
-      "name": "CS Classroom 201",
+      "name": "Lecture Hall 3",
       "type": "Classroom",
       "capacity": 40,
-      "floor": "2nd",
-      "building": null,
+      "floor": "1nd",
+      "building": "",
       "createdAt": "2026-03-01T22:00:12.675Z"
+    },
+    {
+      "id": "ee398e01-c847-47cc-9eeb-ba610965c574",
+      "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
+      "name": "Lecture Hall 4",
+      "type": "Classroom",
+      "capacity": 60,
+      "floor": "1st",
+      "building": "",
+      "createdAt": "2026-03-02T19:02:43.011Z"
+    },
+    {
+      "id": "5b2cf9df-fb9e-4cc0-9c91-8b7b0a7d0eff",
+      "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
+      "name": "Lecture Hall 5",
+      "type": "Classroom",
+      "capacity": 60,
+      "floor": "1st",
+      "building": "",
+      "createdAt": "2026-03-02T19:02:57.234Z"
     },
     {
       "id": "5161ad54-8fb3-453d-a3fd-4b81bffde5ea",
       "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
-      "name": "CS Lab A",
+      "name": "Major Lab A",
       "type": "Lab",
-      "capacity": 30,
+      "capacity": 60,
       "floor": "Ground",
-      "building": null,
+      "building": "",
       "createdAt": "2026-03-01T22:00:12.676Z"
     },
     {
       "id": "4af8ce96-95f6-4c77-b865-aec83a283d5d",
       "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
-      "name": "CS Lab B",
+      "name": "Major Lab B",
+      "type": "Lab",
+      "capacity": 60,
+      "floor": "Ground",
+      "building": "",
+      "createdAt": "2026-03-01T22:00:12.678Z"
+    },
+    {
+      "id": "605674cf-8637-486b-8f35-21c37724ada3",
+      "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
+      "name": "Minor Lab A",
       "type": "Lab",
       "capacity": 30,
       "floor": "Ground",
-      "building": null,
-      "createdAt": "2026-03-01T22:00:12.678Z"
+      "building": "",
+      "createdAt": "2026-03-02T19:04:12.270Z"
+    },
+    {
+      "id": "5fffe828-577b-4da4-87f4-4e9b4ebcc418",
+      "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
+      "name": "Minor Lab B",
+      "type": "Lab",
+      "capacity": 30,
+      "floor": "Ground",
+      "building": "",
+      "createdAt": "2026-03-02T19:04:34.807Z"
+    },
+    {
+      "id": "7675dbe1-aaec-45fb-8f3f-44180d7878c4",
+      "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
+      "name": "Theater Hall 1",
+      "type": "Classroom",
+      "capacity": 60,
+      "floor": "Ground",
+      "building": "",
+      "createdAt": "2026-03-02T19:05:19.306Z"
+    },
+    {
+      "id": "7185cb2c-9206-4c53-9a85-c40ba2e166cb",
+      "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
+      "name": "Theater Hall 2",
+      "type": "Classroom",
+      "capacity": 60,
+      "floor": "Ground",
+      "building": "",
+      "createdAt": "2026-03-02T19:05:45.863Z"
+    },
+    {
+      "id": "6b0967bd-beb7-4d8f-8370-c3cd7a7f4ce5",
+      "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
+      "name": "Theater Hall 3",
+      "type": "Classroom",
+      "capacity": 60,
+      "floor": "1st",
+      "building": "",
+      "createdAt": "2026-03-02T19:08:15.562Z"
+    },
+    {
+      "id": "dcb67545-0d78-4ea4-96c8-acf81624bc25",
+      "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
+      "name": "Theater Hall 4",
+      "type": "Classroom",
+      "capacity": 60,
+      "floor": "1st",
+      "building": "",
+      "createdAt": "2026-03-02T19:08:27.606Z"
     }
   ],
   "batches": [
@@ -269,22 +349,22 @@
       "semester": 2,
       "division": "A",
       "year": "2025-26",
-      "strength": 30,
-      "totalStudents": 0,
+      "strength": 60,
+      "totalStudents": 120,
       "createdAt": "2026-03-01T22:00:12.680Z"
     },
     {
-      "id": "1d673686-f071-403c-8fd2-964c8a039c07",
+      "id": "34dc01f7-b143-4ad9-80ea-9fb0e6567497",
       "departmentId": "123cdda3-0837-4f7c-9409-b2aec0ac6375",
       "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
-      "name": "MCA Sem 2 Div B 2025-26",
+      "name": "MCA Sem 2 Div A 2025-26",
       "program": "MCA",
       "semester": 2,
       "division": "B",
       "year": "2025-26",
-      "strength": 30,
-      "totalStudents": 0,
-      "createdAt": "2026-03-01T22:00:12.683Z"
+      "strength": 60,
+      "totalStudents": 120,
+      "createdAt": "2026-03-02T19:26:14.902Z"
     }
   ],
   "courses": [
@@ -297,8 +377,9 @@
       "program": "MCA",
       "credits": 4,
       "weeklyHrs": 4,
-      "semester": null,
+      "semester": 2,
       "type": "Theory",
+      "isElective": false,
       "createdAt": "2026-03-01T22:00:12.685Z"
     },
     {
@@ -309,22 +390,10 @@
       "code": "202",
       "program": "MCA",
       "credits": 4,
-      "weeklyHrs": 6,
-      "semester": null,
-      "type": "Theory+Lab",
-      "createdAt": "2026-03-01T22:00:12.685Z"
-    },
-    {
-      "id": "ffe3a8c6-e9d5-443c-bc8a-cb492e7485c1",
-      "departmentId": "123cdda3-0837-4f7c-9409-b2aec0ac6375",
-      "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
-      "name": "Blockchain",
-      "code": "204",
-      "program": "MCA",
-      "credits": 4,
       "weeklyHrs": 4,
-      "semester": null,
+      "semester": 2,
       "type": "Theory",
+      "isElective": false,
       "createdAt": "2026-03-01T22:00:12.685Z"
     },
     {
@@ -335,22 +404,10 @@
       "code": "203",
       "program": "MCA",
       "credits": 4,
-      "weeklyHrs": 6,
-      "semester": null,
-      "type": "Theory+Lab",
-      "createdAt": "2026-03-01T22:00:12.685Z"
-    },
-    {
-      "id": "8143df58-8f3d-4f6c-9e22-027004d53e79",
-      "departmentId": "123cdda3-0837-4f7c-9409-b2aec0ac6375",
-      "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
-      "name": "Python",
-      "code": "Python-204",
-      "program": "MCA",
-      "credits": 4,
-      "weeklyHrs": 6,
-      "semester": null,
-      "type": "Theory+Lab",
+      "weeklyHrs": 4,
+      "semester": 2,
+      "type": "Theory",
+      "isElective": false,
       "createdAt": "2026-03-01T22:00:12.685Z"
     },
     {
@@ -361,9 +418,10 @@
       "code": "Android-205",
       "program": "MCA",
       "credits": 4,
-      "weeklyHrs": 6,
-      "semester": null,
-      "type": "Theory+Lab",
+      "weeklyHrs": 4,
+      "semester": 2,
+      "type": "Theory",
+      "isElective": false,
       "createdAt": "2026-03-01T22:00:12.685Z"
     },
     {
@@ -371,12 +429,97 @@
       "departmentId": "123cdda3-0837-4f7c-9409-b2aec0ac6375",
       "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
       "name": "iOS Development",
-      "code": "205",
+      "code": "iOS-205",
       "program": "MCA",
       "credits": 4,
-      "weeklyHrs": 6,
-      "semester": null,
-      "type": "Theory+Lab",
+      "weeklyHrs": 4,
+      "semester": 2,
+      "type": "Theory",
+      "isElective": false,
+      "createdAt": "2026-03-01T22:00:12.685Z"
+    },
+    {
+      "id": "d28f8dca-763d-4870-99d6-fea3c0b243e2",
+      "departmentId": "123cdda3-0837-4f7c-9409-b2aec0ac6375",
+      "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
+      "name": "Programming Skills - IV",
+      "code": "206",
+      "program": "MCA",
+      "credits": 3,
+      "weeklyHrs": 3,
+      "semester": 2,
+      "type": "Lab",
+      "isElective": false,
+      "createdAt": "2026-03-02T19:14:25.397Z"
+    },
+    {
+      "id": "ffe3a8c6-e9d5-443c-bc8a-cb492e7485c1",
+      "departmentId": "123cdda3-0837-4f7c-9409-b2aec0ac6375",
+      "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
+      "name": "Blockchain",
+      "code": "Blockchain-204",
+      "program": "MCA",
+      "credits": 4,
+      "weeklyHrs": 4,
+      "semester": 2,
+      "type": "Theory",
+      "isElective": false,
+      "createdAt": "2026-03-01T22:00:12.685Z"
+    },
+    {
+      "id": "a834304e-4fef-4758-8f69-5166798f3188",
+      "departmentId": "123cdda3-0837-4f7c-9409-b2aec0ac6375",
+      "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
+      "name": "Programming Skills - V",
+      "code": "207",
+      "program": "MCA",
+      "credits": 2,
+      "weeklyHrs": 2,
+      "semester": 2,
+      "type": "Lab",
+      "isElective": false,
+      "createdAt": "2026-03-02T19:17:04.729Z"
+    },
+    {
+      "id": "9c5ba6dc-f0c7-4762-845c-72493f14806e",
+      "departmentId": "123cdda3-0837-4f7c-9409-b2aec0ac6375",
+      "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
+      "name": "Programming Skills - VI",
+      "code": "208",
+      "program": "MCA",
+      "credits": 2,
+      "weeklyHrs": 2,
+      "semester": 2,
+      "type": "Lab",
+      "isElective": false,
+      "createdAt": "2026-03-02T19:17:20.093Z"
+    },
+    {
+      "id": "f8c65348-eae6-4bd1-8d39-68aaf04beeb3",
+      "departmentId": "123cdda3-0837-4f7c-9409-b2aec0ac6375",
+      "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
+      "name": "Programming Skills - VII",
+      "code": "209",
+      "program": "MCA",
+      "credits": 3,
+      "weeklyHrs": 3,
+      "semester": 2,
+      "type": "Lab",
+      "isElective": false,
+      "createdAt": "2026-03-02T19:17:39.003Z"
+    },
+    {
+      "id": "8143df58-8f3d-4f6c-9e22-027004d53e79",
+      "departmentId": "123cdda3-0837-4f7c-9409-b2aec0ac6375",
+      "universityId": "e3e20ac6-34b5-4cc7-a51d-57be2c8bf9cc",
+      "name": "Python",
+      "code": "Python-204",
+      "program": "MCA",
+      "credits": 4,
+      "weeklyHrs": 4,
+      "semester": 2,
+      "type": "Theory",
+      "isElective": false,
       "createdAt": "2026-03-01T22:00:12.685Z"
     }
   ],
@@ -391,6 +534,9 @@
       "qualifications": null,
       "experience": null,
       "userId": "97e72c0a-bddc-48df-bcaa-a2bebcf2b28e",
+      "availability": null,
+      "maxHrsPerDay": 6,
+      "maxHrsPerWeek": 30,
       "createdAt": "2026-03-01T22:00:13.789Z"
     },
     {
@@ -403,6 +549,9 @@
       "qualifications": null,
       "experience": null,
       "userId": "bc3ef6eb-6b94-4f6c-bd9d-29340648d4f9",
+      "availability": null,
+      "maxHrsPerDay": 6,
+      "maxHrsPerWeek": 30,
       "createdAt": "2026-03-01T22:00:14.908Z"
     },
     {
@@ -415,6 +564,9 @@
       "qualifications": null,
       "experience": null,
       "userId": "0d5e91f1-a026-4d39-afb1-415a47cbcfa7",
+      "availability": null,
+      "maxHrsPerDay": 6,
+      "maxHrsPerWeek": 30,
       "createdAt": "2026-03-01T22:00:16.081Z"
     },
     {
@@ -427,6 +579,9 @@
       "qualifications": null,
       "experience": null,
       "userId": "8fbea77e-b43f-46f4-b25c-791c20ab253d",
+      "availability": null,
+      "maxHrsPerDay": 6,
+      "maxHrsPerWeek": 30,
       "createdAt": "2026-03-01T22:00:17.192Z"
     },
     {
@@ -439,6 +594,9 @@
       "qualifications": null,
       "experience": null,
       "userId": "375a115a-0159-4124-8001-1f56324fcf27",
+      "availability": null,
+      "maxHrsPerDay": 6,
+      "maxHrsPerWeek": 30,
       "createdAt": "2026-03-01T22:00:18.297Z"
     },
     {
@@ -451,6 +609,9 @@
       "qualifications": null,
       "experience": null,
       "userId": "143405af-50a1-420b-914d-a4222ecac71a",
+      "availability": null,
+      "maxHrsPerDay": 6,
+      "maxHrsPerWeek": 30,
       "createdAt": "2026-03-01T22:00:19.351Z"
     },
     {
@@ -463,6 +624,9 @@
       "qualifications": null,
       "experience": null,
       "userId": "d7ea3fd7-86e5-4068-bf9e-4ffb3ddc3b48",
+      "availability": null,
+      "maxHrsPerDay": 6,
+      "maxHrsPerWeek": 30,
       "createdAt": "2026-03-01T22:00:20.390Z"
     },
     {
@@ -475,6 +639,9 @@
       "qualifications": null,
       "experience": null,
       "userId": "12d3d723-5842-4f8c-8e27-3f93df2afe3c",
+      "availability": null,
+      "maxHrsPerDay": 6,
+      "maxHrsPerWeek": 30,
       "createdAt": "2026-03-01T22:00:21.575Z"
     },
     {
@@ -487,6 +654,9 @@
       "qualifications": null,
       "experience": null,
       "userId": "a5fdae99-403c-476c-a8ef-08f17d766877",
+      "availability": null,
+      "maxHrsPerDay": 6,
+      "maxHrsPerWeek": 30,
       "createdAt": "2026-03-01T22:00:22.800Z"
     }
   ],
@@ -530,5 +700,5 @@
   ],
   "facultySubjects": [],
   "timetables": [],
-  "exportedAt": "2026-03-01T22:03:56.907Z"
+  "exportedAt": "2026-03-02T19:43:08.155Z"
 }

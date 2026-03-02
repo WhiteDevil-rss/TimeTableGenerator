@@ -9,7 +9,16 @@ export const callAiEngine = async (payload: any) => {
         return response.data;
     } catch (error: any) {
         if (error.response) {
-            throw new Error(`AI Engine Error: ${error.response.data.detail || error.response.data}`);
+            const data = error.response.data;
+            let errMsg = data;
+
+            if (data?.detail && Array.isArray(data.detail)) {
+                errMsg = JSON.stringify(data.detail);
+            } else if (typeof data === 'object') {
+                errMsg = JSON.stringify(data);
+            }
+
+            throw new Error(`AI Engine Error: ${errMsg}`);
         }
         throw new Error('Failed to reach AI Engine');
     }

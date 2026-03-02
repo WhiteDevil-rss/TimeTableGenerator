@@ -4,10 +4,12 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { LuArrowRight, LuCalendar, LuUsers, LuLayers, LuShieldCheck, LuLayoutDashboard } from "react-icons/lu";
 import { useAuthStore } from "@/lib/store/useAuthStore";
+import { GetStartedModal } from "@/components/get-started-modal";
 
 export default function Home() {
   const { user, isAuthenticated } = useAuthStore();
   const [mounted, setMounted] = useState(false);
+  const [showInquiryModal, setShowInquiryModal] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -46,9 +48,9 @@ export default function Home() {
         </div>
 
         <nav className="hidden md:flex items-center gap-8 glass px-8 py-3 rounded-full border-white/5">
-          <a href="#features" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">Platform</a>
-          <a href="#solutions" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">Solutions</a>
-          <a href="#security" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">Security</a>
+          <a href="/platform" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">Platform</a>
+          <a href="/solutions" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">Solutions</a>
+          <a href="/security" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">Security</a>
         </nav>
 
         <div className="flex gap-4 items-center">
@@ -64,12 +66,12 @@ export default function Home() {
               <Link href="/login" className="hidden sm:block text-sm font-medium text-slate-300 hover:text-white transition-colors px-4">
                 Sign In
               </Link>
-              <Link
-                href="/login"
+              <button
+                onClick={() => setShowInquiryModal(true)}
                 className="px-6 py-2.5 rounded-full bg-neon-cyan text-[#0a0a0c] text-sm font-bold hover:bg-white hover:text-[#0a0a0c] transition-all shadow-[0_0_20px_rgba(57,193,239,0.3)] hover:shadow-[0_0_30px_rgba(57,193,239,0.6)] flex items-center gap-2"
               >
                 Get Started
-              </Link>
+              </button>
             </>
           )}
         </div>
@@ -106,12 +108,12 @@ export default function Home() {
               </Link>
             ) : (
               <>
-                <Link
-                  href="/login"
+                <button
+                  onClick={() => setShowInquiryModal(true)}
                   className="px-8 py-4 rounded-full bg-white text-black text-lg font-bold hover:bg-slate-200 transition-all transform hover:scale-105 shadow-[0_0_30px_rgba(255,255,255,0.2)] flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
                   Start Optimization <LuArrowRight className="w-5 h-5 ml-1" />
-                </Link>
+                </button>
                 <div className="flex items-center gap-2 text-slate-400 text-sm font-medium">
                   <LuShieldCheck className="w-5 h-5 text-neon-purple" />
                   Enterprise Grade Security
@@ -161,6 +163,9 @@ export default function Home() {
       <footer className="py-8 text-center text-slate-500 text-sm border-t border-white/5 relative z-10 glass">
         <p className="font-light">© {new Date().getFullYear()} Zembaa AI Timetable Systems. All systems operational.</p>
       </footer>
+
+      {/* Get Started Inquiry Modal */}
+      <GetStartedModal isOpen={showInquiryModal} onClose={() => setShowInquiryModal(false)} />
     </div>
   );
 }

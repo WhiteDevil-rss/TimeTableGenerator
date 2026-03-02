@@ -11,7 +11,17 @@ redisClient.connect().catch(console.error);
 
 export const generateTimetable = async (req: AuthRequest, res: Response) => {
     try {
-        const { departmentId, excludedFacultyIds = [], excludedRoomIds = [], excludedDayIds = [], semesterFilter = 'all', selectedBatchIds = [] } = req.body;
+        const {
+            departmentId,
+            excludedFacultyIds = [],
+            excludedRoomIds = [],
+            excludedDayIds = [],
+            semesterFilter = 'all',
+            selectedBatchIds = [],
+            continuousMode = 'balanced',
+            generationType = 'NORMAL', // NORMAL | LAB_ONLY | ELECTIVE_ONLY
+            lockedSlots = []           // Array of slot objects to preserve
+        } = req.body;
         let { config } = req.body;
 
         // Normalize config for backward compatibility
@@ -55,7 +65,7 @@ export const generateTimetable = async (req: AuthRequest, res: Response) => {
             const semesterCondition = buildSemesterCondition();
 
             // Parallel Data Fetching
-            const [batches, faculty, targetDept] = await Promise.all([
+            const [batches, faculty, targetDept, electiveBaskets] = await Promise.all([
                 prisma.batch.findMany({
                     where: {
                         departmentId,
@@ -70,7 +80,20 @@ export const generateTimetable = async (req: AuthRequest, res: Response) => {
                         subjects: { include: { course: true } }
                     }
                 }),
-                prisma.department.findUnique({ where: { id: departmentId } })
+                prisma.department.findUnique({ where: { id: departmentId } }),
+                // Fetch elective baskets for this department
+                prisma.electiveBasket.findMany({
+                    where: { departmentId },
+                    include: {
+                        options: {
+                            include: {
+                                course: { select: { id: true, code: true, name: true, type: true } },
+                                faculty: { select: { id: true } },
+                                subgroups: true,
+                            },
+                        },
+                    },
+                }),
             ]);
 
             if (batches.length === 0) {
@@ -101,20 +124,32 @@ export const generateTimetable = async (req: AuthRequest, res: Response) => {
                 prisma.resource.findMany({ where: { universityId: targetDept!.universityId } })
             ]);
 
-            // Structure Payload exactly matching Pydantic Models 
+            // Identify courses used inside any elective basket
+            const electiveCourseIds = new Set<string>();
+            electiveBaskets.forEach((bk: any) => {
+                bk.options?.forEach((opt: any) => {
+                    if (opt.course?.id) electiveCourseIds.add(opt.course.id);
+                });
+            });
+
+            // Structure Payload exactly matching Pydantic Models
             const payload = {
                 departmentId,
-                config,
+                generationType,
+                config: { ...(config || {}), continuousMode },
                 faculty: faculty.map((f: any) => ({
                     id: f.id,
                     name: f.name,
+                    availability: f.availability || [],
                     subjects: f.subjects.map((s: any) => ({ courseId: s.courseId, isPrimary: s.isPrimary }))
                 })),
                 courses: courses.map((c: any) => ({
                     id: c.id,
+                    name: c.name,
                     code: c.code,
                     weeklyHrs: c.weeklyHrs,
                     type: c.type,
+                    isElective: c.isElective || electiveCourseIds.has(c.id),
                     program: c.program,
                     semester: c.semester
                 })),
@@ -133,7 +168,42 @@ export const generateTimetable = async (req: AuthRequest, res: Response) => {
                 })),
                 excludedFacultyIds,
                 excludedRoomIds,
-                excludedDayIds
+                excludedDayIds,
+                lockedSlots,
+                electiveBaskets: (electiveBaskets as any[]).map((bk: any) => {
+                    const firstOpt = bk.options[0];
+                    const derivedSemester = firstOpt?.course?.semester ?? bk.semester;
+                    const derivedProgram = firstOpt?.course?.program ?? bk.program;
+
+                    const divisionIds = batches
+                        .filter((b: any) =>
+                            (!derivedProgram || !b.program || derivedProgram === b.program) &&
+                            (!derivedSemester || !b.semester || derivedSemester === b.semester)
+                        )
+                        .map((b: any) => b.id);
+
+                    return {
+                        basketId: bk.id,
+                        subjectCode: bk.subjectCode,
+                        name: bk.name,
+                        // Always derive from master course to handle updates to subjects
+                        semester: derivedSemester,
+                        program: derivedProgram,
+                        weeklyHrs: firstOpt?.course?.weeklyHrs ?? bk.weeklyHrs,
+                        divisionIds,
+                        options: bk.options.map((opt: any) => ({
+                            optionId: opt.id,
+                            courseId: opt.course.id,
+                            enrollmentCount: opt.enrollmentCount,
+                            facultyId: opt.facultyId ?? null,
+                            subgroups: (opt.subgroups || []).map((sg: any) => ({
+                                subgroupId: sg.id,
+                                name: sg.subgroupId,
+                                enrollmentCount: sg.enrollmentCount
+                            }))
+                        })),
+                    };
+                }),
             };
 
             const startTime = Date.now();
@@ -145,34 +215,72 @@ export const generateTimetable = async (req: AuthRequest, res: Response) => {
             }
 
             // Save Timetable to database
-            const isSpecial = excludedFacultyIds.length > 0 || excludedRoomIds.length > 0;
+            const isSpecial = excludedFacultyIds.length > 0 || excludedRoomIds.length > 0 || generationType !== 'NORMAL';
             const savedTimetable = await prisma.$transaction(async (tx: any) => {
                 const newTt = await tx.timetable.create({
                     data: {
                         universityId: targetDept!.universityId,
                         departmentId,
-                        configJson: config,
+                        configJson: {
+                            ...(config || {}),
+                            continuousMode,
+                            metrics: {
+                                workloadVariance: aiResponse.workloadVariance,
+                                utilizationScore: aiResponse.utilizationScore,
+                                gapScore: aiResponse.gapScore,
+                                electiveGroupCount: aiResponse.electiveGroupCount,
+                            }
+                        },
                         generationMs,
-                        conflictCount: aiResponse.conflictCount,
+                        conflictCount: aiResponse.conflictCount || 0,
                         status: 'ACTIVE',
                         isSpecial
                     }
                 });
 
                 // Bulk Insert Slots
-                const slotsData = aiResponse.slots.map((s: any) => ({
-                    timetableId: newTt.id,
-                    dayOfWeek: s.dayOfWeek,
-                    slotNumber: s.slotNumber,
-                    startTime: s.startTime,
-                    endTime: s.endTime,
-                    courseId: s.courseId,
-                    facultyId: s.facultyId,
-                    roomId: s.roomId,
-                    batchId: s.batchId,
-                    isBreak: s.isBreak,
-                    slotType: s.slotType
-                }));
+                const slotsData: any[] = [];
+                aiResponse.slots.forEach((s: any) => {
+                    if (s.isBreak && !s.batchId) {
+                        // Create a break slot for EVERY regular batch
+                        batches.forEach((b: any) => {
+                            slotsData.push({
+                                timetableId: newTt.id,
+                                dayOfWeek: s.dayOfWeek,
+                                slotNumber: s.slotNumber,
+                                startTime: s.startTime,
+                                endTime: s.endTime,
+                                courseId: null,
+                                facultyId: null,
+                                roomId: null,
+                                batchId: b.id,
+                                isBreak: true,
+                                slotType: "BREAK",
+                                isElective: false,
+                                basketId: null,
+                                optionId: null,
+                            });
+                        });
+                    } else {
+                        slotsData.push({
+                            timetableId: newTt.id,
+                            dayOfWeek: s.dayOfWeek,
+                            slotNumber: s.slotNumber,
+                            startTime: s.startTime,
+                            endTime: s.endTime,
+                            courseId: s.courseId || null,
+                            facultyId: s.facultyId || null,
+                            roomId: s.roomId || null,
+                            batchId: s.batchId,
+                            isBreak: s.isBreak || false,
+                            slotType: s.slotType || "THEORY",
+                            // Elective Metadata
+                            isElective: s.isElective || false,
+                            basketId: s.basketId || null,
+                            optionId: s.optionId || null,
+                        });
+                    }
+                });
 
                 await tx.timetableSlot.createMany({ data: slotsData });
 

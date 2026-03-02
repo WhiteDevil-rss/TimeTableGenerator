@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { ConfirmDialog, useConfirm } from '@/components/ui/confirm-dialog';
 import { Toast, useToast } from '@/components/ui/toast-alert';
 
-const emptyForm = { name: '', code: '', program: '', semester: 0, credits: 4, weeklyHrs: 4, type: 'Theory' };
+const emptyForm = { name: '', code: '', program: '', semester: 0, credits: 4, weeklyHrs: 4, type: 'Theory', isElective: false };
 type SubjectForm = typeof emptyForm;
 
 interface Program {
@@ -30,6 +30,7 @@ interface Subject {
     semester?: number;
     credits: number;
     type: string;
+    isElective: boolean;
 }
 
 // ALL sub-components defined OUTSIDE the parent — fixes focus loss on typing
@@ -126,6 +127,19 @@ function SubjectFormFields({
                     className="dark:bg-slate-900/50 dark:border-white/10 dark:text-white"
                 />
                 <p className="text-xs text-slate-500 dark:text-slate-400">Weekly teaching hours are automatically set equal to credits.</p>
+            </div>
+            <div className="flex items-center gap-3 p-3 border dark:border-white/10 rounded-lg bg-slate-50/50 dark:bg-slate-900/30">
+                <input
+                    type="checkbox"
+                    id="isElective"
+                    className="w-4 h-4 rounded border-slate-300 dark:border-white/20 text-primary focus:ring-primary dark:bg-slate-800"
+                    checked={form.isElective}
+                    onChange={(e) => setForm({ ...form, isElective: e.target.checked })}
+                />
+                <label htmlFor="isElective" className="text-sm font-medium dark:text-slate-300 cursor-pointer flex flex-col">
+                    <span>Is Elective Subject?</span>
+                    <span className="text-[10px] text-slate-500 font-normal">Mark this if the subject belongs to a parallel elective track.</span>
+                </label>
             </div>
         </div>
     );
@@ -282,6 +296,11 @@ export default function DeptSubjectsDashboard() {
                                         <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-md border shrink-0 ${typeColor[course.type] || 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'}`}>
                                             {course.type}
                                         </span>
+                                        {course.isElective && (
+                                            <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md border border-amber-200 dark:border-amber-500/30 bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 shrink-0">
+                                                Elective
+                                            </span>
+                                        )}
                                     </div>
                                 </CardHeader>
                                 <CardContent className="pt-4 pb-4">
@@ -303,7 +322,16 @@ export default function DeptSubjectsDashboard() {
                                         <Button variant="outline" size="sm" className="w-1/2 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 border-slate-200 dark:border-white/10 dark:bg-transparent"
                                             onClick={() => {
                                                 setSelectedId(course.id);
-                                                setEditForm({ name: course.name, code: course.code, program: course.program || '', semester: course.semester ?? 0, credits: course.credits, weeklyHrs: course.credits, type: course.type });
+                                                setEditForm({
+                                                    name: course.name,
+                                                    code: course.code,
+                                                    program: course.program || '',
+                                                    semester: course.semester ?? 0,
+                                                    credits: course.credits,
+                                                    weeklyHrs: course.credits,
+                                                    type: course.type,
+                                                    isElective: course.isElective
+                                                });
                                                 setError('');
                                                 setIsEditOpen(true);
                                             }}>

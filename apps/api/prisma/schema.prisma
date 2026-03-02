@@ -44,6 +44,7 @@ model Department {
   courses      Course[]
   batches      Batch[]
   timetables   Timetable[]
+  electiveBaskets ElectiveBasket[]
 
   @@map("departments")
 }
@@ -70,10 +71,17 @@ model Faculty {
   experience      String?
   userId          String?
   user            User?           @relation(fields: [userId], references: [id])
+  
+  // Advanced Constraints for AI Engine
+  availability    Json?           // Blocked slot map: { "Monday": [1, 2], "Friday": [5, 6] }
+  maxHrsPerDay    Int             @default(6)
+  maxHrsPerWeek   Int             @default(30)
+  
   createdAt       DateTime        @default(now())
   subjects        FacultySubject[]
   departments     FacultyDepartment[]
   timetableSlots  TimetableSlot[]
+  electiveOptions ElectiveOption[]
 
   @@map("faculty")
 }
@@ -104,9 +112,11 @@ model Course {
   weeklyHrs      Int             @default(4)
   semester       Int?            // e.g. 1, 2, 3, 4 — which semester this subject belongs to
   type           String          @default("Theory")  // Theory | Lab | Theory+Lab
+  isElective     Boolean         @default(false)     // Used for parallel track matching
   createdAt      DateTime        @default(now())
   facultySubjects FacultySubject[]
   timetableSlots TimetableSlot[]
+  electiveOptions ElectiveOption[]
 
   @@map("courses")
 }
@@ -159,6 +169,47 @@ model Program {
   @@map("programs")
 }
 
+model ElectiveBasket {
+  id           String           @id @default(uuid())
+  departmentId String
+  department   Department       @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  subjectCode  String           // e.g. "204" – groups elective options under one umbrella
+  name         String           // e.g. "Semester 4 – Elective Set A"
+  semester     Int?
+  program      String?
+  weeklyHrs    Int              @default(2)
+  createdAt    DateTime         @default(now())
+  options      ElectiveOption[]
+
+  @@map("elective_baskets")
+}
+
+model ElectiveOption {
+  id              String         @id @default(uuid())
+  basketId        String
+  basket          ElectiveBasket @relation(fields: [basketId], references: [id], onDelete: Cascade)
+  courseId        String
+  course          Course         @relation(fields: [courseId], references: [id])
+  facultyId       String?        // preferred faculty (optional)
+  faculty         Faculty?       @relation(fields: [facultyId], references: [id])
+  enrollmentCount Int            @default(30)  // sub-batch size for room assignment
+  createdAt       DateTime       @default(now())
+  subgroups       ElectiveSubgroup[]
+
+  @@map("elective_options")
+}
+
+model ElectiveSubgroup {
+  id              String         @id @default(uuid())
+  optionId        String
+  option          ElectiveOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  subgroupId      String         // e.g. "Group 1", "Group 2", or "Div A"
+  enrollmentCount Int            @default(30)  // Splitted size
+  createdAt       DateTime       @default(now())
+
+  @@map("elective_subgroups")
+}
+
 model Timetable {
   id              String          @id @default(uuid())
   universityId    String
@@ -199,6 +250,11 @@ model TimetableSlot {
   batch        Batch      @relation(fields: [batchId], references: [id])
   isBreak      Boolean    @default(false)
   slotType     String     @default("THEORY")  // THEORY | LAB | BREAK
+  
+  // Elective Metadata
+  isElective   Boolean    @default(false)
+  basketId     String?
+  optionId     String?
 
   @@map("timetable_slots")
 }
@@ -255,4 +311,19 @@ model GlobalSettings {
   updatedAt       DateTime @updatedAt
 
   @@map("global_settings")
+}
+
+model Inquiry {
+  id            String   @id @default(uuid())
+  name          String
+  email         String
+  contactNumber String
+  organization  String?
+  message       String?
+  status        String   @default("NEW")  // NEW | CONTACTED | CONVERTED
+  ipAddress     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("inquiries")
 }

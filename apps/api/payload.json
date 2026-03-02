@@ -1,0 +1,447 @@
+{
+  "departmentId": "123cdda3-0837-4f7c-9409-b2aec0ac6375",
+  "config": {
+    "startTime": "10:30",
+    "endTime": "17:00",
+    "lectureDuration": 120,
+    "breakDuration": 30,
+    "numberOfBreaks": 1,
+    "daysPerWeek": 6
+  },
+  "faculty": [
+    {
+      "id": "670764ac-f6a7-46e7-898d-386bffc90cdf",
+      "name": "Rustam Morena",
+      "availability": [],
+      "maxHrsPerDay": 6,
+      "maxHrsPerWeek": 30,
+      "subjects": [
+        {
+          "courseId": "ffe3a8c6-e9d5-443c-bc8a-cb492e7485c1",
+          "isPrimary": true
+        },
+        {
+          "courseId": "9c5ba6dc-f0c7-4762-845c-72493f14806e",
+          "isPrimary": true
+        }
+      ]
+    },
+    {
+      "id": "f766b2c2-ee10-4024-9674-60581f6f79d4",
+      "name": "Ravi Gulati",
+      "availability": [],
+      "maxHrsPerDay": 6,
+      "maxHrsPerWeek": 30,
+      "subjects": [
+        {
+          "courseId": "8143df58-8f3d-4f6c-9e22-027004d53e79",
+          "isPrimary": true
+        },
+        {
+          "courseId": "9c5ba6dc-f0c7-4762-845c-72493f14806e",
+          "isPrimary": true
+        }
+      ]
+    },
+    {
+      "id": "2cfe0df3-445a-4905-96a4-76997956f03b",
+      "name": "Dharmen Shah",
+      "availability": [],
+      "maxHrsPerDay": 6,
+      "maxHrsPerWeek": 30,
+      "subjects": [
+        {
+          "courseId": "f8c65348-eae6-4bd1-8d39-68aaf04beeb3",
+          "isPrimary": true
+        },
+        {
+          "courseId": "afe16ff3-14a0-48dd-b5b2-ad57c63c9776",
+          "isPrimary": true
+        },
+        {
+          "courseId": "5177f45a-26bb-4ebd-82fa-23e753fb902c",
+          "isPrimary": true
+        },
+        {
+          "courseId": "a834304e-4fef-4758-8f69-5166798f3188",
+          "isPrimary": true
+        }
+      ]
+    },
+    {
+      "id": "f9575e92-f61b-446a-ab40-2eea49b9f265",
+      "name": "Nimisha",
+      "availability": [],
+      "maxHrsPerDay": 6,
+      "maxHrsPerWeek": 30,
+      "subjects": [
+        {
+          "courseId": "80695027-3fe2-4c13-9df3-d00edd29af22",
+          "isPrimary": true
+        },
+        {
+          "courseId": "f8c65348-eae6-4bd1-8d39-68aaf04beeb3",
+          "isPrimary": true
+        }
+      ]
+    },
+    {
+      "id": "87d9cf38-4a98-4578-9a62-93f3f716f918",
+      "name": "Jayshree Patel",
+      "availability": [],
+      "maxHrsPerDay": 6,
+      "maxHrsPerWeek": 30,
+      "subjects": [
+        {
+          "courseId": "5177f45a-26bb-4ebd-82fa-23e753fb902c",
+          "isPrimary": true
+        },
+        {
+          "courseId": "a834304e-4fef-4758-8f69-5166798f3188",
+          "isPrimary": true
+        }
+      ]
+    },
+    {
+      "id": "8d4bac13-254f-4bd2-9ece-76b99519ccbc",
+      "name": "Mayur",
+      "availability": [],
+      "maxHrsPerDay": 6,
+      "maxHrsPerWeek": 30,
+      "subjects": [
+        {
+          "courseId": "80695027-3fe2-4c13-9df3-d00edd29af22",
+          "isPrimary": true
+        },
+        {
+          "courseId": "f8c65348-eae6-4bd1-8d39-68aaf04beeb3",
+          "isPrimary": true
+        }
+      ]
+    },
+    {
+      "id": "d8684dc4-f732-4397-8a30-bf5754ad537f",
+      "name": "Prakash Rana",
+      "availability": [],
+      "maxHrsPerDay": 6,
+      "maxHrsPerWeek": 30,
+      "subjects": [
+        {
+          "courseId": "ba79af4d-e60a-4d95-81d7-33654a87fef2",
+          "isPrimary": true
+        }
+      ]
+    },
+    {
+      "id": "be2a75ef-1db6-469b-84f2-77757ac41ab1",
+      "name": "Vimal",
+      "availability": [],
+      "maxHrsPerDay": 6,
+      "maxHrsPerWeek": 30,
+      "subjects": [
+        {
+          "courseId": "79cbe1cc-04c3-47dc-a57a-10aa5575eace",
+          "isPrimary": true
+        },
+        {
+          "courseId": "d28f8dca-763d-4870-99d6-fea3c0b243e2",
+          "isPrimary": true
+        }
+      ]
+    },
+    {
+      "id": "1f51a258-8a9e-4405-8a93-c3d3b6f42422",
+      "name": "Rinku",
+      "availability": [],
+      "maxHrsPerDay": 6,
+      "maxHrsPerWeek": 30,
+      "subjects": [
+        {
+          "courseId": "79cbe1cc-04c3-47dc-a57a-10aa5575eace",
+          "isPrimary": true
+        },
+        {
+          "courseId": "d28f8dca-763d-4870-99d6-fea3c0b243e2",
+          "isPrimary": true
+        }
+      ]
+    }
+  ],
+  "courses": [
+    {
+      "id": "ba79af4d-e60a-4d95-81d7-33654a87fef2",
+      "name": "Artificial Intelligence",
+      "code": "201",
+      "weeklyHrs": 4,
+      "type": "Theory",
+      "isElective": false,
+      "program": "MCA",
+      "semester": 2,
+      "labDuration": 1
+    },
+    {
+      "id": "79cbe1cc-04c3-47dc-a57a-10aa5575eace",
+      "name": "Frontend Technologies",
+      "code": "202",
+      "weeklyHrs": 4,
+      "type": "Theory",
+      "isElective": false,
+      "program": "MCA",
+      "semester": 2,
+      "labDuration": 1
+    },
+    {
+      "id": "5177f45a-26bb-4ebd-82fa-23e753fb902c",
+      "name": ".Net using C#",
+      "code": "203",
+      "weeklyHrs": 4,
+      "type": "Theory",
+      "isElective": false,
+      "program": "MCA",
+      "semester": 2,
+      "labDuration": 1
+    },
+    {
+      "id": "80695027-3fe2-4c13-9df3-d00edd29af22",
+      "name": "Android Development",
+      "code": "Android-205",
+      "weeklyHrs": 4,
+      "type": "Theory",
+      "isElective": true,
+      "program": "MCA",
+      "semester": 2,
+      "labDuration": 1
+    },
+    {
+      "id": "afe16ff3-14a0-48dd-b5b2-ad57c63c9776",
+      "name": "iOS Development",
+      "code": "iOS-205",
+      "weeklyHrs": 4,
+      "type": "Theory",
+      "isElective": true,
+      "program": "MCA",
+      "semester": 2,
+      "labDuration": 1
+    },
+    {
+      "id": "d28f8dca-763d-4870-99d6-fea3c0b243e2",
+      "name": "Programming Skills - IV",
+      "code": "206",
+      "weeklyHrs": 3,
+      "type": "Lab",
+      "isElective": false,
+      "program": "MCA",
+      "semester": 2,
+      "labDuration": 1
+    },
+    {
+      "id": "ffe3a8c6-e9d5-443c-bc8a-cb492e7485c1",
+      "name": "Blockchain",
+      "code": "Blockchain-204",
+      "weeklyHrs": 4,
+      "type": "Theory",
+      "isElective": true,
+      "program": "MCA",
+      "semester": 2,
+      "labDuration": 1
+    },
+    {
+      "id": "a834304e-4fef-4758-8f69-5166798f3188",
+      "name": "Programming Skills - V",
+      "code": "207",
+      "weeklyHrs": 2,
+      "type": "Lab",
+      "isElective": false,
+      "program": "MCA",
+      "semester": 2,
+      "labDuration": 1
+    },
+    {
+      "id": "9c5ba6dc-f0c7-4762-845c-72493f14806e",
+      "name": "Programming Skills - VI",
+      "code": "208",
+      "weeklyHrs": 2,
+      "type": "Lab",
+      "isElective": false,
+      "program": "MCA",
+      "semester": 2,
+      "labDuration": 1
+    },
+    {
+      "id": "f8c65348-eae6-4bd1-8d39-68aaf04beeb3",
+      "name": "Programming Skills - VII",
+      "code": "209",
+      "weeklyHrs": 3,
+      "type": "Lab",
+      "isElective": false,
+      "program": "MCA",
+      "semester": 2,
+      "labDuration": 1
+    },
+    {
+      "id": "8143df58-8f3d-4f6c-9e22-027004d53e79",
+      "name": "Python",
+      "code": "Python-204",
+      "weeklyHrs": 4,
+      "type": "Theory",
+      "isElective": true,
+      "program": "MCA",
+      "semester": 2,
+      "labDuration": 1
+    }
+  ],
+  "batches": [
+    {
+      "id": "3b7708d8-8de8-4936-854e-d6fcb3513772",
+      "name": "MCA Sem 2 2025-26",
+      "strength": 60,
+      "program": "MCA",
+      "semester": 2
+    },
+    {
+      "id": "34dc01f7-b143-4ad9-80ea-9fb0e6567497",
+      "name": "MCA Sem 2 2025-26",
+      "strength": 60,
+      "program": "MCA",
+      "semester": 2
+    }
+  ],
+  "resources": [
+    {
+      "id": "ad79e067-9350-4e11-8a4d-20ae0eaa57d1",
+      "name": "Lecture Hall 1",
+      "type": "Classroom",
+      "capacity": 60
+    },
+    {
+      "id": "2a31ee02-e290-4d90-918c-7046e3b01922",
+      "name": "Lecture Hall 2",
+      "type": "Classroom",
+      "capacity": 60
+    },
+    {
+      "id": "a4818727-001a-4da7-88bb-27d950087ae3",
+      "name": "Lecture Hall 3",
+      "type": "Classroom",
+      "capacity": 40
+    },
+    {
+      "id": "ee398e01-c847-47cc-9eeb-ba610965c574",
+      "name": "Lecture Hall 4",
+      "type": "Classroom",
+      "capacity": 60
+    },
+    {
+      "id": "5b2cf9df-fb9e-4cc0-9c91-8b7b0a7d0eff",
+      "name": "Lecture Hall 5",
+      "type": "Classroom",
+      "capacity": 60
+    },
+    {
+      "id": "5161ad54-8fb3-453d-a3fd-4b81bffde5ea",
+      "name": "Major Lab A",
+      "type": "Lab",
+      "capacity": 60
+    },
+    {
+      "id": "4af8ce96-95f6-4c77-b865-aec83a283d5d",
+      "name": "Major Lab B",
+      "type": "Lab",
+      "capacity": 60
+    },
+    {
+      "id": "605674cf-8637-486b-8f35-21c37724ada3",
+      "name": "Minor Lab A",
+      "type": "Lab",
+      "capacity": 30
+    },
+    {
+      "id": "5fffe828-577b-4da4-87f4-4e9b4ebcc418",
+      "name": "Minor Lab B",
+      "type": "Lab",
+      "capacity": 30
+    },
+    {
+      "id": "7675dbe1-aaec-45fb-8f3f-44180d7878c4",
+      "name": "Theater Hall 1",
+      "type": "Classroom",
+      "capacity": 100
+    },
+    {
+      "id": "7185cb2c-9206-4c53-9a85-c40ba2e166cb",
+      "name": "Theater Hall 2",
+      "type": "Classroom",
+      "capacity": 100
+    },
+    {
+      "id": "6b0967bd-beb7-4d8f-8370-c3cd7a7f4ce5",
+      "name": "Theater Hall 3",
+      "type": "Classroom",
+      "capacity": 100
+    },
+    {
+      "id": "dcb67545-0d78-4ea4-96c8-acf81624bc25",
+      "name": "Theater Hall 4",
+      "type": "Classroom",
+      "capacity": 100
+    }
+  ],
+  "electiveBaskets": [
+    {
+      "basketId": "cae5a388-83c0-4899-9bd8-484f0c9e07f0",
+      "subjectCode": "MCA-204",
+      "name": "MCA204",
+      "weeklyHrs": 4,
+      "program": "MCA",
+      "semester": 2,
+      "divisionIds": [
+        "3b7708d8-8de8-4936-854e-d6fcb3513772",
+        "34dc01f7-b143-4ad9-80ea-9fb0e6567497"
+      ],
+      "options": [
+        {
+          "optionId": "6e9b156d-0892-4074-b50a-03c8158032f2",
+          "courseId": "ffe3a8c6-e9d5-443c-bc8a-cb492e7485c1",
+          "enrollmentCount": 27,
+          "facultyId": "670764ac-f6a7-46e7-898d-386bffc90cdf",
+          "subgroups": []
+        },
+        {
+          "optionId": "9bdd9ed5-360b-4bb5-b737-73bd869a72bb",
+          "courseId": "8143df58-8f3d-4f6c-9e22-027004d53e79",
+          "enrollmentCount": 93,
+          "facultyId": "f766b2c2-ee10-4024-9674-60581f6f79d4",
+          "subgroups": []
+        }
+      ]
+    },
+    {
+      "basketId": "d420f7d1-a384-4f99-8bd9-0c6a9116bc62",
+      "subjectCode": "MCA-205",
+      "name": "MCA205",
+      "weeklyHrs": 4,
+      "program": "MCA",
+      "semester": 2,
+      "divisionIds": [
+        "3b7708d8-8de8-4936-854e-d6fcb3513772",
+        "34dc01f7-b143-4ad9-80ea-9fb0e6567497"
+      ],
+      "options": [
+        {
+          "optionId": "8e0a3437-786a-4a3c-93ba-e6e9e6db2f42",
+          "courseId": "afe16ff3-14a0-48dd-b5b2-ad57c63c9776",
+          "enrollmentCount": 30,
+          "facultyId": "2cfe0df3-445a-4905-96a4-76997956f03b",
+          "subgroups": []
+        },
+        {
+          "optionId": "831cc859-dc8e-4ca3-bc39-c3cdc4cc72e7",
+          "courseId": "80695027-3fe2-4c13-9df3-d00edd29af22",
+          "enrollmentCount": 90,
+          "facultyId": "8d4bac13-254f-4bd2-9ece-76b99519ccbc",
+          "subgroups": []
+        }
+      ]
+    }
+  ]
+}

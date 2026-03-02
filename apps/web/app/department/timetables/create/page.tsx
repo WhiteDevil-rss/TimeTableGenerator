@@ -2,7 +2,7 @@
 
 import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
-import { LuPlay, LuUsers, LuSquareCheck, LuSquare, LuLoaderCircle } from 'react-icons/lu';
+import { LuPlay, LuUsers, LuSquareCheck, LuSquare, LuLoaderCircle, LuLayers } from 'react-icons/lu';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { api } from '@/lib/api';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
@@ -27,6 +27,10 @@ export default function GenerateTimetablePage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [semesterFilter, setSemesterFilter] = useState('all');
+    const [continuousMode, setContinuousMode] = useState<'off' | 'balanced' | 'strict'>('balanced');
+    const [generationType, setGenerationType] = useState<'NORMAL' | 'LAB_ONLY' | 'ELECTIVE_ONLY'>('NORMAL');
+    const [lockedSlots, setLockedSlots] = useState<any[]>([]);
+    const [activeTimetable, setActiveTimetable] = useState<any>(null);
 
     // Batch selection
     const [batches, setBatches] = useState<BatchItem[]>([]);
@@ -78,8 +82,12 @@ export default function GenerateTimetablePage() {
     const fetchLatestTimetable = useCallback(async () => {
         if (!user?.entityId) return;
         try {
-            await api.get(`/departments/${user.entityId}/timetables/latest`);
-        } catch { console.log("No active timetable found."); }
+            const res = await api.get(`/departments/${user.entityId}/timetables/latest`);
+            setActiveTimetable(res.data.timetable);
+        } catch {
+            console.log("No active timetable found.");
+            setActiveTimetable(null);
+        }
     }, [user?.entityId]);
 
     useEffect(() => { fetchLatestTimetable(); }, [user, fetchLatestTimetable]);
@@ -136,7 +144,10 @@ export default function GenerateTimetablePage() {
                 departmentId: user.entityId,
                 config,
                 semesterFilter,
-                selectedBatchIds: Array.from(selectedBatchIds)
+                selectedBatchIds: Array.from(selectedBatchIds),
+                continuousMode,
+                generationType,
+                lockedSlots: lockedSlots.length > 0 ? lockedSlots : undefined
             });
             setSuccess(`Success! Timetable generated in ${response.data.timetable.generationMs}ms.`);
             await fetchLatestTimetable();
@@ -205,6 +216,146 @@ export default function GenerateTimetablePage() {
                                 </Button>
                             </CardFooter>
                         </Card>
+
+                        {/* ── Scheduling Mode (Optimized) ────────── */}
+                        <Card className="glass-card shadow-sm border-indigo-200 dark:border-indigo-500/20 bg-indigo-50/20 dark:bg-indigo-900/10">
+                            <CardHeader className="pb-3 text-center sm:text-left">
+                                <CardTitle className="text-lg text-indigo-900 dark:text-indigo-300 flex items-center justify-center sm:justify-start gap-2">
+                                    <LuLayers className="w-5 h-5" /> Scheduling Mode
+                                </CardTitle>
+                                <CardDescription className="dark:text-slate-400">Optimize how strictly the AI handles time gaps between classes.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    {[
+                                        { id: 'off', label: 'Standard', desc: 'Focus on basic constraints only.', color: 'slate' },
+                                        { id: 'balanced', label: 'Balanced', desc: 'Minimize idle gaps for students.', color: 'indigo' },
+                                        { id: 'strict', label: 'Continuous', desc: 'Minimize gaps strictly (Back-to-back).', color: 'cyan' },
+                                    ].map(mode => (
+                                        <button
+                                            key={mode.id}
+                                            onClick={() => setContinuousMode(mode.id as any)}
+                                            className={cn(
+                                                "flex flex-col p-3 rounded-xl border text-left transition-all",
+                                                continuousMode === mode.id
+                                                    ? `bg-white dark:bg-slate-800 border-${mode.color}-200 dark:border-${mode.color}-500/40 shadow-sm ring-2 ring-${mode.color}-500/20`
+                                                    : "bg-transparent border-transparent opacity-60 hover:opacity-100"
+                                            )}
+                                        >
+                                            <span className={cn("text-xs font-bold uppercase tracking-tight", continuousMode === mode.id && (mode.id === 'off' ? 'dark:text-slate-200' : `text-${mode.color}-600 dark:text-${mode.color}-400`))}>{mode.label}</span>
+                                            <span className="text-[10px] text-slate-500 mt-1 leading-tight">{mode.desc}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* ── Generation Strategy ─────────────────── */}
+                        <Card className="glass-card shadow-sm border-amber-200 dark:border-amber-500/20 bg-amber-50/20 dark:bg-amber-900/10">
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-lg text-amber-900 dark:text-amber-300 flex items-center gap-2">
+                                    <LuLayers className="w-5 h-5" /> Generation Strategy
+                                </CardTitle>
+                                <CardDescription className="dark:text-slate-400">Choose the scope of this generation run.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    {[
+                                        { id: 'NORMAL', label: 'Full Rebuild', desc: 'Regenerate everything.', color: 'indigo' },
+                                        { id: 'LAB_ONLY', label: 'Lab Only', desc: 'Only schedule lab sessions.', color: 'emerald' },
+                                        { id: 'ELECTIVE_ONLY', label: 'Electives Only', desc: 'Only schedule elective baskets.', color: 'amber' },
+                                    ].map(type => (
+                                        <button
+                                            key={type.id}
+                                            onClick={() => setGenerationType(type.id as any)}
+                                            className={cn(
+                                                "flex flex-col p-3 rounded-xl border text-left transition-all",
+                                                generationType === type.id
+                                                    ? `bg-white dark:bg-slate-800 border-${type.color}-200 dark:border-${type.color}-500/40 shadow-sm ring-2 ring-${type.color}-500/20`
+                                                    : "bg-transparent border-transparent opacity-60 hover:opacity-100"
+                                            )}
+                                        >
+                                            <span className={cn("text-xs font-bold uppercase tracking-tight", generationType === type.id && `text-${type.color}-600 dark:text-${type.color}-400`)}>{type.label}</span>
+                                            <span className="text-[10px] text-slate-500 mt-1 leading-tight">{type.desc}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* ── Partial Regeneration (Locked Slots) ───── */}
+                        {activeTimetable && (
+                            <Card className="glass-card shadow-sm border-slate-200 dark:border-white/10">
+                                <CardHeader className="pb-3 border-b dark:border-white/5">
+                                    <CardTitle className="text-lg dark:text-white flex items-center gap-2">
+                                        <LuSquareCheck className="w-5 h-5 text-emerald-500" /> Partial Regeneration
+                                    </CardTitle>
+                                    <CardDescription className="dark:text-slate-400">
+                                        Select slots from the active timetable to <b>LOCK</b>. Locked slots will not be moved.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="pt-4 overflow-x-auto">
+                                    <div className="min-w-[500px]">
+                                        <table className="w-full text-xs text-left border-collapse border dark:border-white/10 rounded-lg">
+                                            <thead>
+                                                <tr className="bg-slate-50 dark:bg-slate-900/50">
+                                                    <th className="p-2 border dark:border-white/10 font-bold dark:text-slate-300">Day</th>
+                                                    {[1, 2, 3, 4, 5, 6, 7, 8].map(s => <th key={s} className="p-2 border dark:border-white/10 text-center font-bold dark:text-slate-300">Slot {s}</th>)}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
+                                                    <tr key={day}>
+                                                        <td className="p-2 border dark:border-white/10 font-semibold bg-slate-50/50 dark:bg-slate-900/30 dark:text-slate-400 w-24">{day}</td>
+                                                        {[1, 2, 3, 4, 5, 6, 7, 8].map(slot => {
+                                                            const isLocked = lockedSlots.some(ls => ls.day === day && ls.slot === slot);
+                                                            const hasExisting = activeTimetable.entries?.some((e: any) => e.day === day && e.slot === slot);
+
+                                                            return (
+                                                                <td
+                                                                    key={slot}
+                                                                    onClick={() => {
+                                                                        if (isLocked) {
+                                                                            setLockedSlots(lockedSlots.filter(ls => !(ls.day === day && ls.slot === slot)));
+                                                                        } else {
+                                                                            setLockedSlots([...lockedSlots, { day, slot }]);
+                                                                        }
+                                                                    }}
+                                                                    className={cn(
+                                                                        "p-2 border dark:border-white/10 text-center cursor-pointer transition-all h-10",
+                                                                        isLocked ? "bg-emerald-100 dark:bg-emerald-500/20" : "hover:bg-slate-50 dark:hover:bg-white/5"
+                                                                    )}
+                                                                >
+                                                                    {isLocked ? (
+                                                                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">LOCKED</span>
+                                                                    ) : hasExisting ? (
+                                                                        <span className="text-slate-400 dark:text-slate-600">Active</span>
+                                                                    ) : (
+                                                                        <span className="text-slate-200 dark:text-slate-800">—</span>
+                                                                    )}
+                                                                </td>
+                                                            );
+                                                        })}
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                        <div className="mt-3 flex items-center justify-between">
+                                            <p className="text-[10px] text-slate-500 italic">* Only slots with active sessions can be meaningfully locked.</p>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => setLockedSlots([])}
+                                                className="text-[10px] h-6 px-2 text-red-500 hover:text-red-600 dark:hover:bg-red-500/10"
+                                            >
+                                                Clear All Locks
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+
 
                         {/* AI Engine Status — Dynamic */}
                         <Card className={cn("shadow-sm border glass-card", aiHealth?.reachable ? "bg-indigo-50/50 dark:bg-indigo-900/10 border-indigo-100 dark:border-indigo-500/20" : "bg-red-50/50 dark:bg-red-900/10 border-red-100 dark:border-red-500/20")}>
@@ -321,6 +472,6 @@ export default function GenerateTimetablePage() {
                     </div>
                 </div>
             </DashboardLayout>
-        </ProtectedRoute>
+        </ProtectedRoute >
     );
 }

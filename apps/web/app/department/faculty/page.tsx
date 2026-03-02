@@ -2,7 +2,7 @@
 
 import { ProtectedRoute } from '@/components/protected-route';
 import { DashboardLayout } from '@/components/dashboard-layout';
-import { LuPlus, LuTrash2, LuPencil, LuSearch, LuBookOpen } from 'react-icons/lu';
+import { LuPlus, LuTrash2, LuPencil, LuSearch, LuBookOpen, LuSettings } from 'react-icons/lu';
 import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/store/useAuthStore';
@@ -41,6 +41,7 @@ interface Faculty {
     designation?: string;
     departments?: FacultyDepartment[];
     subjects?: FacultySubject[];
+    availability?: any; // { "Monday": [1, 2], ... }
 }
 
 interface Course {
@@ -61,6 +62,7 @@ export default function DeptFacultyDashboard() {
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isAssignOpen, setIsAssignOpen] = useState(false);
+    const [isConstraintsOpen, setIsConstraintsOpen] = useState(false);
     const [selectedFacId, setSelectedFacId] = useState<string | null>(null);
 
     const [departments, setDepartments] = useState<Department[]>([]);
@@ -72,6 +74,9 @@ export default function DeptFacultyDashboard() {
         name: '', email: '', designation: '', departmentIds: [] as string[]
     });
     const [assignSubjectsForm, setAssignSubjectsForm] = useState<string[]>([]);
+    const [constraintsForm, setConstraintsForm] = useState({
+        availability: {} as any
+    });
     const [subjectSearchTerm, setSubjectSearchTerm] = useState('');
 
     const fetchData = useCallback(async () => {
@@ -150,6 +155,19 @@ export default function DeptFacultyDashboard() {
         }
     }
 
+    const handleUpdateConstraints = async () => {
+        if (!selectedFacId) return;
+        try {
+            await api.put(`/faculty/${selectedFacId}`, constraintsForm);
+            setIsConstraintsOpen(false);
+            fetchData();
+            showToast('success', 'Constraints updated successfully!');
+        } catch (e) {
+            const errorMsg = (e as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to update constraints.';
+            showToast('error', errorMsg);
+        }
+    }
+
     const handleDeleteFaculty = (id: string) => {
         askConfirm({
             title: 'Delete Faculty',
@@ -218,10 +236,10 @@ export default function DeptFacultyDashboard() {
                                         <span className="text-slate-500 dark:text-slate-500 text-xs font-semibold uppercase tracking-wider">Contact</span>
                                         <span className="font-medium text-slate-700 dark:text-slate-300">{fac.email}</span>
                                     </div>
-                                    <div className="flex gap-2 mt-5">
+                                    <div className="flex flex-wrap gap-2 mt-5">
                                         <Button
                                             variant="outline"
-                                            className="w-1/3 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 border-slate-200 dark:border-white/10 dark:bg-transparent"
+                                            className="grow text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 border-slate-200 dark:border-white/10 dark:bg-transparent px-2"
                                             size="sm"
                                             onClick={() => {
                                                 setSelectedFacId(fac.id);
@@ -232,11 +250,11 @@ export default function DeptFacultyDashboard() {
                                                 setIsEditOpen(true);
                                             }}
                                         >
-                                            <LuPencil className="w-4 h-4 mr-2" /> Edit
+                                            <LuPencil className="w-3.5 h-3.5 mr-1.5" /> Edit
                                         </Button>
                                         <Button
                                             variant="outline"
-                                            className="w-1/3 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 border-slate-200 dark:border-white/10 dark:bg-transparent"
+                                            className="grow text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 border-slate-200 dark:border-white/10 dark:bg-transparent px-2"
                                             size="sm"
                                             onClick={() => {
                                                 setSelectedFacId(fac.id);
@@ -244,15 +262,29 @@ export default function DeptFacultyDashboard() {
                                                 setIsAssignOpen(true);
                                             }}
                                         >
-                                            <LuBookOpen className="w-4 h-4 mr-2" /> Subjects
+                                            <LuBookOpen className="w-3.5 h-3.5 mr-1.5" /> Subjects
                                         </Button>
                                         <Button
                                             variant="outline"
-                                            className="w-1/3 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-500/10 dark:bg-transparent"
+                                            className="grow text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 border-slate-200 dark:border-white/10 dark:bg-transparent px-2"
+                                            size="sm"
+                                            onClick={() => {
+                                                setSelectedFacId(fac.id);
+                                                setConstraintsForm({
+                                                    availability: fac.availability || {}
+                                                });
+                                                setIsConstraintsOpen(true);
+                                            }}
+                                        >
+                                            <LuSettings className="w-3.5 h-3.5 mr-1.5" /> Constraints
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            className="grow text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-500/10 dark:bg-transparent px-2"
                                             size="sm"
                                             onClick={() => handleDeleteFaculty(fac.id)}
                                         >
-                                            <LuTrash2 className="w-4 h-4 mr-2" /> Delete
+                                            <LuTrash2 className="w-3.5 h-3.5 mr-1.5" /> Delete
                                         </Button>
                                     </div>
                                 </CardContent>
@@ -457,6 +489,73 @@ export default function DeptFacultyDashboard() {
                             <Button variant="outline" className="dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-800" onClick={() => setIsAssignOpen(false)}>Cancel</Button>
                             <Button className="bg-primary hover:bg-primary/90 text-white" onClick={handleAssignSubjects}>
                                 Save Assignments
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Advanced Constraints Modal */}
+                <Dialog open={isConstraintsOpen} onOpenChange={setIsConstraintsOpen}>
+                    <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto glass-card dark:border-white/10">
+                        <DialogHeader>
+                            <DialogTitle className="dark:text-white">Professional Constraints</DialogTitle>
+                            <DialogDescription className="dark:text-slate-400">
+                                Define availability and workload limits for {faculties.find(f => f.id === selectedFacId)?.name}.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-6 py-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium dark:text-slate-300">Availability Map (Blocked Slots)</label>
+                                <p className="text-xs text-slate-500 mb-2">Select slots where this faculty is NOT available to teach.</p>
+                                <div className="overflow-x-auto border dark:border-white/10 rounded-lg">
+                                    <table className="w-full text-xs text-left border-collapse">
+                                        <thead>
+                                            <tr className="bg-slate-50 dark:bg-slate-900/50">
+                                                <th className="p-2 border-b dark:border-white/10 font-bold dark:text-slate-300">Day</th>
+                                                {[1, 2, 3, 4, 5, 6, 7, 8].map(s => (
+                                                    <th key={s} className="p-2 border-b dark:border-white/10 text-center font-bold dark:text-slate-300">S{s}</th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
+                                                <tr key={day} className="border-b dark:border-white/10">
+                                                    <td className="p-2 font-medium bg-slate-50/50 dark:bg-slate-900/30 dark:text-slate-400">{day}</td>
+                                                    {[1, 2, 3, 4, 5, 6, 7, 8].map(slot => {
+                                                        const isBlocked = constraintsForm.availability[day]?.includes(slot);
+                                                        return (
+                                                            <td
+                                                                key={slot}
+                                                                className={`p-2 text-center cursor-pointer transition-colors ${isBlocked ? 'bg-red-100 dark:bg-red-500/20' : 'hover:bg-slate-100 dark:hover:bg-white/5'}`}
+                                                                onClick={() => {
+                                                                    const currentSlots = constraintsForm.availability[day] || [];
+                                                                    const nextSlots = isBlocked
+                                                                        ? currentSlots.filter((s: number) => s !== slot)
+                                                                        : [...currentSlots, slot];
+                                                                    setConstraintsForm({
+                                                                        ...constraintsForm,
+                                                                        availability: {
+                                                                            ...constraintsForm.availability,
+                                                                            [day]: nextSlots
+                                                                        }
+                                                                    });
+                                                                }}
+                                                            >
+                                                                {isBlocked ? '❌' : '✅'}
+                                                            </td>
+                                                        );
+                                                    })}
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <DialogFooter className="border-t dark:border-white/5 pt-4">
+                            <Button variant="outline" className="dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-800" onClick={() => setIsConstraintsOpen(false)}>Cancel</Button>
+                            <Button className="bg-primary hover:bg-primary/90 text-white" onClick={handleUpdateConstraints}>
+                                Apply Constraints
                             </Button>
                         </DialogFooter>
                     </DialogContent>
