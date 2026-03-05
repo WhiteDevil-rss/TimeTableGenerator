@@ -47,6 +47,7 @@ import settingsRoutes from './routes/settings.routes';
 import firebaseSyncRoutes from './routes/firebase-sync.routes';
 import seedManagementRoutes from './routes/seed-management.routes';
 import inquiryRoutes from './routes/inquiry.routes';
+import subscriberRoutes from './routes/subscriber.routes';
 
 app.use('/v1/auth', authRoutes);
 app.use('/v1/universities/:universityId/departments', departmentRoutes);
@@ -65,6 +66,7 @@ app.use('/v1/settings', settingsRoutes);
 app.use('/v1/firebase-sync', firebaseSyncRoutes);
 app.use('/v1/seed', seedManagementRoutes);
 app.use('/v1/inquiries', inquiryRoutes);
+app.use('/v1/subscribers', subscriberRoutes);
 
 const server = createServer(app);
 socketService.initialize(server);

@@ -31,6 +31,7 @@ export const SUPERADMIN_NAV: NavItem[] = [
     { title: 'Dashboard', href: '/superadmin', icon: <LuLayoutDashboard className="w-5 h-5" /> },
     { title: 'Universities', href: '/superadmin/universities', icon: <LuBuilding2 className="w-5 h-5" /> },
     { title: 'Users', href: '/superadmin/users', icon: <LuUsers className="w-5 h-5" /> },
+    { title: 'Subscribers', href: '/superadmin/subscribers', icon: <LuMailOpen className="w-5 h-5" /> },
     { title: 'Inquiries', href: '/superadmin/inquiries', icon: <LuMailOpen className="w-5 h-5" /> },
     { title: 'Global Settings', href: '/superadmin/settings', icon: <LuShieldCheck className="w-5 h-5" /> },
     { title: 'Audit Logs', href: '/superadmin/logs', icon: <LuClipboardList className="w-5 h-5" /> },

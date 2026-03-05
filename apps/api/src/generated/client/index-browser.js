@@ -378,6 +378,14 @@ exports.Prisma.InquiryScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.SubscriberScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -426,7 +434,8 @@ exports.Prisma.ModelName = {
   User: 'User',
   AuditLog: 'AuditLog',
   GlobalSettings: 'GlobalSettings',
-  Inquiry: 'Inquiry'
+  Inquiry: 'Inquiry',
+  Subscriber: 'Subscriber'
 };
 
 /**

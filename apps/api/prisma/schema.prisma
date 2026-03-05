@@ -391,3 +391,13 @@ model Inquiry {
 
   @@map("inquiries")
 }
+
+model Subscriber {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  status        String   @default("ACTIVE") // ACTIVE | UNSUBSCRIBED
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("subscribers")
+}
